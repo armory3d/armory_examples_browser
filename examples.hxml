@@ -1,0 +1,2 @@
+-cp src
+--macro Build.examples("armory_examples","web/examples",false,true)

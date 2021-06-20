@@ -1,0 +1,7 @@
+-js web/app.js
+-main App
+-cp src
+--dce full
+--debug
+-D analyzer-optimize
+-D js-es=6

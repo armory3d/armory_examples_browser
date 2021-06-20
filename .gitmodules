@@ -1,0 +1,3 @@
+[submodule "armory_examples"]
+	path = armory_examples
+	url = https://github.com/tong/armory_examples.git
