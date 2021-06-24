@@ -10,7 +10,7 @@ class Build {
 
     #if macro
 
-    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false ) {
+    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, ?ignore : Array<String> ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
             Context.error( 'Examples directory [$src] not found', pos );
@@ -22,6 +22,7 @@ class Build {
         var failed = new Array<String>();
         for( i in 0...examples.length ) {
             var example = examples[i];
+            if( ignore != null && ignore.indexOf( example ) != -1 ) continue;
             Sys.println('Building example ${i+1}/${examples.length} $example');
             var code = Build.example( src, example, dst, forceRebuild );
             if( code != 0 ) {
