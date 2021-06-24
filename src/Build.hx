@@ -10,7 +10,7 @@ class Build {
 
     #if macro
 
-    static function examples( src : String, dst : String, forceRebuild = true, ignoreErrors = true ) {
+    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
             Context.error( 'Examples directory [$src] not found', pos );
@@ -22,14 +22,13 @@ class Build {
         var failed = new Array<String>();
         for( i in 0...examples.length ) {
             var example = examples[i];
-            Sys.println('--- Building example ${i+1} if ${examples.length} - $example');
-            var code = buildProject( src, example, dst, forceRebuild );
+            Sys.println('Building example ${i+1}/${examples.length} $example');
+            var code = Build.example( src, example, dst, forceRebuild );
             if( code != 0 ) {
                 Sys.println( 'Failed to build [$example]: $code' );
                 if( !ignoreErrors ) Sys.exit(1);
                 failed.push( example );
             }
-            //if( i >= 3 ) break;
         }
         if( failed.length > 0 ) {
             Sys.println( failed.length+' examples failed:');
@@ -37,7 +36,7 @@ class Build {
         }
     }
 
-    static function buildProject( path : String, name : String, dst : String, forceRebuild = true ) {
+    static function example( path : String, name : String, dst : String, forceRebuild = true ) {
         if( !exists( path ) )
             throw 'Destination directory [$path] not found';
         var srcdir = '$path/$name';
@@ -45,11 +44,11 @@ class Build {
         if( exists( dstdir ) )
             forceRebuild ? rmdir(dstdir) : return 0;
         var blend = '$srcdir/$name.blend';
-        var code = Sys.command('blender',['-b','-noaudio',blend,'--python','build.py']);
+        var args = ['-b',blend,'--python','build.py'];
+        Sys.println( 'blender '+args.join(' ') );
+        var code = Sys.command('blender', args);
         if( code == 0 ) {
             if( !exists( dst ) ) createDirectory( dst );
-
-            trace( '$srcdir/build_$name/html5', dstdir );
             rename( '$srcdir/build_$name/html5', dstdir );
         }
         return code;
@@ -72,6 +71,7 @@ class Build {
             var p = '$path/$dir';
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
         });
+        examples.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
         return macro $v{examples};
     }
 }
