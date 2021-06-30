@@ -10,42 +10,47 @@ class Build {
 
     #if macro
 
-    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, ?ignore : Array<String> ) {
+    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, ?ignoreProject : Array<String> ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
             Context.error( 'Examples directory [$src] not found', pos );
-        var examples = readDirectory(src).filter( dir->{
+        var projects = readDirectory(src).filter( dir->{
             var blend = '$src/$dir/$dir.blend';
             return !~/^_|\..+$/.match(dir) && isDirectory('$src/$dir') && exists( blend );
         });
-        examples.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
+        projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
         var failed = new Array<String>();
-        for( i in 0...examples.length ) {
-            var example = examples[i];
-            if( ignore != null && ignore.indexOf( example ) != -1 ) continue;
-            Sys.println('Building example ${i+1}/${examples.length} $example');
-            var code = Build.example( src, example, dst, forceRebuild );
+        for( i in 0...projects.length ) {
+            var project = projects[i];
+            if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
+            Sys.println('Building example ${i+1}/${projects.length} $project');
+            var code = Build.example( src, project, dst, forceRebuild );
             if( code != 0 ) {
-                Sys.println( 'Failed to build [$example]: $code' );
+                //Sys.println( 'Failed to build [$project]: $code' );
+                Sys.println( '$project: $code' );
                 if( !ignoreErrors ) Sys.exit(1);
-                failed.push( example );
+                failed.push( project );
             }
         }
         if( failed.length > 0 ) {
-            Sys.println( failed.length+' examples failed:');
+            Sys.println( failed.length+' projects failed:');
             for( e in failed ) Sys.println( '- Failed: $e' );
         }
     }
 
-    static function example( path : String, name : String, dst : String, forceRebuild = true ) {
+    static function example( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'build.py' ) {
         if( !exists( path ) )
-            throw 'Destination directory [$path] not found';
+            throw 'Directory [$path] not found';
         var srcdir = '$path/$name';
+        if( !exists( path ) )
+            throw 'Directory [$srcdir] not found';
         var dstdir = '$dst/$name';
         if( exists( dstdir ) )
             forceRebuild ? rmdir(dstdir) : return 0;
         var blend = '$srcdir/$name.blend';
-        var args = ['-b',blend,'--python','build.py'];
+        var args = [];
+        if( backgroundMode ) args.push('-b');
+        args = args.concat( [blend,'--python',buildScript] );
         Sys.println( 'blender '+args.join(' ') );
         var code = Sys.command('blender', args);
         if( code == 0 ) {

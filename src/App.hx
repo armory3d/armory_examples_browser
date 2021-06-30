@@ -7,49 +7,64 @@ import js.html.CanvasElement;
 import js.html.Element;
 import js.html.IFrameElement;
 import js.html.InputElement;
+import js.html.OListElement;
 
 using Lambda;
 using StringTools;
 
 class App {
     
-    static var REPO_PATH = "https://github.com/armory3d/armory_examples/tree/master";
+    static var REPO_OWNER = "https://github.com/tong";
     static var EXAMPLES_PATH = "examples";
 
     static var panelWidth : Int;
     static var current : String;
     static var nav : Element;
+    static var olExamples : OListElement;
     static var iframe : IFrameElement;
     static var canvas : CanvasElement;
 
     static function main() {
 
-        console.log( '%cArmory3D Examples Browser', 'color:#fff;background:#ff2851;padding:1rem;' );
+        console.log( '%cArmory3D Examples Browser', 'color:#fff;background:#cf2b43;padding:1rem;' );
 
         var style = window.getComputedStyle(document.documentElement);
         var panelWidthStr = style.getPropertyValue('--panel-width');
         panelWidth = Std.parseInt( panelWidthStr.substr(0, panelWidthStr.length-2) );
 
         nav = document.body.querySelector('nav');
+        olExamples = cast nav.querySelector('ol.examples');
         var searchInput : InputElement = cast nav.querySelector('input[type="search"]');
-        var olExamples = nav.querySelector('ol.examples');
         
         iframe = cast document.getElementById('frame');
         iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
         iframe.style.left = panelWidth+'px';
 
         var examples = Build.examplesList( 'web/examples' );
-        for( example in examples ) {
-            var li = document.createLIElement();
-            li.setAttribute( 'data-example', example );
-            li.classList.add('link');
-            li.textContent = example.replace('_',' ');
-            li.onclick = e -> {
-                loadExample( example );
+        for( example in examples ) addExampleLink( example, 'examples' );
+        olExamples.append( document.createElement('hr') );
+        var templates = Build.examplesList( 'web/templates' );
+        for( example in templates ) addExampleLink( example, 'templates' );
+
+        searchInput.addEventListener('input', e -> {
+            var term = searchInput.value;
+            var expr = new EReg( term, "" );
+            var matched = new Array<String>();
+            for( example in examples ) {
+                if( expr.match( example ) ) {
+                    matched.push( example );
+                } 
             }
-            olExamples.appendChild( li );
-        }
-        
+            for( li in olExamples.children ) {
+                var attr = li.getAttribute('data-example');
+                if( matched.has( attr ) ) {
+                    li.style.display = "flex";
+                } else {
+                    li.style.display = "none";
+                }
+            }
+        } );
+
         iframe.onerror = e -> {
             console.warn('ERROR: $e');
             console.groupEnd();
@@ -69,25 +84,6 @@ class App {
             iframe.classList.remove('loading');
         } 
 
-        searchInput.addEventListener('input', e -> {
-            var term = searchInput.value;
-            var expr = new EReg( term, "" );
-            var matched = new Array<String>();
-            for( example in examples ) {
-                if( expr.match( example ) ) {
-                    matched.push( example );
-                } 
-            }
-            for( li in olExamples.children ) {
-                var attr = li.getAttribute('data-example');
-                if( matched.has( attr ) ) {
-                    li.style.display = "block";
-                } else {
-                    li.style.display = "none";
-                }
-            }
-        } );
-
         window.onresize = e -> {
             iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
             iframe.style.left = panelWidth+'px';
@@ -99,12 +95,44 @@ class App {
         }
 
         if( window.location.hash != '' ) {
-            var example = window.location.hash.substring( 1 );
-            loadExample( example );
+            var hash = window.location.hash.substring( 1 );
+            var i = hash.indexOf('-');
+            if( i == -1 )
+                return;
+            var group = hash.substr(0,i);
+            var example = hash.substr(i+1);
+            loadProject( example, group );
         }
     }
+
+    static function addExampleLink( example : String, group : String ) {
+
+        var li = document.createLIElement();
+        li.setAttribute( 'data-example', example );
+        li.setAttribute( 'data-group', group );
+        li.classList.add('link');
+        
+        var src = document.createAnchorElement();
+
+        var text = document.createSpanElement();
+        text.textContent = example.replace('_',' ');
+        text.onpointerover = e -> {
+            //src.style.display = 'block';
+        }
+        text.onclick = e -> {
+            loadProject( example, group );
+        }
+        li.append( text );
+
+        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$example';
+        src.textContent = '</>';
+        src.classList.add('src');
+        li.append( src );
+
+        olExamples.append( li );
+    }
     
-    static function loadExample( example : String ) {
+    static function loadProject( example : String, group : String ) {
 
         document.getElementById('title').textContent = 'Loading '+example.replace('_', ' ');
 
@@ -115,23 +143,20 @@ class App {
 
         current = example;
 
-        var link = nav.querySelector( 'ol.examples > [data-example=$current]' );
+        var link = nav.querySelector( 'ol.examples > li[data-example=$current]' );
         link.classList.toggle('active');
 
-        var path = '$EXAMPLES_PATH/$example/';
-        console.group('Loading $example');
+        var path = '$group/$example/';
+        console.group('Loading $group/$example');
         iframe.classList.add('loading');
         iframe.src = path;
         
-        window.location.hash = example;
-        //window.history.replaceState( null, null );
-        //window.history.pushState( { page: example }, "Armroy3D" );
+        window.location.hash = '$group-$example';
         
-        var url = '$REPO_PATH/$example';
+        var url = '$REPO_OWNER/armory_$group/tree/master/$example';
         var srcLink : AnchorElement = cast document.getElementById('source-link');
         srcLink.href = url;
         srcLink.style.display = 'block';
-        
         
         // var title = document.getElementById( 'example-title' );
         // title.textContent = example.replace('_',' ');

@@ -1,16 +1,17 @@
 
 :root {
-    --background: #29272b;
+    
+    --panel-width: 260px;
+
+    --background: #1b1a1e;
     --f_high: #ffffff;
-    --f_med: #ff2851;
-    --f_low: #66606b;
-    --f_inv: #000000;
-    --b_high: #000000;
-    --b_med: #201e21;
-    --b_low: #322e33;
-    --b_inv: #ff2851;
-    --sprite-size: 1rem;
-    --panel-width: 240px;
+    --f_med: #cf2b43;
+    --f_low: #888888;
+    --f_inv: #ffffff;
+    --b_high: #555555;
+    --b_med: #333333;
+    --b_low: #111111;
+    --b_inv: #cf2b43;
 }
 
 *,
@@ -93,6 +94,13 @@ h4 {
     padding: 0;
 }
 
+hr {
+    border: 0;
+    margin: 0.5rem 0;
+    height: 1px;
+    background: var(--background);
+}
+
 ol {
     display: block;
     margin: 0;
@@ -129,21 +137,32 @@ nav {
     flex-direction: column;
     background: var(--b_med);
     z-index: 1000;
+    user-select: none;
 }
 
-nav>ol.examples {
-    padding: 0.75rem 0;
+nav > ol.examples {
+    padding: 0.5rem 0;
     overflow: auto;
     border-top: 1px solid var(--background);
 }
 
-nav>ol.examples>.link {
+nav > ol.examples > li.link {
+    display: flex;
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
+    /* line-height: 2em; */
+    padding: 0.25em 0.5em;
+    /* padding: 0.25rem 0.5rem; */
 }
 
-nav>ol.examples>.link:hover {
+nav > ol.examples > li.link:hover {
     color: var(--f_high);
+}
+nav > ol.examples > li.link > .src {
+    display: none;
+    margin-left: 1ch;
+}
+nav > ol.examples > li.link:hover > .src {
+    display: block;
 }
 
 nav>ol.examples>.link.active {
@@ -176,7 +195,7 @@ iframe {
 
 #source-link {
     position: absolute;
-    top: 1rem;
+    bottom: 1rem;
     right: 1.5rem;
     font-weight: bold;
     z-index: 1000;
