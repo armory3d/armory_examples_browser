@@ -19,6 +19,7 @@ class App {
 
     static var panelWidth : Int;
     static var current : String;
+
     static var nav : Element;
     static var olExamples : OListElement;
     static var iframe : IFrameElement;
@@ -26,7 +27,7 @@ class App {
 
     static function main() {
 
-        console.log( '%cArmory3D Examples Browser', 'color:#fff;background:#cf2b43;padding:1rem;' );
+        console.log( '%cArmory3D Examples Browser', 'color:#fff;background:#cf2b43;padding:0.5rem 1rem;' );
 
         var style = window.getComputedStyle(document.documentElement);
         var panelWidthStr = style.getPropertyValue('--panel-width');
@@ -69,11 +70,13 @@ class App {
             console.warn('ERROR: $e');
             console.groupEnd();
         }
-        iframe.onload = function() {
+        iframe.onload = e -> {
             console.groupEnd();
+            console.timeEnd( 'time' );
             document.getElementById('title').textContent = '';
             iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
             iframe.style.left = panelWidth+'px';
+            //HACK
             var iframeDocument = iframe.contentWindow.document;
             canvas = cast iframeDocument.getElementById('khanvas');
             canvas.remove();
@@ -114,15 +117,14 @@ class App {
         
         var src = document.createAnchorElement();
 
-        var text = document.createSpanElement();
-        text.textContent = example.replace('_',' ');
-        text.onpointerover = e -> {
-            //src.style.display = 'block';
-        }
-        text.onclick = e -> {
+        var link = document.createAnchorElement();
+        link.href = '#$group-$example';
+        link.textContent = example.replace('_',' ');
+        link.onclick = e -> {
+            e.preventDefault();
             loadProject( example, group );
         }
-        li.append( text );
+        li.append( link );
 
         src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$example';
         src.textContent = '</>';
@@ -147,8 +149,9 @@ class App {
         link.classList.toggle('active');
 
         var path = '$group/$example/';
-        console.group('Loading $group/$example');
+        console.group('$group/$example');
         iframe.classList.add('loading');
+        console.time( 'time' );
         iframe.src = path;
         
         window.location.hash = '$group-$example';
