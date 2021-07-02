@@ -1,2 +1,5 @@
--cp src
+# -cmd blender --version
 --macro Build.examples("armory_examples","web/examples",false,true)
+# --macro Build.examples("armory_templates","web/templates",false,true)
+#--macro Build.example("armory_templates","first_person","web/templates",true,true)
+# --macro Build.example("armory_examples","animation_actions","web/examples",true)

@@ -10,7 +10,7 @@ class Build {
 
     #if macro
 
-    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, ?ignoreProject : Array<String> ) {
+    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, backgroundMode = true, ?ignoreProject : Array<String> ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
             Context.error( 'Examples directory [$src] not found', pos );
@@ -23,18 +23,19 @@ class Build {
         for( i in 0...projects.length ) {
             var project = projects[i];
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
-            Sys.println('Building example ${i+1}/${projects.length} $project');
-            var code = Build.example( src, project, dst, forceRebuild );
+            Sys.println('----------- ${i+1}/${projects.length} $project');
+            var timeStart = Sys.time();
+            var code = Build.example( src, project, dst, forceRebuild, backgroundMode );
+            Sys.println('Time: '+Std.int((Sys.time() - timeStart) * 1000)+'ms');
             if( code != 0 ) {
-                //Sys.println( 'Failed to build [$project]: $code' );
-                Sys.println( '$project: $code' );
-                if( !ignoreErrors ) Sys.exit(1);
+                Sys.println( 'ERROR: $code' );
+                if( !ignoreErrors ) Sys.exit(code);
                 failed.push( project );
             }
         }
         if( failed.length > 0 ) {
-            Sys.println( failed.length+' projects failed:');
-            for( e in failed ) Sys.println( '- Failed: $e' );
+            Sys.println( '\n${failed.length} projects failed:');
+            for( e in failed ) Sys.println( e );
         }
     }
 
@@ -54,12 +55,17 @@ class Build {
         Sys.println( 'blender '+args.join(' ') );
         var code = Sys.command('blender', args);
         if( code == 0 ) {
+            var builddir = '$srcdir/build_$name/html5';
+            if( !exists( builddir ) ) {
+                trace( 'Exit code 0 but build directory not found: $builddir' );
+                return 1;
+            }
             if( !exists( dst ) ) createDirectory( dst );
-            rename( '$srcdir/build_$name/html5', dstdir );
+            rename( builddir, dstdir );
         }
         return code;
     }
-
+   
     static function rmdir( path : String ) {
 		if( exists( path ) ) {
 			for( e in readDirectory( path ) ) {
