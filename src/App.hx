@@ -15,53 +15,51 @@ using StringTools;
 class App {
     
     static var REPO_OWNER = "https://github.com/tong";
-    static var EXAMPLES_PATH = "examples";
 
     static var panelWidth : Int;
     static var current : String;
 
     static var nav : Element;
-    static var olExamples : OListElement;
+    static var olProjects : OListElement;
     static var iframe : IFrameElement;
     static var canvas : CanvasElement;
 
     static function main() {
 
-        console.log( '%cArmory3D Examples Browser', 'color:#fff;background:#cf2b43;padding:0.5rem 1rem;' );
+        console.log( '%cArmory3D Examples Browser', 'color:#cf2b43;background:#000;padding:0.5rem 1rem;' );
 
         var style = window.getComputedStyle(document.documentElement);
         var panelWidthStr = style.getPropertyValue('--panel-width');
         panelWidth = Std.parseInt( panelWidthStr.substr(0, panelWidthStr.length-2) );
 
         nav = document.body.querySelector('nav');
-        olExamples = cast nav.querySelector('ol.examples');
+        olProjects = cast nav.querySelector('ol.projects');
         var searchInput : InputElement = cast nav.querySelector('input[type="search"]');
         
         iframe = cast document.getElementById('frame');
         iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
         iframe.style.left = panelWidth+'px';
 
-        var examples = Build.examplesList( 'web/examples' );
-        for( example in examples ) addExampleLink( example, 'examples' );
-        olExamples.append( document.createElement('hr') );
-        var templates = Build.examplesList( 'web/templates' );
-        for( example in templates ) addExampleLink( example, 'templates' );
+        var examples = Build.projectList( 'web/examples' );
+        for( project in examples ) addProjectLink( project, 'examples' );
+        olProjects.append( document.createElement('hr') );
+        var templates = Build.projectList( 'web/templates' );
+        for( project in templates ) addProjectLink( project, 'templates' );
 
         searchInput.addEventListener('input', e -> {
-            var term = searchInput.value;
-            var expr = new EReg( term, "" );
-            var matched = new Array<String>();
-            for( example in examples ) {
-                if( expr.match( example ) ) {
-                    matched.push( example );
-                } 
-            }
-            for( li in olExamples.children ) {
-                var attr = li.getAttribute('data-example');
-                if( matched.has( attr ) ) {
-                    li.style.display = "flex";
-                } else {
-                    li.style.display = "none";
+            if( searchInput.value.length == 0 ) {
+                for( li in olProjects.children ) li.style.display = "flex";
+            } else {
+                var expr = new EReg( searchInput.value, "" );
+                var matchedExamples = examples.filter( p -> return expr.match( p ) );
+                var matchedTemplates = templates.filter( p -> return expr.match( p ) );
+                for( li in olProjects.children ) {
+                    switch li.getAttribute('data-group') {
+                    case "examples":
+                        li.style.display = matchedExamples.has( li.getAttribute('data-project') ) ? "flex" : "none";
+                    case "templates":
+                        li.style.display = matchedTemplates.has( li.getAttribute('data-project') ) ? "flex" : "none";
+                    }
                 }
             }
         } );
@@ -103,65 +101,64 @@ class App {
             if( i == -1 )
                 return;
             var group = hash.substr(0,i);
-            var example = hash.substr(i+1);
-            loadProject( example, group );
+            var project = hash.substr(i+1);
+            loadProject( project, group );
         }
     }
 
-    static function addExampleLink( example : String, group : String ) {
+    static function addProjectLink( project : String, group : String ) {
 
         var li = document.createLIElement();
-        li.setAttribute( 'data-example', example );
+        li.setAttribute( 'data-project', project );
         li.setAttribute( 'data-group', group );
         li.classList.add('link');
         
         var src = document.createAnchorElement();
 
         var link = document.createAnchorElement();
-        link.href = '#$group-$example';
-        link.textContent = example.replace('_',' ');
+        link.href = '#$group-$project';
+        link.textContent = project.replace('_',' ');
         link.onclick = e -> {
             e.preventDefault();
-            loadProject( example, group );
+            loadProject( project, group );
         }
         li.append( link );
 
-        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$example';
+        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
         src.textContent = '</>';
         src.classList.add('src');
         li.append( src );
 
-        olExamples.append( li );
+        olProjects.append( li );
     }
     
-    static function loadProject( example : String, group : String ) {
+    static function loadProject( project : String, group : String ) {
 
-        document.getElementById('title').textContent = 'Loading '+example.replace('_', ' ');
+        document.getElementById('title').textContent = 'Loading '+project.replace('_', ' ');
 
         if( current != null ) {
-            var link = nav.querySelector( 'ol.examples > li[data-example=$current]' );
+            var link = olProjects.querySelector( 'li[data-project=$current]' );
             link.classList.remove('active');
         }
 
-        current = example;
+        current = project;
 
-        var link = nav.querySelector( 'ol.examples > li[data-example=$current]' );
+        var link = olProjects.querySelector( 'li[data-project=$current]' );
         link.classList.toggle('active');
 
-        var path = '$group/$example/';
-        console.group('$group/$example');
+        var path = '$group/$project/';
+        console.group('$group/$project');
         iframe.classList.add('loading');
         console.time( 'time' );
         iframe.src = path;
         
-        window.location.hash = '$group-$example';
+        window.location.hash = '$group-$project';
         
-        var url = '$REPO_OWNER/armory_$group/tree/master/$example';
+        var url = '$REPO_OWNER/armory_$group/tree/master/$project';
         var srcLink : AnchorElement = cast document.getElementById('source-link');
         srcLink.href = url;
         srcLink.style.display = 'block';
-        
-        // var title = document.getElementById( 'example-title' );
-        // title.textContent = example.replace('_',' ');
+
+        document.title = 'Armory3D | $project';
     }
 }

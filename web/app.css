@@ -3,11 +3,11 @@
     
     --panel-width: 260px;
 
-    --background: #1b1a1e;
+    --background: #29272b;
     --f_high: #ffffff;
     --f_med: #cf2b43;
     --f_low: #888888;
-    --f_inv: #ffffff;
+    --f_inv: #000000;
     --b_high: #555555;
     --b_med: #333333;
     --b_low: #111111;
@@ -18,43 +18,6 @@
 *::before,
 *::after {
     box-sizing: border-box;
-}
-
-::selection {
-    background: var(--b_inv);
-    color: var(--f_inv);
-}
-
-::-webkit-scrollbar {
-    border: none;
-}
-
-::-webkit-scrollbar:vertical {
-    width: 0.8vw;
-    min-width: 8px;
-    max-width: 12px
-}
-
-::-webkit-scrollbar:horizontal {
-    display: none;
-
-}
-
-/* ::-webkit-scrollbar-track {
-    background: var(--background);
-} */
-
-::-webkit-scrollbar-thumb {
-    background: var(--b_med);
-    --border: 1px solid var(--background);
-    border-top: var(--border);
-    border-bottom: var(--border);
-    border-left: var(--border);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--b_high);
-    border: none;
 }
 
 html {
@@ -73,9 +36,35 @@ body {
     color: var(--f_med);
 }
 
+::selection {
+    background: var(--b_inv);
+    color: var(--f_inv);
+}
+
+::-webkit-scrollbar {
+    border: none;
+}
+::-webkit-scrollbar:vertical {
+    width: 0.8vw;
+    min-width: 8px;
+    max-width: 12px
+}
+::-webkit-scrollbar:horizontal {
+    display: none;
+
+}
+::-webkit-scrollbar-thumb {
+    background: var(--b_med);
+    --border: 1px solid var(--b_low);
+    /* border-right: var(--border); */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--b_high);
+}
+
 a {
     background: transparent;
-    background: var(--bg_low);
     color: var(--f_med);
     text-decoration: none;
 }
@@ -116,18 +105,18 @@ input {
     padding: 1rem 1rem;
     font-family: monospace;
     text-transform: uppercase;
-    background: var(--b_med);
-    color: var(--f_med);
+    background: var(--b_low);
+    color: var(--f_med); 
     border: none;
     outline: none;
 }
 
 input:focus {
-    background: var(--b_high);
-    color: var(--f_high);
+    background: var(--b_med);
 }
 
 /** ----- **/
+
 
 nav {
     position: absolute;
@@ -135,37 +124,34 @@ nav {
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--b_med);
+    background: var(--b_low);
     z-index: 1000;
     user-select: none;
 }
 
-nav > ol.examples {
+nav > ol.projects {
     padding: 0.5rem 0;
     overflow: auto;
     border-top: 1px solid var(--background);
 }
 
-nav > ol.examples > li.link {
+nav > ol.projects > li.link {
     display: flex;
     cursor: pointer;
-    /* line-height: 2em; */
+    line-height: 1em;
     padding: 0.25em 0.5em;
-    /* padding: 0.25rem 0.5rem; */
 }
 
-nav > ol.examples > li.link:hover {
-    color: var(--f_high);
-}
-nav > ol.examples > li.link > .src {
+nav > ol.projects > li.link > .src {
     display: none;
     margin-left: 1ch;
 }
-nav > ol.examples > li.link:hover > .src {
+nav > ol.projects > li.link:hover > .src {
     display: block;
 }
 
-nav>ol.examples>.link.active {
+nav>ol.projects>.link.active,
+nav>ol.projects>.link.active > * {
     background: var(--b_inv);
     color: var(--f_inv);
 }

@@ -10,10 +10,10 @@ class Build {
 
     #if macro
 
-    static function examples( src : String, dst : String, forceRebuild = false, ignoreErrors = false, backgroundMode = true, ?ignoreProject : Array<String> ) {
+    static function projects( src : String, dst : String, forceRebuild = false, ignoreErrors = false, backgroundMode = true, ?ignoreProject : Array<String> ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
-            Context.error( 'Examples directory [$src] not found', pos );
+            Context.error( 'Project directory [$src] not found', pos );
         var projects = readDirectory(src).filter( dir->{
             var blend = '$src/$dir/$dir.blend';
             return !~/^_|\..+$/.match(dir) && isDirectory('$src/$dir') && exists( blend );
@@ -25,7 +25,7 @@ class Build {
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
             Sys.println('----------- ${i+1}/${projects.length} $project');
             var timeStart = Sys.time();
-            var code = Build.example( src, project, dst, forceRebuild, backgroundMode );
+            var code = Build.project( src, project, dst, forceRebuild, backgroundMode );
             Sys.println('Time: '+Std.int((Sys.time() - timeStart) * 1000)+'ms');
             if( code != 0 ) {
                 Sys.println( 'ERROR: $code' );
@@ -39,7 +39,7 @@ class Build {
         }
     }
 
-    static function example( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'build.py' ) {
+    static function project( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'build.py' ) {
         if( !exists( path ) )
             throw 'Directory [$path] not found';
         var srcdir = '$path/$name';
@@ -78,12 +78,12 @@ class Build {
 
     #end
 
-    macro public static function examplesList( path : String ) : ExprOf<Array<String>> {
-        var examples : Array<String> = readDirectory( path ).filter( dir->{
+    macro public static function projectList( path : String ) : ExprOf<Array<String>> {
+        var projects : Array<String> = readDirectory( path ).filter( dir->{
             var p = '$path/$dir';
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
         });
-        examples.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        return macro $v{examples};
+        projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
+        return macro $v{projects};
     }
 }
