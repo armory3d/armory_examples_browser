@@ -80,6 +80,8 @@ class Build {
     #end
 
     macro public static function projectList( path : String ) : ExprOf<Array<String>> {
+        if( !exists( path ) )
+            Context.fatalError( 'Projects directory [$path] not found', Context.currentPos() );
         var projects : Array<String> = readDirectory( path ).filter( dir->{
             var p = '$path/$dir';
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
