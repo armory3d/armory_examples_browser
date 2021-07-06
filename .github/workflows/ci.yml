@@ -19,7 +19,7 @@ jobs:
       - name: Install armory
         run: |
           git clone https://github.com/armory3d/armsdk.git --recurse-submodules
-          blender -noaudio -b -P enable_addon.py
+          blender -noaudio -b -P blender/enable_addon.py
       - name: Get armory_examples
         uses: actions/checkout@v2
         with:

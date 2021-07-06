@@ -34,13 +34,22 @@ class Build {
                 if( !ignoreErrors ) Sys.exit(code);
             }
         }
-        Sys.println('\n---');
+        Sys.println('\n-------');
         for( r in results ) {
-            Sys.println( r.project+': '+r.code+', '+r.time+'ms' );
+            var info = r.project+': '+r.code+', '+r.time+'ms';
+            var color = 0;
+            if( r.code == 0 ) {
+                info = '✔ $info';
+                color = 32;
+            } else {
+                info = '✖ $info';
+                color = 31;
+            }
+            Sys.println( '\x1B['+color+'m'+info+'\x1B[0m' );
         }
     }
 
-    static function project( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'build.py' ) {
+    static function project( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'blender/build_project.py' ) {
         if( !exists( path ) )
             throw 'Directory [$path] not found';
         var srcdir = '$path/$name';
