@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get armory_examples
+        uses: actions/checkout@v2
+        with:
+          repository: tong/armory_examples
+          path: armory_examples
+          ref: add-gh-actions
+      - name: Get armory_templates
+        uses: actions/checkout@v2
+        with:
+          repository: tong/armory_templates
+          path: armory_templates
+          ref: add-gh-actions
+      - name: Build examples, templates
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.3
+        run: haxe projects.hxml
+      - name: Build application
+        run: haxe app.hxml
+      - name: Deploy gh-pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: web
