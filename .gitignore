@@ -2,4 +2,4 @@ web/app.js*
 web/examples/
 web/templates/
 *.log
-armory_examples
+/_*
