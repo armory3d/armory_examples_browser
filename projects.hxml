@@ -1,5 +1,5 @@
---macro Build.projects("armory_examples","web/examples",false,true)
---macro Build.projects("armory_templates","web/templates",false,true)
+build-examples.hxml
+build-templates.hxml
 #--macro Build.projects("armory_templates","web/templates",false,true)
 # --macro Build.project("armory_templates","first_person","web/templates",true,true)
 # --macro Build.project("armory_examples","animation_actions","web/examples",true)

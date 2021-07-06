@@ -32,10 +32,15 @@ jobs:
           repository: tong/armory_templates
           path: armory_templates
           ref: examples-browser-compat
-      - name: Build examples, templates
-        run: haxe projects.hxml
+      - name: Build armory_examples
+        run: haxe build-examples.hxml
+      - name: Build armory_templates
+        run: haxe build-templates.hxml
       - name: Build application
-        run: haxe app.hxml
+        run: |
+          ls web/examples
+          ls web/templates
+          haxe app.hxml
       - name: Deploy gh-pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:

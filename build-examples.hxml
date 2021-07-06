@@ -1,0 +1,1 @@
+--macro Build.projects("armory_examples","web/examples",false,true)
