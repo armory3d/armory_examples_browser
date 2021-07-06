@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.2.3
       - name: Get armory_examples
         uses: actions/checkout@v2
         with:
@@ -24,9 +27,6 @@ jobs:
           path: armory_templates
           ref: add-gh-actions
       - name: Build examples, templates
-        uses: krdlab/setup-haxe@v1
-        with:
-          haxe-version: 4.2.3
         run: haxe projects.hxml
       - name: Build application
         run: haxe app.hxml
