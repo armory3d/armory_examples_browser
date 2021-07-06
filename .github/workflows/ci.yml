@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ ci-config ]
   pull_request:
     branches: [ master ]
 
@@ -14,6 +14,12 @@ jobs:
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.3
+      - name: Install blender
+        run: sudo snap install blender --classic
+      - name: Install armory
+        run: |
+          git clone https://github.com/armory3d/armsdk.git --recurse-submodules
+          blender -noaudio -b -P enable_addon.py
       - name: Get armory_examples
         uses: actions/checkout@v2
         with:
