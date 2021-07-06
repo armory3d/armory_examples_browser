@@ -19,23 +19,24 @@ class Build {
             return !~/^_|\..+$/.match(dir) && isDirectory('$src/$dir') && exists( blend );
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        var failed = new Array<String>();
+        var results = new Array<{project:String,code:Int,time:Int}>();
         for( i in 0...projects.length ) {
             var project = projects[i];
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
             Sys.println('----------- ${i+1}/${projects.length} $project');
             var timeStart = Sys.time();
             var code = Build.project( src, project, dst, forceRebuild, backgroundMode );
-            Sys.println('Time: '+Std.int((Sys.time() - timeStart) * 1000)+'ms');
+            var time = Std.int((Sys.time() - timeStart) * 1000);
+            results.push( { project: project, code: code, time: time } );
+            Sys.println('Time: '+time+'ms');
             if( code != 0 ) {
                 Sys.println( 'ERROR: $code' );
                 if( !ignoreErrors ) Sys.exit(code);
-                failed.push( project );
             }
         }
-        if( failed.length > 0 ) {
-            Sys.println( '\n${failed.length} projects failed:');
-            for( e in failed ) Sys.println( e );
+        Sys.println('\n---');
+        for( r in results ) {
+            Sys.println( r.project+': '+r.code+', '+r.time+'ms' );
         }
     }
 
