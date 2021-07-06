@@ -19,13 +19,13 @@ jobs:
         with:
           repository: tong/armory_examples
           path: armory_examples
-          ref: add-gh-actions
+          ref: examples-browser-compat
       - name: Get armory_templates
         uses: actions/checkout@v2
         with:
           repository: tong/armory_templates
           path: armory_templates
-          ref: add-gh-actions
+          ref: examples-browser-compat
       - name: Build examples, templates
         run: haxe projects.hxml
       - name: Build application
