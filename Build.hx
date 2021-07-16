@@ -2,6 +2,7 @@
 #if macro
 import haxe.macro.Context;
 import sys.FileSystem.*;
+import sys.io.File;
 using StringTools;
 using haxe.io.Path;
 #end
@@ -72,6 +73,8 @@ class Build {
             }
             if( !exists( dst ) ) createDirectory( dst );
             rename( builddir, dstdir );
+            var readmePath = '$srcdir/README.md';
+            if( exists( readmePath ) ) File.copy( readmePath, '$dstdir/README.md' );
         }
         return code;
     }

@@ -1,1 +1,2 @@
 --macro Build.projects("armory_templates","web/templates",false,true)
+# --macro Build.project("armory_templates","first_person","web/templates",true,true)

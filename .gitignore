@@ -3,3 +3,4 @@ web/examples/
 web/templates/
 *.log
 /_*
+node_update_failure.*

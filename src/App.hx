@@ -125,7 +125,7 @@ class App {
         li.append( link );
 
         src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
-        src.textContent = '</>';
+        src.innerHTML = '&lt;/&gt;';
         src.classList.add('src');
         li.append( src );
 
@@ -134,7 +134,7 @@ class App {
     
     static function loadProject( project : String, group : String ) {
 
-        document.getElementById('title').textContent = 'Loading '+project.replace('_', ' ');
+        //document.getElementById('title').textContent = 'Loading '+project.replace('_', ' ');
 
         if( current != null ) {
             var link = olProjects.querySelector( 'li[data-project=$current]' );
@@ -160,5 +160,23 @@ class App {
         srcLink.style.display = 'block';
 
         document.title = 'Armory3D | $project';
+
+        var readmeElement = document.getElementById('project-readme');
+        window.fetch( '${path}README.md' ).then( res -> {
+            if( res.status == 200 ) {
+                res.text().then( md -> {
+                    md = '# '+project.replace('_',' ')+'  \n' + md;
+                    readmeElement.innerHTML = Markdown.markdownToHtml(md);
+                    readmeElement.style.visibility = 'visible';
+                    return null;
+                });
+            } else {
+                readmeElement.innerHTML = '';
+                readmeElement.style.visibility = 'hidden';
+                return null;
+            }
+        }).catchError( e -> {
+            console.log('README.md not found');
+        });
     }
 }

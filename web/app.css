@@ -14,6 +14,12 @@
     --b_inv: #cf2b43;
 }
 
+@font-face {
+	font-family: 'Title';
+	font-display: swap;
+	src: url("hlvtc-75.woff2") format("woff2");
+}
+
 *,
 *::before,
 *::after {
@@ -56,7 +62,6 @@ body {
 ::-webkit-scrollbar-thumb {
     background: var(--b_med);
     --border: 1px solid var(--b_low);
-    /* border-right: var(--border); */
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -76,11 +81,15 @@ h1,
 h2,
 h3,
 h4 {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: 'Title';
     line-height: 1em;
     text-transform: uppercase;
     margin: 0;
     padding: 0;
+}
+
+h3 {
+    margin: 1em 0;
 }
 
 hr {
@@ -94,11 +103,6 @@ ol {
     display: block;
     margin: 0;
     padding: 0;
-    list-style: none;
-}
-
-li {
-    text-transform: uppercase;
 }
 
 input {
@@ -116,6 +120,17 @@ input:focus {
 }
 
 /** ----- **/
+    
+#title {
+    position: absolute;
+    top: 0;
+    left: var(--panel-width);
+    padding: 3rem;
+    font-size: 8rem;
+    line-height: 0.75em;
+    letter-spacing: -0.5rem;
+    z-index: 100;
+}
 
 
 nav {
@@ -124,6 +139,7 @@ nav {
     height: 100%;
     display: flex;
     flex-direction: column;
+    text-transform: uppercase;
     background: var(--b_low);
     z-index: 1000;
     user-select: none;
@@ -158,25 +174,14 @@ nav>ol.projects>.link.active > * {
 
 iframe {
     display: block;
-    position: absolute;
+    position: relative;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     z-index: 10;
-}
-
-#title {
-    position: absolute;
-    top: 0;
-    left: var(--panel-width);
-    padding: 1rem;
-    font-size: 8rem;
-    line-height: 0.75em;
-    letter-spacing: -0.5rem;
-    z-index: 100;
 }
 
 #source-link {
@@ -186,6 +191,22 @@ iframe {
     font-weight: bold;
     z-index: 1000;
     display: none;
+}
+
+#project-readme {
+    --margin: 1px;
+    position: absolute;
+    top: var(--margin);
+    left: calc(var(--panel-width) + var(--margin) );
+    right: var(--margin);
+    padding: 1rem;
+    background: var(--b_low);
+    opacity: 0.95;
+    z-index: 1000;
+    visibility: hidden;
+}
+#project-readme ol {
+    margin-left: 3em;
 }
 
 footer {

@@ -1,6 +1,7 @@
 -js web/app.js
 -main App
 -cp src
+-lib markdown
 --dce full
 --debug
 -D analyzer-optimize
