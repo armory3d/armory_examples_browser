@@ -40,6 +40,7 @@ jobs:
         run: |
           ls web/examples
           ls web/templates
+          haxelib install app.hxml --always
           haxe app.hxml
       - name: Deploy gh-pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
