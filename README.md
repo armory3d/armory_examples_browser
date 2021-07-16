@@ -2,10 +2,14 @@
 
 
 ```sh
-# Build armory_templates
+# Clone including submodules
+git clone --recursive https://github.com/tong/armory_examples_browser.git
+cd armory_examples_browser/
+
+# Build armory_templates projects
 haxe build-templates.hxml
 
-# Build armory_examples
+# Build armory_examples projects
 haxe build-examples.hxml
 
 # Build appllication
