@@ -99,6 +99,7 @@ class Build {
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
+        Sys.println( path+': '+projects.join(', ') );
         return macro $v{projects};
     }
 }
