@@ -6,3 +6,7 @@
 	path = armory_templates
 	url = https://github.com/tong/armory_templates.git
 	branch = examples-browser-compat
+[submodule "armory_tutorials"]
+	path = armory_tutorials
+	url = https://github.com/tong/armory_tutorials.git
+	branch = examples-browser-compat

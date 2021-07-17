@@ -36,10 +36,13 @@ jobs:
         run: haxe build-examples.hxml
       - name: Build armory_templates
         run: haxe build-templates.hxml
+      - name: Build armory_tutorials
+        run: haxe build-tutorials.hxml
       - name: Build application
         run: |
           ls web/examples
           ls web/templates
+          ls web/tutorials
           haxelib install app.hxml --always
           haxe app.hxml
       - name: Deploy gh-pages

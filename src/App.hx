@@ -45,6 +45,9 @@ class App {
         olProjects.append( document.createElement('hr') );
         var templates = Build.projectList( 'web/templates' );
         for( project in templates ) addProjectLink( project, 'templates' );
+        olProjects.append( document.createElement('hr') );
+        var tutorials = Build.projectList( 'web/tutorials' );
+        for( project in tutorials ) addProjectLink( project, 'tutorials' );
 
         searchInput.addEventListener('input', e -> {
             if( searchInput.value.length == 0 ) {
@@ -53,6 +56,7 @@ class App {
                 var expr = new EReg( searchInput.value, "" );
                 var matchedExamples = examples.filter( p -> return expr.match( p ) );
                 var matchedTemplates = templates.filter( p -> return expr.match( p ) );
+                //TODO tutorials
                 for( li in olProjects.children ) {
                     switch li.getAttribute('data-group') {
                     case "examples":
@@ -165,7 +169,7 @@ class App {
         window.fetch( '${path}README.md' ).then( res -> {
             if( res.status == 200 ) {
                 res.text().then( md -> {
-                    md = '# '+project.replace('_',' ')+'  \n' + md;
+                    md = '# '+project.replace('_',' ')+'  \n' + md.trim();
                     readmeElement.innerHTML = Markdown.markdownToHtml(md);
                     readmeElement.style.visibility = 'visible';
                     return null;

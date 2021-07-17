@@ -1,6 +1,7 @@
 web/app.js*
 web/examples/
 web/templates/
+web/tutorials/
 *.log
 /_*
 node_update_failure.*

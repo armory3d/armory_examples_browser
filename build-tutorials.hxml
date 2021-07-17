@@ -1,0 +1,2 @@
+--macro Build.projects("armory_tutorials","web/tutorials",false,true)
+# --macro Build.project("armory_tutorials","instancing","web/examples",true)
