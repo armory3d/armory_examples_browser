@@ -1,10 +1,12 @@
 
 #if macro
 import haxe.macro.Context;
+import haxe.macro.Expr;
 import sys.FileSystem.*;
 import sys.io.File;
 using StringTools;
 using haxe.io.Path;
+using haxe.macro.ExprTools;
 #end
 
 class Build {

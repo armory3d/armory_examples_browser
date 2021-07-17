@@ -14,7 +14,7 @@ using StringTools;
 
 class App {
     
-    static var REPO_OWNER = "https://github.com/tong";
+    static var REPO_OWNER = "https://github.com/armory3d";
 
     static var panelWidth : Int;
     static var current : String;
@@ -26,9 +26,12 @@ class App {
 
     static function main() {
 
-        console.log( '%cArmory3D Examples Browser', 'color:#cf2b43;background:#000;padding:0.5rem 1rem;' );
-
         var style = window.getComputedStyle(document.documentElement);
+        var colorA = style.getPropertyValue('--f_med');
+        var colorB = style.getPropertyValue('--f_inv');
+        
+        console.log( '%cArmory3D Examples Browser', 'color:$colorA;background:$colorB;padding:0.5rem 1rem;' );
+
         var panelWidthStr = style.getPropertyValue('--panel-width');
         panelWidth = Std.parseInt( panelWidthStr.substr(0, panelWidthStr.length-2) );
 
@@ -40,27 +43,24 @@ class App {
         iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
         iframe.style.left = panelWidth+'px';
 
-        var examples = Build.projectList( 'web/examples' );
-        for( project in examples ) addProjectLink( project, 'examples' );
-        olProjects.append( document.createElement('hr') );
-        var templates = Build.projectList( 'web/templates' );
-        for( project in templates ) addProjectLink( project, 'templates' );
-        olProjects.append( document.createElement('hr') );
-        var tutorials = Build.projectList( 'web/tutorials' );
-        for( project in tutorials ) addProjectLink( project, 'tutorials' );
+        var templates = addProjectGroup( 'templates', Build.projectList( 'web/templates' ) );
+        var tutorials = addProjectGroup( 'tutorials', Build.projectList( 'web/tutorials' ) );
+        var examples = addProjectGroup( 'examples', Build.projectList( 'web/examples' ) );
 
         searchInput.addEventListener('input', e -> {
             if( searchInput.value.length == 0 ) {
                 for( li in olProjects.children ) li.style.display = "flex";
             } else {
-                var expr = new EReg( searchInput.value, "" );
-                var matchedExamples = examples.filter( p -> return expr.match( p ) );
-                var matchedTemplates = templates.filter( p -> return expr.match( p ) );
-                //TODO tutorials
+                var searchExpr = new EReg( searchInput.value, "" );
+                var matchedExamples = examples.filter( p -> return searchExpr.match( p ) );
+                var matchedTutorials = tutorials.filter( p -> return searchExpr.match( p ) );
+                var matchedTemplates = templates.filter( p -> return searchExpr.match( p ) );
                 for( li in olProjects.children ) {
                     switch li.getAttribute('data-group') {
                     case "examples":
                         li.style.display = matchedExamples.has( li.getAttribute('data-project') ) ? "flex" : "none";
+                    case "tutorials":
+                        li.style.display = matchedTutorials.has( li.getAttribute('data-project') ) ? "flex" : "none";
                     case "templates":
                         li.style.display = matchedTemplates.has( li.getAttribute('data-project') ) ? "flex" : "none";
                     }
@@ -108,6 +108,14 @@ class App {
             var project = hash.substr(i+1);
             loadProject( project, group );
         }
+    }
+
+    static function addProjectGroup( group : String, projects : Array<String> ) {
+        var title = document.createElement('h2');
+        title.textContent = group;
+        olProjects.append( title );
+        for( p in projects ) addProjectLink( p, group );
+        return projects;
     }
 
     static function addProjectLink( project : String, group : String ) {
