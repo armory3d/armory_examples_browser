@@ -32,6 +32,12 @@ jobs:
           repository: tong/armory_templates
           path: armory_templates
           ref: examples-browser-compat
+      - name: Get armory_tutorials
+        uses: actions/checkout@v2
+        with:
+          repository: tong/armory_tutorials
+          path: armory_tutorials
+          ref: examples-browser-compat
       - name: Build armory_examples
         run: haxe build-examples.hxml
       - name: Build armory_templates
