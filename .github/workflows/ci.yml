@@ -20,6 +20,9 @@ jobs:
         run: |
           git clone https://github.com/armory3d/armsdk.git --recurse-submodules
           blender -noaudio -b -P blender/enable_addon.py
+      - name: Install haxelibs
+        run: |
+          haxelib install markdown
       - name: Get armory_examples
         uses: actions/checkout@v2
         with:
