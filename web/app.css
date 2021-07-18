@@ -6,6 +6,7 @@
     --background: #29272b;
     --f_high: #ffffff;
     --f_med: #cf2b43;
+    /* --f_med: #4c6ea5 */
     --f_low: #888888;
     --f_inv: #000000;
     --b_high: #555555;
@@ -17,7 +18,7 @@
 @font-face {
 	font-family: 'Title';
 	font-display: swap;
-	src: url("hlvtc-75.woff2") format("woff2");
+	src: url("title.woff2") format("woff2");
 }
 
 *,
@@ -27,7 +28,6 @@
 }
 
 html {
-    height: 100%;
     line-height: 1.2em;
     font-family: monospace;
     -webkit-text-size-adjust: 100%;
@@ -38,6 +38,9 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    /* display: grid;
+    grid-template-columns: var(--panel-width) 1fr;
+    grid-template-rows: 32px 1fr; */
     background: var(--background);
     color: var(--f_med);
 }
@@ -75,6 +78,10 @@ a {
 }
 a:hover {
     color: var(--f_high);
+}
+
+p {
+    margin: 0;
 }
 
 h1,
@@ -119,7 +126,7 @@ input:focus {
     background: var(--b_med);
 }
 
-/** ----- **/
+/** ----- NAV ----- **/
     
 #title {
     position: absolute;
@@ -132,19 +139,21 @@ input:focus {
     z-index: 100;
 }
 
-
 nav {
     position: absolute;
     width: var(--panel-width);
     height: 100%;
-    display: flex;
     flex-direction: column;
     text-transform: uppercase;
     background: var(--b_low);
     z-index: 1000;
     user-select: none;
 }
+/* nav.closed {
+    transform: translateX(-100%);
+} */
 nav > ol.projects {
+    height: 100%;
     padding: 0.5rem 0;
     overflow: auto;
     border-top: 1px solid var(--background);
@@ -159,10 +168,16 @@ nav > ol.projects > li.link {
     padding: 0.25em 1rem 0.25em 1.5rem;
     cursor: pointer;
 }
+nav > ol.projects > li.link > .close {
+    /* background: green; */
+    margin-left: 1ch;
+    display: none;
+}
 nav > ol.projects > li.link > .src {
     display: none;
     margin-left: 1ch;
 }
+nav > ol.projects > li.link.active:hover > .close,
 nav > ol.projects > li.link:hover > .src {
     display: block;
 }
@@ -172,17 +187,20 @@ nav>ol.projects>.link.active > * {
     background: var(--b_inv);
     color: var(--f_inv);
 }
+nav>ol.projects>.link.active > .close {
+    display: inline-block;
+}
 
 iframe {
-    display: block;
-    position: relative;
+    /* display: block; */
+    position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    left: var(--panel-width);
     z-index: 10;
+    width: 100%;
+    height: 100vh; 
 }
 
 #source-link {
@@ -190,32 +208,33 @@ iframe {
     bottom: 1rem;
     right: 1.5rem;
     font-weight: bold;
-    z-index: 1000;
     display: none;
+    z-index: 1000;
 }
 
 #project-readme {
     --margin: 1px;
+    display: table;
     position: absolute;
     top: var(--margin);
     left: calc(var(--panel-width) + var(--margin) );
     right: var(--margin);
-    padding: 1rem;
+    padding: 0.5rem 1rem;
     background: var(--b_low);
     opacity: 0.95;
     z-index: 1000;
     visibility: hidden;
 }
 #project-readme ol {
-    margin-left: 3em;
+    /* margin-left: 2em; */
 }
 
-footer {
-    position: absolute;
+/* footer {
+    /* position: absolute;
     bottom: 0;
-    left: 0;
+    left: 0; */
     width: var(--panel-width);
     z-index: 1000;
     font-size: 75%;
     display: none;
-}
+} */

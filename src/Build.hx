@@ -75,8 +75,12 @@ class Build {
             }
             if( !exists( dst ) ) createDirectory( dst );
             rename( builddir, dstdir );
+
             var readmePath = '$srcdir/README.md';
-            if( exists( readmePath ) ) File.copy( readmePath, '$dstdir/README.md' );
+            if( exists( readmePath ) ) {
+                var html = Markdown.markdownToHtml( File.getContent(readmePath) );
+                File.saveContent( '$dstdir/readme.html', html );
+            }
         }
         return code;
     }

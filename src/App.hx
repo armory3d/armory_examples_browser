@@ -23,6 +23,7 @@ class App {
     static var olProjects : OListElement;
     static var iframe : IFrameElement;
     static var canvas : CanvasElement;
+    static var readme : Element;
 
     static function main() {
 
@@ -39,12 +40,14 @@ class App {
         olProjects = cast nav.querySelector('ol.projects');
         var searchInput : InputElement = cast nav.querySelector('input[type="search"]');
         
-        iframe = cast document.getElementById('frame');
+        iframe = cast document.getElementById('project');
         iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
         iframe.style.left = panelWidth+'px';
+        
+        readme = document.getElementById('project-readme');
 
-        var templates = addProjectGroup( 'templates', Build.projectList( 'web/templates' ) );
         var tutorials = addProjectGroup( 'tutorials', Build.projectList( 'web/tutorials' ) );
+        var templates = addProjectGroup( 'templates', Build.projectList( 'web/templates' ) );
         var examples = addProjectGroup( 'examples', Build.projectList( 'web/examples' ) );
 
         searchInput.addEventListener('input', e -> {
@@ -75,18 +78,20 @@ class App {
         iframe.onload = e -> {
             console.groupEnd();
             console.timeEnd( 'time' );
-            document.getElementById('title').textContent = '';
+            // document.getElementById('title').textContent = '';
             iframe.width = Std.int( window.innerWidth - panelWidth )+'px';
             iframe.style.left = panelWidth+'px';
             //HACK
             var iframeDocument = iframe.contentWindow.document;
             canvas = cast iframeDocument.getElementById('khanvas');
-            canvas.remove();
-            iframeDocument.body.append( canvas );
-            iframeDocument.body.querySelector('p').remove();
-            canvas.width = Std.int( window.innerWidth - panelWidth );
-            canvas.height = window.innerHeight;
-            iframe.classList.remove('loading');
+            if( canvas != null ) {
+                canvas.remove();
+                iframeDocument.body.append( canvas );
+                iframeDocument.body.querySelector('p').remove();
+                canvas.width = Std.int( window.innerWidth - panelWidth );
+                canvas.height = window.innerHeight;
+                iframe.classList.remove('loading');
+            }
         } 
 
         window.onresize = e -> {
@@ -124,9 +129,21 @@ class App {
         li.setAttribute( 'data-project', project );
         li.setAttribute( 'data-group', group );
         li.classList.add('link');
+
+        var close = document.createSpanElement();
+        close.title = "Close project";
+        close.classList.add('close');
+        close.textContent = "X";
+        close.onclick = e -> {
+            unloadProject();
+        }
         
         var src = document.createAnchorElement();
-
+        src.classList.add('src');
+        src.title = 'Open source code on github';
+        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
+        src.innerHTML = '&lt;/&gt;';
+        
         var link = document.createAnchorElement();
         link.href = '#$group-$project';
         link.textContent = project.replace('_',' ');
@@ -134,13 +151,10 @@ class App {
             e.preventDefault();
             loadProject( project, group );
         }
+
         li.append( link );
-
-        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
-        src.innerHTML = '&lt;/&gt;';
-        src.classList.add('src');
+        li.append( close );
         li.append( src );
-
         olProjects.append( li );
     }
     
@@ -167,12 +181,24 @@ class App {
         window.location.hash = '$group-$project';
         
         var url = '$REPO_OWNER/armory_$group/tree/master/$project';
-        var srcLink : AnchorElement = cast document.getElementById('source-link');
-        srcLink.href = url;
-        srcLink.style.display = 'block';
+        
+        // var srcLink : AnchorElement = cast document.getElementById('source-link');
+        // srcLink.href = url;
+        // srcLink.style.display = 'block';
 
         document.title = 'Armory3D | $project';
 
+        readme.innerHTML = '';
+        readme.style.visibility = 'hidden';
+        window.fetch( '${path}readme.html' ).then( res -> {
+            if( res.status == 200 ) {
+                res.text().then( html -> {
+                    readme.innerHTML = html;
+                    readme.style.visibility = 'visible';
+                });
+            }
+        });
+        /*
         var readmeElement = document.getElementById('project-readme');
         window.fetch( '${path}README.md' ).then( res -> {
             if( res.status == 200 ) {
@@ -190,5 +216,16 @@ class App {
         }).catchError( e -> {
             console.log('README.md not found');
         });
+        */
+    }
+
+    static function unloadProject() {
+        if( current != null ) {
+            iframe.src = '';
+            readme.innerHTML = '';
+            readme.style.visibility = 'hidden';
+            var link = olProjects.querySelector( 'li[data-project=$current]' );
+            link.classList.remove('active');
+        }
     }
 }

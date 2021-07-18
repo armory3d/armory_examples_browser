@@ -1,2 +1,4 @@
+-cp src
+-lib markdown
 --macro Build.projects("armory_examples","web/examples",false,true)
-#--macro Build.project("armory_examples","physics_ragdoll","web/examples",true)
+#--macro Build.project("armory_examples","logic_callgroup","web/examples",true)
