@@ -75,12 +75,10 @@ class Build {
             }
             if( !exists( dst ) ) createDirectory( dst );
             rename( builddir, dstdir );
-
+            Sys.println('Creating readme.html');
             var readmePath = '$srcdir/README.md';
-            if( exists( readmePath ) ) {
-                var html = Markdown.markdownToHtml( File.getContent(readmePath) );
-                File.saveContent( '$dstdir/readme.html', html );
-            }
+            var html = exists( readmePath ) ? Markdown.markdownToHtml( File.getContent(readmePath) ) : "";
+            File.saveContent( '$dstdir/readme.html', html );
         }
         return code;
     }

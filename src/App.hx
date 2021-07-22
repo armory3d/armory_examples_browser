@@ -11,7 +11,6 @@ import js.html.OListElement;
 
 using Lambda;
 using StringTools;
-
 class App {
     
     static var REPO_OWNER = "https://github.com/armory3d";
@@ -132,17 +131,21 @@ class App {
 
         var close = document.createSpanElement();
         close.title = "Close project";
-        close.classList.add('close');
-        close.textContent = "X";
+        close.classList.add('close','link','ic-clear');
         close.onclick = e -> {
             unloadProject();
         }
         
-        var src = document.createAnchorElement();
-        src.classList.add('src');
-        src.title = 'Open source code on github';
-        src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
-        src.innerHTML = '&lt;/&gt;';
+        var source = document.createAnchorElement();
+        source.classList.add('src','ic-code');
+        source.title = 'Open source code on github';
+        source.href = source.title = '$REPO_OWNER/armory_$group/tree/master/$project';
+        // source.innerHTML = '&lt;/&gt;';
+       
+        // var fullscreen = document.createAnchorElement();
+        // fullscreen.classList.add('ic-fullscreen');
+        // // fullscreen.title = 'Open source code on github';
+        // // src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
         
         var link = document.createAnchorElement();
         link.href = '#$group-$project';
@@ -152,9 +155,10 @@ class App {
             loadProject( project, group );
         }
 
-        li.append( link );
         li.append( close );
-        li.append( src );
+        // li.append( fullscreen );
+        li.append( link );
+        li.append( source );
         olProjects.append( li );
     }
     
@@ -193,30 +197,21 @@ class App {
         window.fetch( '${path}readme.html' ).then( res -> {
             if( res.status == 200 ) {
                 res.text().then( html -> {
-                    readme.innerHTML = html;
-                    readme.style.visibility = 'visible';
-                });
-            }
-        });
-        /*
-        var readmeElement = document.getElementById('project-readme');
-        window.fetch( '${path}README.md' ).then( res -> {
-            if( res.status == 200 ) {
-                res.text().then( md -> {
-                    md = '# '+project.replace('_',' ')+'  \n' + md.trim();
-                    readmeElement.innerHTML = Markdown.markdownToHtml(md);
-                    readmeElement.style.visibility = 'visible';
-                    return null;
+                    html = html.trim();
+                    if( html.length < 0 ) {
+                        readme.innerHTML = html;
+                        readme.style.visibility = 'visible';
+                    } else {
+                        readme.innerHTML = '';
+                         readme.style.visibility = 'hidden';
+                    }
                 });
             } else {
-                readmeElement.innerHTML = '';
-                readmeElement.style.visibility = 'hidden';
+                readme.innerHTML = '';
+                readme.style.visibility = 'hidden';
                 return null;
             }
-        }).catchError( e -> {
-            console.log('README.md not found');
         });
-        */
     }
 
     static function unloadProject() {
