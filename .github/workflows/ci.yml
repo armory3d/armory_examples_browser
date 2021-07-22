@@ -25,7 +25,7 @@ jobs:
         run: sudo snap install blender --classic
       - name: Install armory
         run: |
-          if [ -d "armsdk" ]; then; git clone https://github.com/armory3d/armsdk.git --recurse-submodules; fi
+          git clone --recurse-submodules https://github.com/armory3d/armsdk.git
           blender -noaudio -b -P blender/enable_addon.py
       - name: Install haxelibs
         run: |
