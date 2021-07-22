@@ -1,12 +1,10 @@
-
 :root {
-    
+
     --panel-width: 260px;
 
     --background: #29272b;
     --f_high: #ffffff;
     --f_med: #cf2b43;
-    /* --f_med: #4c6ea5 */
     --f_low: #888888;
     --f_inv: #000000;
     --b_high: #555555;
@@ -16,9 +14,16 @@
 }
 
 @font-face {
-	font-family: 'Title';
-	font-display: swap;
-	src: url("title.woff2") format("woff2");
+    font-family: 'Title';
+    font-display: swap;
+    src: url("title.woff2") format("woff2");
+}
+@font-face {
+    font-family: 'icon';
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+    src: url('icons.woff') format('woff');
 }
 
 *,
@@ -30,6 +35,7 @@
 html {
     line-height: 1.2em;
     font-family: monospace;
+    font-size: 14px;
     -webkit-text-size-adjust: 100%;
 }
 
@@ -53,15 +59,18 @@ body {
 ::-webkit-scrollbar {
     border: none;
 }
+
 ::-webkit-scrollbar:vertical {
     width: 0.8vw;
     min-width: 8px;
     max-width: 12px
 }
+
 ::-webkit-scrollbar:horizontal {
     display: none;
 
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--b_med);
     --border: 1px solid var(--b_low);
@@ -76,6 +85,7 @@ a {
     color: var(--f_med);
     text-decoration: none;
 }
+
 a:hover {
     color: var(--f_high);
 }
@@ -117,7 +127,7 @@ input {
     font-family: monospace;
     text-transform: uppercase;
     background: var(--b_low);
-    color: var(--f_med); 
+    color: var(--f_med);
     border: none;
     outline: none;
 }
@@ -126,8 +136,20 @@ input:focus {
     background: var(--b_med);
 }
 
+/** -----  ----- **/
+
+.link {
+    color: var(--f_med);
+    text-decoration: none;
+}
+
+.link:hover {
+    color: var(--f_high);
+}
+
+
 /** ----- NAV ----- **/
-    
+
 #title {
     position: absolute;
     top: 0;
@@ -149,50 +171,56 @@ nav {
     z-index: 1000;
     user-select: none;
 }
-/* nav.closed {
-    transform: translateX(-100%);
-} */
-nav > ol.projects {
+
+nav>ol.projects {
     height: 100%;
     padding: 0.5rem 0;
     overflow: auto;
     border-top: 1px solid var(--background);
 }
-nav > ol.projects > h2 {
+
+nav>ol.projects>h2 {
     padding: 1.25rem 0 0.25rem 0.75rem;
 }
-nav > ol.projects > li.link {
+
+nav>ol.projects>li.link {
     display: flex;
     line-height: 1em;
     white-space: nowrap;
     padding: 0.25em 1rem 0.25em 1.5rem;
     cursor: pointer;
 }
-nav > ol.projects > li.link > .close {
-    /* background: green; */
-    margin-left: 1ch;
+
+nav>ol.projects>li.link>.close {
+    margin-right: 0.25ch;
     display: none;
 }
-nav > ol.projects > li.link > .src {
-    display: none;
-    margin-left: 1ch;
+
+nav>ol.projects>li.link>.close:hover {
+    color: var(--f_high);
 }
-nav > ol.projects > li.link.active:hover > .close,
-nav > ol.projects > li.link:hover > .src {
+
+nav>ol.projects>li.link>.src {
+    display: none;
+    margin-left: 0.25ch;
+}
+
+nav>ol.projects>li.link.active:hover>.close,
+nav>ol.projects>li.link:hover>.src {
     display: block;
 }
 
-nav>ol.projects>.link.active,
-nav>ol.projects>.link.active > * {
+nav>ol.projects>li.link.active,
+nav>ol.projects>li.link.active>* {
     background: var(--b_inv);
     color: var(--f_inv);
 }
-nav>ol.projects>.link.active > .close {
+
+nav>ol.projects>.link.active>.close {
     display: inline-block;
 }
 
 iframe {
-    /* display: block; */
     position: absolute;
     top: 0;
     right: 0;
@@ -200,7 +228,7 @@ iframe {
     left: var(--panel-width);
     z-index: 10;
     width: 100%;
-    height: 100vh; 
+    height: 100vh;
 }
 
 #source-link {
@@ -217,24 +245,12 @@ iframe {
     display: table;
     position: absolute;
     top: var(--margin);
-    left: calc(var(--panel-width) + var(--margin) );
+    left: calc(var(--panel-width) + var(--margin));
     right: var(--margin);
+    max-width: 600px;
     padding: 0.5rem 1rem;
     background: var(--b_low);
     opacity: 0.95;
     z-index: 1000;
     visibility: hidden;
 }
-#project-readme ol {
-    /* margin-left: 2em; */
-}
-
-/* footer {
-    /* position: absolute;
-    bottom: 0;
-    left: 0; */
-    width: var(--panel-width);
-    z-index: 1000;
-    font-size: 75%;
-    display: none;
-} */
