@@ -198,7 +198,7 @@ class App {
             if( res.status == 200 ) {
                 res.text().then( html -> {
                     html = html.trim();
-                    if( html.length < 0 ) {
+                    if( html.length > 0 ) {
                         readme.innerHTML = html;
                         readme.style.visibility = 'visible';
                     } else {

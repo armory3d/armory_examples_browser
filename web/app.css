@@ -116,11 +116,16 @@ hr {
     background: var(--background);
 }
 
-ol {
+ol, ul {
+    display: block;
+    margin: 0.5em 0 0.5em 1em;
+    padding: 0;
+}
+/* li {
     display: block;
     margin: 0;
     padding: 0;
-}
+} */
 
 input {
     padding: 1rem 1rem;
@@ -136,7 +141,7 @@ input:focus {
     background: var(--b_med);
 }
 
-/** -----  ----- **/
+/** -----  ----- **/22
 
 .link {
     color: var(--f_med);
@@ -164,22 +169,24 @@ input:focus {
 nav {
     position: absolute;
     width: var(--panel-width);
+    min-width: var(--panel-width);
     height: 100%;
-    flex-direction: column;
     text-transform: uppercase;
     background: var(--b_low);
     z-index: 1000;
     user-select: none;
 }
 
-nav>ol.projects {
+nav > ol.projects {
     height: 100%;
-    padding: 0.5rem 0;
+    margin: 0;
+    padding: 0.5em 0;
+    padding: 0.25em 0 5em 0;
     overflow: auto;
     border-top: 1px solid var(--background);
 }
 
-nav>ol.projects>h2 {
+nav > ol.projects > h2 {
     padding: 1.25rem 0 0.25rem 0.75rem;
 }
 
@@ -244,9 +251,9 @@ iframe {
     --margin: 1px;
     display: table;
     position: absolute;
-    top: var(--margin);
+    bottom: var(--margin);
     left: calc(var(--panel-width) + var(--margin));
-    right: var(--margin);
+    /* right: var(--margin); */
     max-width: 600px;
     padding: 0.5rem 1rem;
     background: var(--b_low);
