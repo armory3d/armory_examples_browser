@@ -14,13 +14,13 @@ jobs:
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.3
-      - name: Cache 
-        uses: actions/cache@v2
-        env:
-          armsdk-cache-version: 21.07
-        with:
-          path: ./armsdk
-          key: armsdk-cache-${{ env.armsdk-cache-version }}
+      # - name: Cache 
+      #   uses: actions/cache@v2
+      #   env:
+      #     armsdk-cache-version: 21.07
+      #   with:
+      #     path: ./armsdk
+      #     key: armsdk-cache-${{ env.armsdk-cache-version }}
       - name: Install blender
         run: sudo snap install blender --classic
       - name: Install armory
