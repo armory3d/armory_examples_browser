@@ -1,3 +1,3 @@
 -cp src
---macro Project.buildGroup("armory_examples","web/examples",false,false,true,['game_bowling','mesh_terrain','input_mouselock','logic_event_global','logic_mouselock','logic_pong','logic_script','logic_toy_car','logic_triggers','physics_raycast'])
+--macro Project.buildGroup("armory_examples","web/examples",false,true,true,['game_bowling','mesh_terrain','input_mouselock','logic_event_global','logic_mouselock','logic_pong','logic_script','logic_toy_car','logic_triggers','material_params','physics_raycast'])
 #--macro Project.build("armory_examples","logic_callgroup","web/examples",true)
