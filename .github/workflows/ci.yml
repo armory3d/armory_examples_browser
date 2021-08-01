@@ -27,38 +27,39 @@ jobs:
         run: |
           git clone --recurse-submodules https://github.com/armory3d/armsdk.git
           blender -noaudio -b -P blender/enable_addon.py
-      - name: Install haxelibs
-        run: |
-          haxelib install markdown
       - name: Get armory_examples
         uses: actions/checkout@v2
         with:
           repository: tong/armory_examples
           path: armory_examples
           ref: examples-browser-compat
+      - name: Build armory_examples
+        run: |
+          haxe build-examples.hxml
+          ls web/examples
       - name: Get armory_templates
         uses: actions/checkout@v2
         with:
           repository: tong/armory_templates
           path: armory_templates
           ref: examples-browser-compat
+      - name: Build armory_templates
+        run: |
+          haxe build-templates.hxml
+          ls web/templates
       - name: Get armory_tutorials
         uses: actions/checkout@v2
         with:
           repository: tong/armory_tutorials
           path: armory_tutorials
           ref: examples-browser-compat
-      - name: Build armory_examples
-        run: haxe build-examples.hxml
-      - name: Build armory_templates
-        run: haxe build-templates.hxml
       - name: Build armory_tutorials
-        run: haxe build-tutorials.hxml
+        run: |
+          haxe build-tutorials.hxml
+          ls web/tutorials
       - name: Build application
         run: |
-          ls web/examples
-          ls web/templates
-          ls web/tutorials
+          haxelib install app.hxml
           haxe app.hxml
       - name: Deploy gh-pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
