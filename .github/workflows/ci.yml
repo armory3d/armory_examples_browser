@@ -59,7 +59,7 @@ jobs:
           ls web/tutorials
       - name: Build application
         run: |
-          haxelib install app.hxml
+          haxelib install markdown --always
           haxe app.hxml
       - name: Deploy gh-pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
