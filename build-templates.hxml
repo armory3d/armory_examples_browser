@@ -1,4 +1,3 @@
 -cp src
--lib markdown
 --macro Project.buildGroup("armory_templates","web/templates",false,false,['third_person_terrain'])
 # --macro Project.buildAll("armory_templates","first_person","web/templates",true,true)
