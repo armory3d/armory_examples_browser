@@ -1,5 +1,5 @@
 -js web/app.js
--main App
+-main ArmoryExamplesBrowser
 -cp src
 -lib markdown
 --dce full

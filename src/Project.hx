@@ -9,11 +9,11 @@ using haxe.io.Path;
 using haxe.macro.ExprTools;
 #end
 
-class Build {
+class Project {
 
     #if macro
 
-    static function projects( src : String, dst : String, forceRebuild = false, ignoreErrors = false, backgroundMode = true, ?ignoreProject : Array<String> ) {
+    static function buildGroup( src : String, dst : String, forceRebuild = false, ignoreErrors = false, backgroundMode = true, ?ignoreProject : Array<String> ) {
         var pos = Context.currentPos();
         if( !exists( src ) || !isDirectory( src ) )
             Context.error( 'Project directory [$src] not found', pos );
@@ -26,9 +26,9 @@ class Build {
         for( i in 0...projects.length ) {
             var project = projects[i];
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
-            Sys.println('----------- ${i+1}/${projects.length} $project');
+            Sys.println('\nBuilding ${i+1}/${projects.length} $project');
             var timeStart = Sys.time();
-            var code = Build.project( src, project, dst, forceRebuild, backgroundMode );
+            var code = Project.build( src, project, dst, forceRebuild, backgroundMode );
             var time = Std.int((Sys.time() - timeStart) * 1000);
             results.push( { project: project, code: code, time: time } );
             Sys.println('Time: '+time+'ms');
@@ -37,7 +37,7 @@ class Build {
                 if( !ignoreErrors ) Sys.exit(code);
             }
         }
-        Sys.println('\n-------');
+        Sys.println('');
         for( r in results ) {
             var info = r.project+': '+r.code+', '+r.time+'ms';
             var color = 0;
@@ -52,7 +52,7 @@ class Build {
         }
     }
 
-    static function project( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'blender/build_project.py' ) {
+    static function build( path : String, name : String, dst : String, forceRebuild = true, backgroundMode = true, buildScript = 'blender/build_project.py' ) {
         if( !exists( path ) )
             throw 'Directory [$path] not found';
         var srcdir = '$path/$name';
@@ -75,10 +75,16 @@ class Build {
             }
             if( !exists( dst ) ) createDirectory( dst );
             rename( builddir, dstdir );
-            Sys.println('Creating readme.html');
-            var readmePath = '$srcdir/README.md';
-            var html = exists( readmePath ) ? Markdown.markdownToHtml( File.getContent(readmePath) ) : "";
-            File.saveContent( '$dstdir/readme.html', html );
+            var readmeFile = 'README.md';
+            var readmePath = '$srcdir/$readmeFile';
+            if( exists( readmePath ) )
+                File.copy( readmePath, '$dstdir/$readmeFile' );
+            else
+                File.saveContent( '$dstdir/$readmeFile', '' );
+            // Sys.println('Creating readme.html');
+            // var readmePath = '$srcdir/README.md';
+            // var html = exists( readmePath ) ? Markdown.markdownToHtml( File.getContent(readmePath) ) : "";
+            // File.saveContent( '$dstdir/readme.html', html );
         }
         return code;
     }
@@ -95,7 +101,7 @@ class Build {
 
     #end
 
-    macro public static function projectList( path : String ) : ExprOf<Array<String>> {
+    /* macro public static function list( path : String ) : ExprOf<Array<String>> {
         if( !exists( path ) )
             Context.fatalError( 'Projects directory [$path] not found', Context.currentPos() );
         var projects : Array<String> = readDirectory( path ).filter( dir->{
@@ -105,5 +111,5 @@ class Build {
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
         Sys.println( path+': '+projects.join(', ') );
         return macro $v{projects};
-    }
+    } */
 }

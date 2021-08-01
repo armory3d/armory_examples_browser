@@ -16,3 +16,5 @@ wrd.arm_exporterlist[wrd.arm_exporterlist_index].arm_project_scene = bpy.context
 # bpy.ops.arm.clean_project()
 # bpy.ops.arm.build_project()
 bpy.ops.arm.publish_project()
+
+bpy.ops.wm.quit_blender()

@@ -1,3 +1,2 @@
 -cp src
--lib markdown
---macro Build.projects("armory_tutorials","web/tutorials",false,true)
+--macro Project.buildGroup("armory_tutorials","web/tutorials",false,false)

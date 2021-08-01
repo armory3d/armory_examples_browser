@@ -2,6 +2,7 @@ web/app.js*
 web/examples/
 web/templates/
 web/tutorials/
+web/font/*.ttf
 *.log
 /_*
 node_update_failure.*

@@ -2,22 +2,33 @@
 <html lang='en'>
     <head>
         <meta charset='utf-8'>
-        <meta name="viewport" content="width=device-width,minimum-scale=1">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
         <meta name="twitter:title" content="Armory3D Examples Browser">
         <meta name="twitter:description" value="Serious Fucking Business">
         <meta name="twitter:image" content="https://armory3d.org/img/Logo.png">
         <title>Armory3D Examples Browser</title>
         <link rel='icon' href='https://armory3d.org/favicon.ico'>
-        <link rel="stylesheet" href="icons.css">
         <link rel="stylesheet" href="app.css">
         <script src="app.js" async></script>
     </head>
-    <body>
-        <nav>
-            <input type="search" placeholder="…" maxlength="64" autocapitalize="off" autocorrect="off" spellcheck="false">
-            <ol class="projects"></ol>
+    <body class="armory_examples_browser">
+        <header>
+            <h1>Armory3D</h1>
+        </header>
+        <nav class="sidebar">
+            <input type="search" placeholder="Search …" maxlength="64" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <ol id="project-groups"></ol>
+            <!-- <div id="project-controls">
+                <i class="clear"></i> 
+                <i class="fullscreen"></i> 
+                <i class="code"></i> 
+            </div> -->
         </nav>
-        <iframe id="project" scrolling="no" frameborder="0" width="100%" height="100%" allowfullscreen allowvr></iframe>
-        <div id="project-readme"></div>
+        <main>
+            <iframe class="project" scrolling="no" frameborder="0" allowfullscreen allowvr></iframe>
+            <div class="meta">
+                <div class="readme markdown"></div>
+            </div>
+        </main>
     </body>
 </html>
