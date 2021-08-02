@@ -100,16 +100,4 @@ class Project {
 	}
 
     #end
-
-    /* macro public static function list( path : String ) : ExprOf<Array<String>> {
-        if( !exists( path ) )
-            Context.fatalError( 'Projects directory [$path] not found', Context.currentPos() );
-        var projects : Array<String> = readDirectory( path ).filter( dir->{
-            var p = '$path/$dir';
-            return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
-        });
-        projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        Sys.println( path+': '+projects.join(', ') );
-        return macro $v{projects};
-    } */
 }

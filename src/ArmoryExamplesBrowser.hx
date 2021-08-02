@@ -28,7 +28,6 @@ typedef Project = {
 class ArmoryExamplesBrowser {
     
     static final REPO_OWNER = "https://github.com/armory3d";
-    static final GROUPS = ["tutorials","templates","examples"];
 
     #if macro #elseif js
 
@@ -68,22 +67,22 @@ class ArmoryExamplesBrowser {
             searchInput.addEventListener('input', e -> {
                 final term = searchInput.value.trim();
                 if( term.length == 0 ) {
-                    for( group in GROUPS ) {
+                    for( group in projects.keys() ) {
                         for( li in sidebar.querySelector('section[data-group="$group"] > ol').children )
                             li.classList.remove('hidden');
                     }
                 } else {
-                    function searchTerm( group : String, project : String ) {
-                        var expr = new EReg( searchInput.value, "" );
-                        var matched = projects.get( group ).filter( p -> return expr.match( p ) );
-                        var list = sidebar.querySelector('section[data-group="$group"] > ol');
-                        for( li in list.children ) {
-                            if( !li.classList.contains('playing') && matched.has( li.getAttribute('data-project') ) )
-                                li.classList.remove('hidden');
-                            else li.classList.add('hidden');
+                    for( group in projects.keys() ) {
+                        var found = searchProject( group, searchInput.value );
+                        if( found.length > 0 ) {
+                            var list = sidebar.querySelector('section[data-group="$group"] > ol');
+                            for( li in list.children ) {
+                                if( !li.classList.contains('playing') && found.has( li.getAttribute('data-project') ) )
+                                    li.classList.remove('hidden');
+                                else li.classList.add('hidden');
+                            }
                         }
                     }
-                    for( g in GROUPS ) searchTerm( g, searchInput.value );
                 }
             });
 
@@ -182,25 +181,11 @@ class ArmoryExamplesBrowser {
             li.setAttribute( 'data-group', group );
             list.append(li);
             
-            var close = document.createElement('i');
+           /*  var close = document.createAnchorElement();
             close.title = "Close project";
-            close.classList.add('clear');
-            close.onclick = e -> {
-                unloadProject();
-            }
-            li.append(close);
-            
-            /* function createIconElement( id : String ) {
-                var e = document.createElement('i');
-                // e.title = "Close project";
-                e.classList.add('$id');
-                return e;
-            } */
-
-            // var close =  document.createElement('i');
-            // close.classList.add( 'clear' );
-            // close.onclick = e -> unloadProject();
-            // li.append( close );
+            close.classList.add('ic-clear');
+            close.onclick = e -> unloadProject();
+            li.append(close); */
 
             var name = document.createAnchorElement();
             name.classList.add( 'name' );
@@ -212,12 +197,33 @@ class ArmoryExamplesBrowser {
                 else loadProject( project, group );
             }
             li.append( name );
+
+            var controls = document.createDivElement();
+            controls.classList.add('controls');
+            li.append( controls );
             
+            var close = document.createAnchorElement();
+            close.href = "";
+            close.title = "Close project";
+            close.classList.add('ic-clear');
+            close.onclick = e -> {
+                e.preventDefault();
+                unloadProject();
+            }
+            controls.append(close);
+            
+            var open = document.createAnchorElement();
+            open.classList.add('src','ic-launch');
+            open.target = '_blank';
+            open.title = 'Open in new tab';
+            open.href = '$group/$project';
+            controls.append( open );
+
             var src = document.createAnchorElement();
             src.classList.add('src','ic-code');
             src.title = 'Open source code on github';
             src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
-            li.append( src );
+            controls.append( src );
         }
 
         document.getElementById('project-groups').append( section );
@@ -265,8 +271,8 @@ class ArmoryExamplesBrowser {
     static function unloadProject() {
         if( project == null )
             return;
-        var name = project.name, group = project.group;
-        var li = sidebar.querySelector( 'li[data-project=${name}]' );
+        final name = project.name, group = project.group;
+        final li = sidebar.querySelector( 'li[data-project=${name}]' );
         li.classList.remove('playing','loading');
         project = null;
         iframe.src = '';
@@ -292,19 +298,15 @@ class ArmoryExamplesBrowser {
         var sidebar_width = 0;
         if( !sidebar.classList.contains('hidden'))
             sidebar_width = Std.parseInt(style.getPropertyValue('--sidebar-width'));
-        trace(sidebar_width);
-        var w = window.innerWidth - sidebar_width;
-        var h = window.innerHeight - readme.clientHeight;
-        //iframe.width = w+'px';
-        //iframe.height = h+'px';
-        //iframe.style.left = sidebar_width+'px';
-        var mainElement = document.body.querySelector("main");
+        final w = window.innerWidth - sidebar_width;
+        final h = window.innerHeight - readme.clientHeight;
+        final mainElement = document.body.querySelector("main");
         mainElement.style.width = w+'px';
         mainElement.style.left = sidebar_width+'px';
         //HACK
         if( iframe.src != null ) {
-            var iframeDocument = iframe.contentWindow.document;
-            var canvas : CanvasElement = cast iframeDocument.getElementById('khanvas');
+            final iframeDocument = iframe.contentWindow.document;
+            final canvas : CanvasElement = cast iframeDocument.getElementById('khanvas');
             if( canvas != null ) {
                 canvas.width = Std.int(window.innerWidth - sidebar_width);
                 canvas.height = Std.int( h );
@@ -322,7 +324,7 @@ class ArmoryExamplesBrowser {
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        // Sys.println( path+': '+projects.join(', ') );
+        Sys.println( path+': '+projects.join(', ') );
         return macro $v{projects};
     }
 
