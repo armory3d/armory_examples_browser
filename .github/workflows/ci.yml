@@ -52,7 +52,7 @@ jobs:
         with:
           repository: tong/armory_tutorials
           path: armory_tutorials
-          ref: update-projects
+          ref: master
       - name: Build armory_tutorials
         run: |
           haxe build-tutorials.hxml
