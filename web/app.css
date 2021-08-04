@@ -19,8 +19,6 @@
     --bg: #f0f0f0;
     --fg: #141419;
     --acc: var(--f_med);
-
-    
 }
 
 @media screen and (max-width: 30em) {
@@ -190,7 +188,7 @@ h1, h2, h3, h4 {
     line-height: 1em;
 }
 h1 {
-    font-size: 4em;
+    font-size: 4rem;
     line-height: 1.5em;
 }
 h2 {
@@ -252,6 +250,10 @@ body {
 
 body.armory_examples_browser > header {
     display: none;
+    /* position: fixed;
+    top: 0;
+    left: var(--sidebar-width); */
+
 }
 
 body.armory_examples_browser > nav.sidebar {
@@ -426,6 +428,10 @@ footer {
     height: 1px;
     background: var(--f_med);
 }
+/* .markdown a[href^="http"]:before {
+    font-family: 'icon' !important;
+    content: "\e900";
+} */
 .markdown p {
     margin-bottom: 1rem; 
 }

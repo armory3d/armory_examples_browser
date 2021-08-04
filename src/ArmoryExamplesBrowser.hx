@@ -159,8 +159,8 @@ class ArmoryExamplesBrowser {
         section.classList.add('group');
         section.setAttribute('data-group', group);
 
-        var title = document.createElement('h2');
-        title.classList.add( 'title' );
+        var title = document.createElement('h3');
+        title.classList.add( 'title', 'icon-link' );
         section.append( title );
 
         var link = document.createAnchorElement();
@@ -277,6 +277,11 @@ class ArmoryExamplesBrowser {
         project = null;
         iframe.src = '';
         readme.innerHTML = '';
+
+        //var hr = window.location.href;
+        //trace(hr);
+
+        window.location.href = window.location.href.substr(0, window.location.href.indexOf('#')+1);
     }
 
     static function fetchMarkdown( path : String ) : Promise<String> {
@@ -324,7 +329,7 @@ class ArmoryExamplesBrowser {
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        Sys.println( path+': '+projects.join(', ') );
+        Sys.println( projects.length+' '+path);
         return macro $v{projects};
     }
 
