@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, ci ]
   pull_request:
     branches: [ master ]
 
@@ -32,7 +32,7 @@ jobs:
         with:
           repository: tong/armory_examples
           path: armory_examples
-          ref: examples-browser-compat
+          ref: update-projects
       - name: Build armory_examples
         run: |
           haxe build-examples.hxml
@@ -42,7 +42,7 @@ jobs:
         with:
           repository: tong/armory_templates
           path: armory_templates
-          ref: examples-browser-compat
+          ref: update-projects
       - name: Build armory_templates
         run: |
           haxe build-templates.hxml
@@ -52,7 +52,7 @@ jobs:
         with:
           repository: tong/armory_tutorials
           path: armory_tutorials
-          ref: examples-browser-compat
+          ref: update-projects
       - name: Build armory_tutorials
         run: |
           haxe build-tutorials.hxml
