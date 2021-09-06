@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches: [ master, ci ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -32,7 +30,7 @@ jobs:
         with:
           repository: tong/armory_examples
           path: armory_examples
-          ref: update-projects
+          # ref: update-projects
       - name: Build armory_examples
         run: |
           haxe build-examples.hxml
@@ -42,7 +40,7 @@ jobs:
         with:
           repository: tong/armory_templates
           path: armory_templates
-          ref: update-projects
+          # ref: update-projects
       - name: Build armory_templates
         run: |
           haxe build-templates.hxml
@@ -52,7 +50,7 @@ jobs:
         with:
           repository: tong/armory_tutorials
           path: armory_tutorials
-          ref: master
+          # ref: master
       - name: Build armory_tutorials
         run: |
           haxe build-tutorials.hxml
@@ -62,7 +60,7 @@ jobs:
           haxelib install markdown --always
           haxe app.hxml
       - name: Deploy gh-pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: gh-pages
           folder: web
