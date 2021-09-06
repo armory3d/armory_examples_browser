@@ -28,7 +28,7 @@ typedef Project = {
 class ArmoryExamplesBrowser {
     
     static final REPO_OWNER = "https://github.com/armory3d";
-
+    
     #if macro #elseif js
 
     @:expose public static var projects(default,null) : Map<String,Array<String>>;
@@ -56,6 +56,9 @@ class ArmoryExamplesBrowser {
             controls = document.getElementById('project-controls');
             iframe = cast mainElement.querySelector('iframe');
             readme = mainElement.querySelector('.readme');
+            
+            final build = getBuildInfo();
+            readme.textContent = 'BUILD: '+build.time;
 
             projects = [
                 "tutorials" => addProjectGroup('tutorials', makeProjectsList( 'web/tutorials' )),
@@ -332,5 +335,12 @@ class ArmoryExamplesBrowser {
         Sys.println( projects.length+' '+path);
         return macro $v{projects};
     }
+
+    macro public static function getBuildInfo() {
+        var info : Dynamic = {
+            time: Date.now().toString()
+        };
+        return macro $v{info};
+     }
 
 }
