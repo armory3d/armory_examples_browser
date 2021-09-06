@@ -277,7 +277,7 @@ body.armory_examples_browser > nav.sidebar {
     bottom: 0;
     width: var(--sidebar-width);
     height: 100%;
-    /* padding-bottom: 5rem; */
+    padding-bottom: var(--sidebar-width); /* HACK */
     z-index: 1000;
     background: var(--b_med); 
     color: var(--f_med); 
@@ -293,6 +293,9 @@ body.armory_examples_browser > nav.sidebar.hidden {
 
 body.armory_examples_browser > nav.sidebar img {
     width: 100%;
+}
+body.armory_examples_browser > nav.sidebar a.logo:hover {
+    background: none; /* HACK */
 }
 
 body.armory_examples_browser nav.sidebar section.group {
