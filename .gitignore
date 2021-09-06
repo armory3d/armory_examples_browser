@@ -4,5 +4,5 @@ web/templates/
 web/tutorials/
 web/font/*.ttf
 *.log
-/_*
+_*
 node_update_failure.*
