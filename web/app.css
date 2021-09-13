@@ -11,7 +11,7 @@
     --f_med: #b0b0b0;
     --f_low: #606060;
     --f_inv: #ffffff;
-    --b_high: #ffffff;
+    --b_high: #151515;
     --b_med: #101010;
     --b_low: #050505;
     --b_inv: #cf2b43;
@@ -166,6 +166,9 @@ body {
     width: 2px;
 }
 ::-webkit-scrollbar-thumb {
+    background:  var(--b_high);
+}
+::-webkit-scrollbar-thumb:hover {
     background:  var(--f_low);
 }
 
@@ -186,11 +189,11 @@ a {
     text-decoration: none;
     border: none;
 }
-a:hover, a:focus {
+/* a:hover, a:focus {
     background: var(--f_med); 
     color: var(--b_low); 
     border-radius: 2px;
-}
+} */
 /* a:focus {
     background: var(--f_med);
     color: var(--b_med);
@@ -293,6 +296,7 @@ body.armory_examples_browser > nav.sidebar.hidden {
 
 body.armory_examples_browser > nav.sidebar img {
     width: 100%;
+    -webkit-user-drag: none;
 }
 body.armory_examples_browser > nav.sidebar a.logo:hover {
     background: none; /* HACK */
@@ -329,21 +333,34 @@ body.armory_examples_browser nav.sidebar li.project {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+body.armory_examples_browser nav.sidebar li.project a {
+}
+body.armory_examples_browser nav.sidebar li.project a:hover {
+    color: var(--f_high);
+}
 body.armory_examples_browser nav.sidebar li.project.hidden {
     height: 0px;
 }
 body.armory_examples_browser nav.sidebar li.project.loading,
 body.armory_examples_browser nav.sidebar li.project.playing {
-    margin: 0.25rem 0;
-    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
 }
 body.armory_examples_browser nav.sidebar li.project.loading {
     background: var(--b_low);
     color: var(--f_low);
 }
 body.armory_examples_browser nav.sidebar li.project.playing {
-    background: var(--f_inv);
-    color: var(--b_med);
+    background: var(--b_inv);
+    color: var(--f_inv);
+}
+body.armory_examples_browser nav.sidebar li.project.playing a {
+    color: var(--f_inv);
+}
+body.armory_examples_browser nav.sidebar li.project.playing a:hover {
+    /* background: var(--f_med);  */
+    color: var(--b_low); 
+    border-radius: 2px;
 }
 /* body.armory_examples_browser nav.sidebar li.project .ic-clear {
     display: none;
