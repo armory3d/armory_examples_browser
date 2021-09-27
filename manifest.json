@@ -1,0 +1,16 @@
+{
+    "name": "Armory3D Examples Browser",
+    "short_name": "Armory3D Examples Browser",
+	"description": "",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#cf2b43",
+    "background_color": "#050301",
+    "icons": [
+        {
+			"src": "graphics/favicon.svg",
+			"sizes": "any",
+			"purpose": "maskable any"
+		}
+    ]
+}

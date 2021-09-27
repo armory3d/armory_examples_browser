@@ -1,8 +1,0 @@
--js web/app.js
--main ArmoryExamplesBrowser
--cp src
--lib markdown
---dce full
---debug
--D analyzer-optimize
--D js-es=6
