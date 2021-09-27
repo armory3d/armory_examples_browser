@@ -59,8 +59,3 @@ jobs:
         run: |
           haxelib install markdown --always
           haxe app.hxml
-      - name: Deploy gh-pages
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        with:
-          branch: gh-pages
-          folder: web
