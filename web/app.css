@@ -486,7 +486,6 @@ footer {
     margin-left: 2rem;
 }
 .markdown code {
-    padding: 0 4px;
     font-weight: bold;
     border-radius: 2px;
     background: var(--b_low);
