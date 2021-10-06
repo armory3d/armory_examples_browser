@@ -1,4 +1,4 @@
-# [Armory3D](https://github.com/armory3d/armory_examples) [Examples](https://github.com/armory3d/armory_examples) [Browser](https://disktree.net/app/armory_examples_browser/)
+# [Armory3D Examples Browser](https://armory3d.github.io/armory_examples_browser/)
 
 
 ```sh
