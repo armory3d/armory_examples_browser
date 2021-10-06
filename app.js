@@ -14,8 +14,8 @@ class ArmoryExamplesBrowser {
 			ArmoryExamplesBrowser.controls = window.document.getElementById("project-controls");
 			ArmoryExamplesBrowser.iframe = mainElement.querySelector("iframe");
 			ArmoryExamplesBrowser.readme = mainElement.querySelector(".readme");
-			let build_time = "2021-09-27 19:14:26";
-			ArmoryExamplesBrowser.readme.textContent = "BUILD: " + build_time;
+			let build_time = "2021-10-06 13:06:47";
+			ArmoryExamplesBrowser.readme.innerHTML = "BUILD: " + build_time;
 			let _g = new haxe_ds_StringMap();
 			let value = ArmoryExamplesBrowser.addProjectGroup("tutorials",["playground","tanks_nodes","tanks_script"]);
 			_g.h["tutorials"] = value;

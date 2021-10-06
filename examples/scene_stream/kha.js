@@ -3541,7 +3541,7 @@ var armory_trait_internal_PositionStateEnum = $hxEnums["armory.trait.internal.Po
 	,RIGHT: {_hx_name:"RIGHT",_hx_index:2,__enum__:"armory.trait.internal.PositionStateEnum",toString:$estr}
 };
 armory_trait_internal_PositionStateEnum.__constructs__ = [armory_trait_internal_PositionStateEnum.LEFT,armory_trait_internal_PositionStateEnum.CENTER,armory_trait_internal_PositionStateEnum.RIGHT];
-var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,positionDebugConsole,visibleDebugConsole,keyCodeVisible,keyCodeScaleIn,keyCodeScaleOut) {
+var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,positionDebugConsole,visibleDebugConsole,traceWithPosition,keyCodeVisible,keyCodeScaleIn,keyCodeScaleOut) {
 	if(keyCodeScaleOut == null) {
 		keyCodeScaleOut = 221;
 	}
@@ -3550,6 +3550,9 @@ var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,
 	}
 	if(keyCodeVisible == null) {
 		keyCodeVisible = 176;
+	}
+	if(traceWithPosition == null) {
+		traceWithPosition = 1;
 	}
 	if(visibleDebugConsole == null) {
 		visibleDebugConsole = 1;
@@ -3594,6 +3597,7 @@ var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,
 	var _gthis = this;
 	iron_Trait.call(this);
 	this.scaleFactor = scaleFactor;
+	armory_trait_internal_DebugConsole.traceWithPosition = traceWithPosition == 1;
 	iron_data_Data.getFont("font_default.ttf",function(font) {
 		armory_trait_internal_DebugConsole.ui = new zui_Zui({ scaleFactor : scaleFactor, font : font});
 		armory_trait_internal_DebugConsole.setScale(scaleDebugConsole);
@@ -3621,10 +3625,10 @@ var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,
 		kha_input_Keyboard.get().notify(null,function(key) {
 			if(key == 219) {
 				armory_trait_internal_DebugConsole.debugFloat -= 0.1;
-				haxe_Log.trace("debugFloat = " + armory_trait_internal_DebugConsole.debugFloat,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 107, className : "armory.trait.internal.DebugConsole", methodName : "new"});
+				haxe_Log.trace("debugFloat = " + armory_trait_internal_DebugConsole.debugFloat,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 111, className : "armory.trait.internal.DebugConsole", methodName : "new"});
 			} else if(key == 221) {
 				armory_trait_internal_DebugConsole.debugFloat += 0.1;
-				haxe_Log.trace("debugFloat = " + armory_trait_internal_DebugConsole.debugFloat,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 111, className : "armory.trait.internal.DebugConsole", methodName : "new"});
+				haxe_Log.trace("debugFloat = " + armory_trait_internal_DebugConsole.debugFloat,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 115, className : "armory.trait.internal.DebugConsole", methodName : "new"});
 			}
 			if(key == _gthis.shortcut_visible) {
 				armory_trait_internal_DebugConsole.visible = !armory_trait_internal_DebugConsole.visible;
@@ -3645,7 +3649,7 @@ var armory_trait_internal_DebugConsole = function(scaleFactor,scaleDebugConsole,
 $hxClasses["armory.trait.internal.DebugConsole"] = armory_trait_internal_DebugConsole;
 armory_trait_internal_DebugConsole.__name__ = "armory.trait.internal.DebugConsole";
 armory_trait_internal_DebugConsole.consoleTrace = function(v,inf) {
-	armory_trait_internal_DebugConsole.lastTraces.unshift(haxe_Log.formatOutput(v,inf));
+	armory_trait_internal_DebugConsole.lastTraces.unshift(haxe_Log.formatOutput(v,armory_trait_internal_DebugConsole.traceWithPosition ? inf : null));
 	if(armory_trait_internal_DebugConsole.lastTraces.length > 10) {
 		armory_trait_internal_DebugConsole.lastTraces.pop();
 	}
@@ -4147,21 +4151,32 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					var t = armory_trait_internal_DebugConsole.ui.textInput(zui_Handle.global.nest(30,null));
 					if(armory_trait_internal_DebugConsole.ui.button("Run")) {
 						try {
-							haxe_Log.trace("> " + t,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 770, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
+							haxe_Log.trace("> " + t,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 774, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
 							eval(t);
 						} catch( _g ) {
 							var e = haxe_Exception.caught(_g).unwrap();
-							haxe_Log.trace(e,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 771, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
+							haxe_Log.trace(e,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 775, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
 						}
 					}
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
 				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(31,{ selected : true}),"Log")) {
 					armory_trait_internal_DebugConsole.ui.indent();
+					var h = zui_Handle.global.nest(32,null);
+					h.selected = armory_trait_internal_DebugConsole.traceWithPosition;
+					armory_trait_internal_DebugConsole.traceWithPosition = armory_trait_internal_DebugConsole.ui.check(h,"Print With Position");
+					if(armory_trait_internal_DebugConsole.ui.isHovered) {
+						armory_trait_internal_DebugConsole.ui.tooltip("Whether to prepend the position of print/trace statements to the printed text");
+					}
 					if(armory_trait_internal_DebugConsole.ui.button("Clear")) {
 						armory_trait_internal_DebugConsole.lastTraces[0] = "";
 						armory_trait_internal_DebugConsole.lastTraces.splice(1,armory_trait_internal_DebugConsole.lastTraces.length - 1);
 					}
+					if(armory_trait_internal_DebugConsole.ui.isHovered) {
+						armory_trait_internal_DebugConsole.ui.tooltip("Clear the log output");
+					}
+					var eh = armory_trait_internal_DebugConsole.ui.t.ELEMENT_H;
+					armory_trait_internal_DebugConsole.ui.t.ELEMENT_H = armory_trait_internal_DebugConsole.ui.fontSize;
 					var _g = 0;
 					var _g1 = armory_trait_internal_DebugConsole.lastTraces;
 					while(_g < _g1.length) {
@@ -4169,6 +4184,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						++_g;
 						armory_trait_internal_DebugConsole.ui.text(t);
 					}
+					armory_trait_internal_DebugConsole.ui.t.ELEMENT_H = eh;
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
 			}
@@ -4183,7 +4199,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			}
 			armory_trait_internal_DebugConsole.ui.separator();
 		}
-		var handleWinTrait = zui_Handle.global.nest(32,null);
+		var handleWinTrait = zui_Handle.global.nest(33,null);
 		var _g = 0;
 		var _g1 = this.selectedTraits;
 		while(_g < _g1.length) {
@@ -4215,7 +4231,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			armory_trait_internal_DebugConsole.ui.text("Object:");
 			armory_trait_internal_DebugConsole.ui.text(trait.object.name,2);
 			armory_trait_internal_DebugConsole.ui.separator();
-			if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(33,null).nest(objectID).nest(traitIndex),"Attributes")) {
+			if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(34,null).nest(objectID).nest(traitIndex),"Attributes")) {
 				armory_trait_internal_DebugConsole.ui.indent();
 				var _g2 = 0;
 				var _g3 = Reflect.fields(trait);
@@ -4264,7 +4280,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					this.benchTime += t;
 				}
 				if(this.benchFrames == 20) {
-					haxe_Log.trace((this.benchTime / 10 * 1000000 | 0) / 1000,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 877, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
+					haxe_Log.trace((this.benchTime / 10 * 1000000 | 0) / 1000,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 893, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
 				}
 			}
 			this.renderPathTimeAvg = this.renderPathTime / this.frames;
@@ -39036,6 +39052,7 @@ armory_trait_internal_Bridge.Object = iron_object_Object;
 armory_trait_internal_Bridge.Data = iron_data_Data;
 armory_trait_internal_Bridge.Vec4 = iron_math_Vec4;
 armory_trait_internal_DebugConsole.visible = true;
+armory_trait_internal_DebugConsole.traceWithPosition = true;
 armory_trait_internal_DebugConsole.lrow = [0.5,0.5];
 armory_trait_internal_DebugConsole.row4 = [0.25,0.25,0.25,0.25];
 armory_trait_internal_DebugConsole.debugFloat = 1.0;
@@ -39131,7 +39148,7 @@ kha_Shaders.Cube_mesh_fragData0 = "s3527:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWR
 kha_Shaders.Cube_mesh_vertData0 = "s404:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDMgTjsKdW5pZm9ybSBtYXQ0IFdWUDsKdW5pZm9ybSBtYXQ0IExXVlA7CgppbiB2ZWM0IHBvczsKb3V0IHZlYzMgd25vcm1hbDsKaW4gdmVjMiBub3I7Cm91dCB2ZWM0IGxpZ2h0UG9zaXRpb247Cgp2b2lkIG1haW4oKQp7CiAgICB2ZWM0IHNwb3MgPSB2ZWM0KHBvcy54eXosIDEuMCk7CiAgICB3bm9ybWFsID0gbm9ybWFsaXplKE4gKiB2ZWMzKG5vciwgcG9zLncpKTsKICAgIGdsX1Bvc2l0aW9uID0gV1ZQICogc3BvczsKICAgIGxpZ2h0UG9zaXRpb24gPSBMV1ZQICogc3BvczsKfQoK";
 kha_Shaders.Cube_shadowmap_fragData0 = "s107:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdm9pZCBtYWluKCkKewp9Cgo";
 kha_Shaders.Cube_shadowmap_vertData0 = "s180:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgTFdWUDsKCmluIHZlYzQgcG9zOwoKdm9pZCBtYWluKCkKewogICAgdmVjNCBzcG9zID0gdmVjNChwb3MueHl6LCAxLjApOwogICAgZ2xfUG9zaXRpb24gPSBMV1ZQICogc3BvczsKfQoK";
-kha_Shaders.World_World_fragData0 = "s1815:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCB2ZWMzIEg7CnVuaWZvcm0gaGlnaHAgdmVjMyBBOwp1bmlmb3JtIGhpZ2hwIHZlYzMgQjsKdW5pZm9ybSBoaWdocCB2ZWMzIEM7CnVuaWZvcm0gaGlnaHAgdmVjMyBEOwp1bmlmb3JtIGhpZ2hwIHZlYzMgRTsKdW5pZm9ybSBoaWdocCB2ZWMzIEY7CnVuaWZvcm0gaGlnaHAgdmVjMyBHOwp1bmlmb3JtIGhpZ2hwIHZlYzMgSTsKdW5pZm9ybSBoaWdocCB2ZWMzIGhvc2VrU3VuRGlyZWN0aW9uOwp1bmlmb3JtIGhpZ2hwIHZlYzMgWjsKdW5pZm9ybSBoaWdocCBmbG9hdCBlbnZtYXBTdHJlbmd0aDsKCmluIGhpZ2hwIHZlYzMgbm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMzIGhvc2VrV2lsa2llKGhpZ2hwIGZsb2F0IGNvc190aGV0YSwgaGlnaHAgZmxvYXQgZ2FtbWEsIGhpZ2hwIGZsb2F0IGNvc19nYW1tYSkKewogICAgaGlnaHAgdmVjMyBjaGkgPSB2ZWMzKDEuMCArIChjb3NfZ2FtbWEgKiBjb3NfZ2FtbWEpKSAvIHBvdygodmVjMygxLjApICsgKEggKiBIKSkgLSAoSCAqICgyLjAgKiBjb3NfZ2FtbWEpKSwgdmVjMygxLjUpKTsKICAgIHJldHVybiAodmVjMygxLjApICsgKEEgKiBleHAoQiAvIHZlYzMoY29zX3RoZXRhICsgMC4wMDk5OTk5OTk3NzY0ODI1ODIwOTIyODUxNTYyNSkpKSkgKiAoKCgoQyArIChEICogZXhwKEUgKiBnYW1tYSkpKSArIChGICogKGNvc19nYW1tYSAqIGNvc19nYW1tYSkpKSArIChHICogY2hpKSkgKyAoSSAqIHNxcnQoY29zX3RoZXRhKSkpOwp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWMzIG4gPSBub3JtYWxpemUobm9ybWFsKTsKICAgIGhpZ2hwIGZsb2F0IGNvc190aGV0YSA9IGNsYW1wKG4ueiwgMC4wLCAxLjApOwogICAgaGlnaHAgZmxvYXQgY29zX2dhbW1hID0gZG90KG4sIGhvc2VrU3VuRGlyZWN0aW9uKTsKICAgIGhpZ2hwIGZsb2F0IGdhbW1hX3ZhbCA9IGFjb3MoY29zX2dhbW1hKTsKICAgIGhpZ2hwIGZsb2F0IHBhcmFtID0gY29zX3RoZXRhOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMSA9IGdhbW1hX3ZhbDsKICAgIGhpZ2hwIGZsb2F0IHBhcmFtXzIgPSBjb3NfZ2FtbWE7CiAgICBoaWdocCB2ZWMzIFNreVRleHR1cmVfQ29sb3JfcmVzID0gKFogKiBob3Nla1dpbGtpZShwYXJhbSwgcGFyYW1fMSwgcGFyYW1fMikpICogZW52bWFwU3RyZW5ndGg7CiAgICBmcmFnQ29sb3IgPSB2ZWM0KFNreVRleHR1cmVfQ29sb3JfcmVzLngsIFNreVRleHR1cmVfQ29sb3JfcmVzLnksIFNreVRleHR1cmVfQ29sb3JfcmVzLnosIGZyYWdDb2xvci53KTsKICAgIGZyYWdDb2xvci53ID0gMC4wOwp9Cgo";
+kha_Shaders.World_World_fragData0 = "s1854:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCB2ZWMzIEg7CnVuaWZvcm0gaGlnaHAgdmVjMyBBOwp1bmlmb3JtIGhpZ2hwIHZlYzMgQjsKdW5pZm9ybSBoaWdocCB2ZWMzIEM7CnVuaWZvcm0gaGlnaHAgdmVjMyBEOwp1bmlmb3JtIGhpZ2hwIHZlYzMgRTsKdW5pZm9ybSBoaWdocCB2ZWMzIEY7CnVuaWZvcm0gaGlnaHAgdmVjMyBHOwp1bmlmb3JtIGhpZ2hwIHZlYzMgSTsKdW5pZm9ybSBoaWdocCB2ZWMzIGhvc2VrU3VuRGlyZWN0aW9uOwp1bmlmb3JtIGhpZ2hwIHZlYzMgWjsKdW5pZm9ybSBoaWdocCBmbG9hdCBlbnZtYXBTdHJlbmd0aDsKCmluIGhpZ2hwIHZlYzMgbm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMzIGhvc2VrV2lsa2llKGhpZ2hwIGZsb2F0IGNvc190aGV0YSwgaGlnaHAgZmxvYXQgZ2FtbWEsIGhpZ2hwIGZsb2F0IGNvc19nYW1tYSkKewogICAgaGlnaHAgdmVjMyBjaGkgPSB2ZWMzKDEuMCArIChjb3NfZ2FtbWEgKiBjb3NfZ2FtbWEpKSAvIHBvdygodmVjMygxLjApICsgKEggKiBIKSkgLSAoSCAqICgyLjAgKiBjb3NfZ2FtbWEpKSwgdmVjMygxLjUpKTsKICAgIHJldHVybiAodmVjMygxLjApICsgKEEgKiBleHAoQiAvIHZlYzMoY29zX3RoZXRhICsgMC4wMDk5OTk5OTk3NzY0ODI1ODIwOTIyODUxNTYyNSkpKSkgKiAoKCgoQyArIChEICogZXhwKEUgKiBnYW1tYSkpKSArIChGICogKGNvc19nYW1tYSAqIGNvc19nYW1tYSkpKSArIChHICogY2hpKSkgKyAoSSAqIHNxcnQoY29zX3RoZXRhKSkpOwp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWMzIG4gPSBub3JtYWxpemUobm9ybWFsKTsKICAgIGhpZ2hwIHZlYzMgcG9zID0gLW47CiAgICBoaWdocCBmbG9hdCBjb3NfdGhldGEgPSBjbGFtcChwb3MueiwgMC4wLCAxLjApOwogICAgaGlnaHAgZmxvYXQgY29zX2dhbW1hID0gZG90KHBvcywgaG9zZWtTdW5EaXJlY3Rpb24pOwogICAgaGlnaHAgZmxvYXQgZ2FtbWFfdmFsID0gYWNvcyhjb3NfZ2FtbWEpOwogICAgaGlnaHAgZmxvYXQgcGFyYW0gPSBjb3NfdGhldGE7CiAgICBoaWdocCBmbG9hdCBwYXJhbV8xID0gZ2FtbWFfdmFsOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMiA9IGNvc19nYW1tYTsKICAgIGhpZ2hwIHZlYzMgU2t5VGV4dHVyZV9Db2xvcl9yZXMgPSAoWiAqIGhvc2VrV2lsa2llKHBhcmFtLCBwYXJhbV8xLCBwYXJhbV8yKSkgKiBlbnZtYXBTdHJlbmd0aDsKICAgIGZyYWdDb2xvciA9IHZlYzQoU2t5VGV4dHVyZV9Db2xvcl9yZXMueCwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueSwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueiwgZnJhZ0NvbG9yLncpOwogICAgZnJhZ0NvbG9yLncgPSAwLjA7Cn0KCg";
 kha_Shaders.World_World_vertData0 = "s258:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgU01WUDsKCm91dCB2ZWMzIG5vcm1hbDsKaW4gdmVjMyBub3I7CmluIHZlYzMgcG9zOwoKdm9pZCBtYWluKCkKewogICAgbm9ybWFsID0gbm9yOwogICAgdmVjNCBwb3NpdGlvbiA9IFNNVlAgKiB2ZWM0KHBvcywgMS4wKTsKICAgIGdsX1Bvc2l0aW9uID0gdmVjNChwb3NpdGlvbik7Cn0KCg";
 kha_Shaders.line_deferred_fragData0 = "s284:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKb3V0IGhpZ2hwIHZlYzQgZnJhZ0NvbG9yWzJdOwppbiBoaWdocCB2ZWMzIGNvbG9yOwoKdm9pZCBtYWluKCkKewogICAgZnJhZ0NvbG9yWzBdID0gdmVjNCgxLjAsIDEuMCwgMC4wLCAxLjApOwogICAgZnJhZ0NvbG9yWzFdID0gdmVjNChjb2xvciwgMS4wKTsKfQoK";
 kha_Shaders.line_fragData0 = "s216:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKb3V0IGhpZ2hwIHZlYzQgZnJhZ0NvbG9yOwppbiBoaWdocCB2ZWMzIGNvbG9yOwoKdm9pZCBtYWluKCkKewogICAgZnJhZ0NvbG9yID0gdmVjNChjb2xvciwgMS4wKTsKfQoK";
