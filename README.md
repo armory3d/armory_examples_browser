@@ -3,7 +3,7 @@
 
 ```sh
 # Clone including submodules
-git clone --recursive https://github.com/tong/armory_examples_browser.git
+git clone --recursive https://github.com/armory3d/armory_examples_browser.git
 cd armory_examples_browser/
 
 # Build armory_examples projects
