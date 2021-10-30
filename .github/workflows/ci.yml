@@ -9,53 +9,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.2.3
-      # - name: Cache 
-      #   uses: actions/cache@v2
-      #   env:
-      #     armsdk-cache-version: 21.07
-      #   with:
-      #     path: ./armsdk
-      #     key: armsdk-cache-${{ env.armsdk-cache-version }}
       - name: Install blender
         run: sudo snap install blender --classic
-      - name: Install armory
+      - name: Install armsdk
         run: |
           git clone --recurse-submodules https://github.com/armory3d/armsdk.git
           blender -noaudio -b -P blender/enable_addon.py
-      - name: Get armory_examples
-        uses: actions/checkout@v2
-        with:
-          repository: tong/armory_examples
-          path: armory_examples
-          # ref: update-projects
-      - name: Build armory_examples
-        run: |
-          haxe build-examples.hxml
-          ls web/examples
-      - name: Get armory_templates
-        uses: actions/checkout@v2
-        with:
-          repository: tong/armory_templates
-          path: armory_templates
-          # ref: update-projects
-      - name: Build armory_templates
-        run: |
-          haxe build-templates.hxml
-          ls web/templates
-      - name: Get armory_tutorials
-        uses: actions/checkout@v2
-        with:
-          repository: tong/armory_tutorials
-          path: armory_tutorials
-          # ref: master
-      - name: Build armory_tutorials
-        run: |
-          haxe build-tutorials.hxml
-          ls web/tutorials
+      - name: Build examples
+        run: haxe build-examples.hxml 
+      - name: Build templates
+        run: haxe build-templates.hxml 
+      - name: Build tutorials
+        run: haxe build-tutorials.hxml 
       - name: Build application
         run: |
           haxelib install markdown --always
-          haxe app.hxml
+          haxe app.hxml 
