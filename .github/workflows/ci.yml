@@ -28,5 +28,6 @@ jobs:
         run: haxe build-tutorials.hxml 
       - name: Build application
         run: |
+          ARMSDK="$(pwd)/armsdk"
           haxelib install markdown --always
           haxe app.hxml 
