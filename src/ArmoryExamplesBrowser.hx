@@ -1,7 +1,10 @@
 
+import haxe.Json;
 #if macro
+import haxe.macro.Compiler;
 import haxe.macro.Context;
 import haxe.macro.Expr;
+import sys.FileSystem;
 import sys.FileSystem.*;
 import sys.io.File;
 #else
@@ -27,9 +30,10 @@ typedef Project = {
 
 class ArmoryExamplesBrowser {
     
-    static final REPO_OWNER = "https://github.com/armory3d";
+    public static final GITORG = 'armory3d';
+    public static final GITHUB = 'https://github.com/$GITORG';
     
-    #if macro #elseif js
+    #if js
 
     @:expose public static var projects(default,null) : Map<String,Array<String>>;
     @:expose public static var project(default,null) : Project;
@@ -57,10 +61,14 @@ class ArmoryExamplesBrowser {
             iframe = cast mainElement.querySelector('iframe');
             readme = mainElement.querySelector('.readme');
             
-            final build = getBuildInfo();
-            readme.textContent = 'BUILD: '+build.time;
+            var build = getBuildInfo();
+            console.debug(build);
+            readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>/<a href="$GITHUB/armsdk/commit/${build.commit}">'+${build.commit.substr(0,7)}+'</a> '+build.time;
+            
+            iframe.src = "start.html";
 
             projects = [
+                // "demos" => addProjectGroup('demos', makeProjectsList( 'web/demos' )),
                 "tutorials" => addProjectGroup('tutorials', makeProjectsList( 'web/tutorials' )),
                 "templates" => addProjectGroup('templates', makeProjectsList( 'web/templates' )),
                 "examples" => addProjectGroup('examples', makeProjectsList( 'web/examples' )),
@@ -167,7 +175,7 @@ class ArmoryExamplesBrowser {
         section.append( title );
 
         var link = document.createAnchorElement();
-        link.href = '$REPO_OWNER/armory_$group';
+        link.href = '$GITHUB/armory_$group';
         link.textContent = group;
         title.append( link );
         
@@ -184,12 +192,6 @@ class ArmoryExamplesBrowser {
             li.setAttribute( 'data-group', group );
             list.append(li);
             
-           /*  var close = document.createAnchorElement();
-            close.title = "Close project";
-            close.classList.add('ic-clear');
-            close.onclick = e -> unloadProject();
-            li.append(close); */
-
             var name = document.createAnchorElement();
             name.classList.add( 'name' );
             name.href = '#$group-$project';
@@ -204,7 +206,30 @@ class ArmoryExamplesBrowser {
             var controls = document.createDivElement();
             controls.classList.add('controls');
             li.append( controls );
-            
+
+            var src = document.createAnchorElement();
+            src.classList.add('src','ic-code');
+            src.title = 'Open source code on github';
+            src.href = src.title = '$GITHUB/armory_$group/tree/master/$project';
+            controls.append( src );
+
+            var view = document.createAnchorElement();
+            view.onclick = e -> {
+                if( document.fullscreenElement == null )
+                    iframe.requestFullscreen();
+                else
+                    document.exitFullscreen();
+            }
+            view.classList.add('view','ic-fullscreen');
+            controls.append( view );
+
+            var open = document.createAnchorElement();
+            open.classList.add('src','ic-launch');
+            open.target = '_blank';
+            open.title = 'Open in new tab';
+            open.href = '$group/$project';
+            controls.append( open );
+
             var close = document.createAnchorElement();
             close.href = "";
             close.title = "Close project";
@@ -214,19 +239,6 @@ class ArmoryExamplesBrowser {
                 unloadProject();
             }
             controls.append(close);
-            
-            var open = document.createAnchorElement();
-            open.classList.add('src','ic-launch');
-            open.target = '_blank';
-            open.title = 'Open in new tab';
-            open.href = '$group/$project';
-            controls.append( open );
-
-            var src = document.createAnchorElement();
-            src.classList.add('src','ic-code');
-            src.title = 'Open source code on github';
-            src.href = src.title = '$REPO_OWNER/armory_$group/tree/master/$project';
-            controls.append( src );
         }
 
         document.getElementById('project-groups').append( section );
@@ -255,9 +267,6 @@ class ArmoryExamplesBrowser {
         var li = sidebar.querySelector( 'li[data-project=$name]' );
         li.classList.add('loading');
 
-        // controls.remove();
-        // li.append( controls );
-
         fetchReadme('${path}/README.md').then( html -> {
             if( html == null ) html = '';
             readme.innerHTML = html;
@@ -280,12 +289,17 @@ class ArmoryExamplesBrowser {
         project = null;
         iframe.src = '';
         readme.innerHTML = '';
-
-        //var hr = window.location.href;
-        //trace(hr);
-
         window.location.href = window.location.href.substr(0, window.location.href.indexOf('#')+1);
     }
+
+    /* static function fetchJson<T>( path : String ) : Promise<T> {
+        return window.fetch( path ).then( res -> {
+            if( res.status == 200 ) {
+                return res.text().then( s -> return Json.parse(s) );
+            }
+            return null;
+        });
+    } */
 
     static function fetchMarkdown( path : String ) : Promise<String> {
         return window.fetch( path ).then( res -> {
@@ -322,6 +336,17 @@ class ArmoryExamplesBrowser {
         }
     }
 
+    #elseif macro
+
+    static function getArmsdkPath() : String {
+        var path  = Context.definedValue('armsdk');
+        if( path == null ) path = Sys.getEnv('ARMSDK');
+        if( path == null ) return null;
+        trace(path,FileSystem.exists( path ),FileSystem.isDirectory(path));
+        if( !FileSystem.exists( path ) || !FileSystem.isDirectory(path) )
+            return null;
+        return path;
+    }
     #end
 
     macro public static function makeProjectsList( path : String ) : ExprOf<Array<String>> {
@@ -336,11 +361,23 @@ class ArmoryExamplesBrowser {
         return macro $v{projects};
     }
 
+    macro public static function embedJson<T>( path : String ) : ExprOf<T> {
+        var obj : T = Json.parse( File.getContent(path) );
+        return macro $v{obj};
+    }
+
     macro public static function getBuildInfo() {
-        var info : Dynamic = {
-            time: Date.now().toString()
-        };
-        return macro $v{info};
-     }
+        var armsdk = getArmsdkPath();
+        if( armsdk == null ) {
+            Context.fatalError('armsdk not found', Context.currentPos() );
+        }
+        Sys.println('armsdk path = $armsdk');
+        var commit = Git.getCommit( armsdk );
+        return macro $v{{
+            time: $v{DateTools.format(Date.now(), "%Y-%m-%d" )},
+            commit: $v{commit},
+            os: Sys.systemName()
+        }};
+    }
 
 }

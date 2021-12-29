@@ -4,7 +4,7 @@
     --font-size: 13px;
     --line-height: 1.2;
     --header-height: 1rem;
-    --sidebar-width: 240px;
+    --sidebar-width: 260px;
 
     --background: #050301;
     --f_high: #cf2b43;
@@ -38,7 +38,6 @@
     box-sizing: border-box;
     list-style: none;
     vertical-align: baseline;
-    /* color: inherit; */
     font-family: inherit;
     font-weight: inherit;
     font-style: inherit;
@@ -58,6 +57,10 @@
 body {
     background:var(--background);
     color: var(--f_med);
+}
+
+::selection {
+    background: var(--b_inv);
 }
 
 /** ------- FONTS ------- **/
@@ -98,7 +101,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   width: 1rem; 
   height: 1rem;
-  /* line-height: var(--line-height); */
   user-select: none;
 }
 .ic-github-alt:before { content: "\e907";}
@@ -165,23 +167,17 @@ body {
     border: none;
     width: 2px;
 }
+::-webkit-scrollbar-track {
+    background:  var(--b_med);
+}
 ::-webkit-scrollbar-thumb {
-    background:  var(--b_high);
+    background:  var(--f_med);
 }
 ::-webkit-scrollbar-thumb:hover {
-    background:  var(--f_low);
+    background:  var(--f_inv);
 }
 
 /** ------- ELEMENTS ------- **/
-
-::selection {
-    background: var(--b_inv);
-    color: var(--f_inv);
-}
-
-/* ::-webkit-scrollbar { border: none; }
-::-webkit-scrollbar:horizontal { display: none; }
-::-webkit-scrollbar:vertical { width: 1px; } */
 
 a {
     background: transparent;
@@ -189,16 +185,13 @@ a {
     text-decoration: none;
     border: none;
 }
-/* a:hover, a:focus {
-    background: var(--f_med); 
-    color: var(--b_low); 
-    border-radius: 2px;
-} */
-/* a:focus {
-    background: var(--f_med);
-    color: var(--b_med);
+a:hover, a:focus {
+    color: var(--f_high);
 }
-*/
+
+p {
+    margin-bottom: 2rem;
+}
 
 h1, h2, h3, h4 {
     font-family: 'title';
@@ -207,7 +200,8 @@ h1, h2, h3, h4 {
 }
 h1 {
     font-size: 4rem;
-    line-height: 1.5em;
+    line-height: 1em;
+    padding-bottom: 0.5em;
 }
 h2 {
     font-size: 2em;
@@ -220,6 +214,11 @@ h3 {
 h4 {
     font-size: 1em;
     line-height: 2em;
+}
+
+hr {
+    margin: 1rem 0;
+    border: 1px solid var(--f_low);
 }
 
 input {
@@ -240,14 +239,6 @@ strong {
     font-weight: bold;
 }
 
-/** ------- CLASSES ------- **/
-
-/* .selected {
-    background: var(--f_low); 
-    color: var(--b_low); 
-    border-radius: 2px;
-} */
-
 /** ------- APP ------- **/
 
 html {
@@ -262,15 +253,10 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    /* background-image: url('pattern.png'); */
-    /* background-color: var(--f_high); */
 }
 
 body.armory_examples_browser > header {
     display: none;
-    /* position: fixed;
-    top: 0;
-    left: var(--sidebar-width); */
 }
 
 body.armory_examples_browser > nav.sidebar {
@@ -290,9 +276,9 @@ body.armory_examples_browser > nav.sidebar {
 body.armory_examples_browser > nav.sidebar.hidden {
     transform: translateX(-100%);
 }
-/* body.armory_examples_browser > nav.sidebar input[type="search"] {
-    box-shadow: 0 4px 10px rgba(0,0,0,1);
-} */
+body.armory_examples_browser > nav.sidebar input[type="search"] {
+    box-shadow: 0 .1rem .5rem rgba(0,0,0,0.7);
+} 
 
 body.armory_examples_browser > nav.sidebar img {
     width: 100%;
@@ -315,16 +301,16 @@ body.armory_examples_browser nav.sidebar section.group {
     width: var(--sidebar-width);
     height: 100%;
     overflow-y: scroll;
-    padding: 1rem 0 5rem 0;
+    padding: 1rem 0 6rem 0;
     /* scroll-padding-bottom: 200px; */
 }
 body.armory_examples_browser nav.sidebar section.group .title {
-    margin: 0rem 0 0.5rem 0.8rem;
+    margin: 0.5em 0 0.25em 2rem;
 }
 body.armory_examples_browser nav.sidebar li.project {
     display: flex;
     width: 100%;
-    padding: 0 1rem;
+    padding: 0 2rem;
     white-space: nowrap;
     text-transform: capitalize;
     text-transform: uppercase;
@@ -332,8 +318,6 @@ body.armory_examples_browser nav.sidebar li.project {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-body.armory_examples_browser nav.sidebar li.project a {
 }
 body.armory_examples_browser nav.sidebar li.project a:hover {
     color: var(--f_high);
@@ -362,14 +346,6 @@ body.armory_examples_browser nav.sidebar li.project.playing a:hover {
     color: var(--b_low); 
     border-radius: 2px;
 }
-/* body.armory_examples_browser nav.sidebar li.project .ic-clear {
-    display: none;
-    margin-right: 0.25ch;
-    cursor: pointer;
-}
-body.armory_examples_browser nav.sidebar li.project.playing .ic-clear {
-    display: inline-block;
-} */
 
 body.armory_examples_browser nav.sidebar li.project .controls {
     display: none;
@@ -380,14 +356,6 @@ body.armory_examples_browser nav.sidebar li.project .controls > * {
 body.armory_examples_browser nav.sidebar li.project.playing .controls {
     display: flex;
 }
-
-/* body.armory_examples_browser nav.sidebar li.project .ic-code {
-    display: none;
-    margin-left: 0.5ch;
-}
-body.armory_examples_browser nav.sidebar li.project:hover .ic-code {
-    display: inline-block;
-} */
 
 body.armory_examples_browser > main {
     position: fixed;
@@ -403,6 +371,7 @@ body.armory_examples_browser > main {
 body.armory_examples_browser > main iframe.project {
     width: 100vw;
     height: 100vh;
+    user-select: none;
     /* background: var(--b_med); */
     /* background-image: url('pattern.png');
     background-color:#fff; */

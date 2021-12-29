@@ -1,5 +1,6 @@
 
 #if macro
+import haxe.Json;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import sys.FileSystem.*;
@@ -22,20 +23,24 @@ class Project {
             return !~/^_|\..+$/.match(dir) && isDirectory('$src/$dir') && exists( blend );
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        var results = new Array<{project:String,code:Int,time:Int}>();
+        final results = new Array<{project:String,code:Int,time:Int}>();
         for( i in 0...projects.length ) {
-            var project = projects[i];
+            final project = projects[i];
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
             Sys.println('\nBuilding ${i+1}/${projects.length} $project');
-            var timeStart = Sys.time();
-            var code = Project.build( src, project, dst, forceRebuild, backgroundMode );
-            var time = Std.int((Sys.time() - timeStart) * 1000);
-            results.push( { project: project, code: code, time: time } );
+            final srcAbs = absolutePath( src );
+            final group = srcAbs.withoutDirectory();
+            final timeStart = Sys.time();
+            final code = Project.build( src, project, dst, forceRebuild, backgroundMode );
+            final time = Std.int((Sys.time() - timeStart) * 1000);
+            final result = { project: project, group: group, src: srcAbs, code: code, time: time, background: backgroundMode };
+            results.push( result );
             Sys.println('Time: '+time+'ms');
             if( code != 0 ) {
                 Sys.println( 'ERROR: $code' );
                 if( !ignoreErrors ) Sys.exit(code);
             }
+            // File.saveContent('$dst/$project/build.json', Json.stringify(result) );
         }
         Sys.println('');
         for( r in results ) {
@@ -66,7 +71,7 @@ class Project {
         if( backgroundMode ) args.push('-b');
         args = args.concat( [blend,'--python',buildScript] );
         Sys.println( 'blender '+args.join(' ') );
-        var code = Sys.command('blender', args);
+        final code = Sys.command('blender', args);
         if( code == 0 ) {
             var builddir = '$srcdir/build_$name/html5';
             if( !exists( builddir ) ) {
