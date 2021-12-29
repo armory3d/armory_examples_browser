@@ -15,7 +15,7 @@ jobs:
         with:
           haxe-version: 4.2.3
       - name: Install blender
-        run: sudo snap install blender --classic
+        run: sudo snap install blender --channel=2.93lts/stable --classic
       - name: Install armsdk
         run: |
           git clone --recurse-submodules https://github.com/armory3d/armsdk.git
