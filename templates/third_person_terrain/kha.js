@@ -1488,7 +1488,12 @@ armory_object_Uniforms.register = function() {
 	iron_object_Uniforms.externalIntLinks = [];
 };
 armory_object_Uniforms.textureLink = function(object,mat,link) {
-	if(link == "_nishitaLUT") {
+	switch(link) {
+	case "_morphDataNor":
+		return (js_Boot.__cast(object , iron_object_MeshObject)).morphTarget.morphDataNor;
+	case "_morphDataPos":
+		return (js_Boot.__cast(object , iron_object_MeshObject)).morphTarget.morphDataPos;
+	case "_nishitaLUT":
 		if(armory_renderpath_Nishita.data == null) {
 			armory_renderpath_Nishita.recompute(iron_Scene.active.world);
 		}
@@ -2762,6 +2767,10 @@ armory_trait_internal_CanvasScript.prototype = $extend(iron_Trait.prototype,{
 	}
 	,setCanvasFontSize: function(fontSize) {
 		this.cui.t.FONT_SIZE = fontSize;
+		this.cui.setScale(this.cui.ops.scaleFactor);
+	}
+	,getCanvasFontSize: function() {
+		return this.cui.t.FONT_SIZE;
 	}
 	,getHandle: function(name) {
 		var this1 = armory_ui_Canvas.h.children;
@@ -3044,14 +3053,16 @@ armory_trait_internal_UniformsManager.removeObjectFromMap = function(object,type
 armory_trait_internal_UniformsManager.__super__ = iron_Trait;
 armory_trait_internal_UniformsManager.prototype = $extend(iron_Trait.prototype,{
 	init: function() {
-		var materials = (js_Boot.__cast(this.object , iron_object_MeshObject)).materials;
-		var _g = 0;
-		while(_g < materials.length) {
-			var material = materials[_g];
-			++_g;
-			var exists = armory_trait_internal_UniformsManager.registerShaderUniforms(material);
-			if(exists) {
-				this.uniformExists = true;
+		if(((this.object) instanceof iron_object_MeshObject)) {
+			var materials = (js_Boot.__cast(this.object , iron_object_MeshObject)).materials;
+			var _g = 0;
+			while(_g < materials.length) {
+				var material = materials[_g];
+				++_g;
+				var exists = armory_trait_internal_UniformsManager.registerShaderUniforms(material);
+				if(exists) {
+					this.uniformExists = true;
+				}
 			}
 		}
 	}
@@ -4068,16 +4079,15 @@ armory_trait_physics_bullet_PhysicsWorld.prototype = $extend(iron_Trait.prototyp
 			var body11 = contactManifold.getBody1();
 			var body12 = body1.upcast(body11);
 			var numContacts = contactManifold.getNumContacts();
-			var pt = null;
-			var posA = null;
-			var posB = null;
-			var nor = null;
-			var cp = null;
 			var _g2 = 0;
 			var _g3 = numContacts;
 			while(_g2 < _g3) {
 				var j = _g2++;
-				pt = contactManifold.getContactPoint(j);
+				var pt = contactManifold.getContactPoint(j);
+				var posA = null;
+				var posB = null;
+				var nor = null;
+				var cp = null;
 				posA = pt.get_m_positionWorldOnA();
 				posB = pt.get_m_positionWorldOnB();
 				nor = pt.get_m_normalWorldOnB();
@@ -4573,11 +4583,9 @@ armory_trait_physics_bullet_RigidBody.prototype = $extend(iron_Trait.prototype,{
 		if(this.animated) {
 			this.syncTransform();
 		} else {
-			var bodyColl = this.body;
-			var trans = bodyColl.getWorldTransform();
+			var trans = this.body.getWorldTransform();
 			var p = trans.getOrigin();
 			var q = trans.getRotation();
-			var qw = q;
 			var _this = this.transform.loc;
 			var x = p.x();
 			var y = p.y();
@@ -4587,10 +4595,10 @@ armory_trait_physics_bullet_RigidBody.prototype = $extend(iron_Trait.prototype,{
 			_this.z = z;
 			_this.w = 1.0;
 			var _this = this.transform.rot;
-			var x = qw.x();
-			var y = qw.y();
-			var z = qw.z();
-			var w = qw.w();
+			var x = q.x();
+			var y = q.y();
+			var z = q.z();
+			var w = q.w();
 			_this.x = x;
 			_this.y = y;
 			_this.z = z;
@@ -4633,6 +4641,9 @@ armory_trait_physics_bullet_RigidBody.prototype = $extend(iron_Trait.prototype,{
 		if(this.physics != null) {
 			this.physics.removeRigidBody(this);
 		}
+	}
+	,isActive: function() {
+		return this.body.isActive();
 	}
 	,activate: function() {
 		var bodyColl = this.body;
@@ -6448,7 +6459,7 @@ haxe_ds_IntMap.prototype = {
 	}
 	,keys: function() {
 		var a = [];
-		for( var key in this.h ) if(this.h.hasOwnProperty(key)) a.push(key | 0);
+		for( var key in this.h ) if(this.h.hasOwnProperty(key)) a.push(+key);
 		return new haxe_iterators_ArrayIterator(a);
 	}
 	,iterator: function() {
@@ -7987,7 +7998,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 859, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 862, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -8003,13 +8014,16 @@ iron_Scene.createTraits = function(traits,object) {
 					} else {
 						switch(ptype) {
 						case "Vec2":
-							Reflect.setProperty(traitInst,pname,new iron_math_Vec2(pval[0],pval[1]));
+							var pVec = pval;
+							Reflect.setProperty(traitInst,pname,new iron_math_Vec2(pVec.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN)));
 							break;
 						case "Vec3":
-							Reflect.setProperty(traitInst,pname,new iron_math_Vec3(pval[0],pval[1],pval[2]));
+							var pVec1 = pval;
+							Reflect.setProperty(traitInst,pname,new iron_math_Vec3(pVec1.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec1.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec1.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN)));
 							break;
 						case "Vec4":
-							Reflect.setProperty(traitInst,pname,new iron_math_Vec4(pval[0],pval[1],pval[2],pval[3]));
+							var pVec2 = pval;
+							Reflect.setProperty(traitInst,pname,new iron_math_Vec4(pVec2.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec2.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec2.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN),pVec2.getFloat32(12,kha_arrays_ByteArray.LITTLE_ENDIAN)));
 							break;
 						default:
 							Reflect.setProperty(traitInst,pname,pval);
@@ -8163,9 +8177,9 @@ iron_Scene.prototype = {
 	,addObject: function(parent) {
 		var object = new iron_object_Object();
 		if(parent != null) {
-			parent.addChild(object);
+			object.setParent(parent);
 		} else {
-			this.root.addChild(object);
+			object.setParent(this.root);
 		}
 		return object;
 	}
@@ -8187,36 +8201,36 @@ iron_Scene.prototype = {
 	,addMeshObject: function(data,materials,parent) {
 		var object = new iron_object_MeshObject(data,materials);
 		if(parent != null) {
-			parent.addChild(object);
+			object.setParent(parent);
 		} else {
-			this.root.addChild(object);
+			object.setParent(this.root);
 		}
 		return object;
 	}
 	,addLightObject: function(data,parent) {
 		var object = new iron_object_LightObject(data);
 		if(parent != null) {
-			parent.addChild(object);
+			object.setParent(parent);
 		} else {
-			this.root.addChild(object);
+			object.setParent(this.root);
 		}
 		return object;
 	}
 	,addCameraObject: function(data,parent) {
 		var object = new iron_object_CameraObject(data);
 		if(parent != null) {
-			parent.addChild(object);
+			object.setParent(parent);
 		} else {
-			this.root.addChild(object);
+			object.setParent(this.root);
 		}
 		return object;
 	}
 	,addSpeakerObject: function(data,parent) {
 		var object = new iron_object_SpeakerObject(data);
 		if(parent != null) {
-			parent.addChild(object);
+			object.setParent(parent);
 		} else {
-			this.root.addChild(object);
+			object.setParent(this.root);
 		}
 		return object;
 	}
@@ -8604,6 +8618,7 @@ iron_Scene.prototype = {
 			iron_Scene.createConstraints(o.constraints,object);
 			iron_Scene.generateTransform(o,object.transform);
 			object.setupAnimation(oactions);
+			object.setupMorphTargets();
 			if(o.properties != null) {
 				object.properties = new haxe_ds_StringMap();
 				var _g = 0;
@@ -9444,11 +9459,11 @@ iron_data_Geometry.getVertexStructure = function(vertexArrays) {
 iron_data_Geometry.getVertexData = function(data) {
 	switch(data) {
 	case "short2norm":
-		return 5;
+		return 23;
 	case "short4norm":
-		return 6;
+		return 27;
 	default:
-		return 6;
+		return 27;
 	}
 };
 iron_data_Geometry.buildVertices = function(vertices,vertexArrays,offset,fakeUVs,uvsIndex) {
@@ -9578,10 +9593,10 @@ iron_data_Geometry.prototype = {
 			vb.unlock();
 			this.vertexBufferMap.h[key] = vb;
 			if(atex && this.uvs == null) {
-				haxe_Log.trace("Armory Warning: Geometry " + this.name + " is missing UV map",{ fileName : "Sources/iron/data/Geometry.hx", lineNumber : 237, className : "iron.data.Geometry", methodName : "get"});
+				haxe_Log.trace("Armory Warning: Geometry " + this.name + " is missing UV map",{ fileName : "Sources/iron/data/Geometry.hx", lineNumber : 228, className : "iron.data.Geometry", methodName : "get"});
 			}
 			if(acol && this.cols == null) {
-				haxe_Log.trace("Armory Warning: Geometry " + this.name + " is missing vertex colors",{ fileName : "Sources/iron/data/Geometry.hx", lineNumber : 238, className : "iron.data.Geometry", methodName : "get"});
+				haxe_Log.trace("Armory Warning: Geometry " + this.name + " is missing vertex colors",{ fileName : "Sources/iron/data/Geometry.hx", lineNumber : 229, className : "iron.data.Geometry", methodName : "get"});
 			}
 		}
 		return vb;
@@ -10094,9 +10109,9 @@ iron_data_ShaderContext.parseData = function(data) {
 	} else if(data == "float4") {
 		return 3;
 	} else if(data == "short2norm") {
-		return 5;
+		return 23;
 	} else if(data == "short4norm") {
-		return 6;
+		return 27;
 	}
 	return 0;
 };
@@ -11078,11 +11093,13 @@ iron_object_Animation.prototype = {
 				var i = _g++;
 				if(this.frameIndex == anim.marker_frames.getUint32(i * 4,kha_arrays_ByteArray.LITTLE_ENDIAN)) {
 					var ar = this.markerEvents.h[anim.marker_names[i]];
-					var _g2 = 0;
-					while(_g2 < ar.length) {
-						var f = ar[_g2];
-						++_g2;
-						f();
+					if(ar != null) {
+						var _g2 = 0;
+						while(_g2 < ar.length) {
+							var f = ar[_g2];
+							++_g2;
+							f();
+						}
 					}
 				}
 			}
@@ -13051,17 +13068,31 @@ iron_object_Object.seededRandom = function() {
 	return iron_object_Object.seed / 233280.0;
 };
 iron_object_Object.prototype = {
-	addChild: function(o,parentInverse) {
+	setParent: function(parentObject,parentInverse,keepTransform) {
+		if(keepTransform == null) {
+			keepTransform = false;
+		}
 		if(parentInverse == null) {
 			parentInverse = false;
 		}
-		if(o.parent == this) {
+		if(parentObject == this || parentObject == this.parent) {
 			return;
 		}
-		this.children.push(o);
-		o.parent = this;
+		if(this.parent != null) {
+			HxOverrides.remove(this.parent.children,this);
+			if(keepTransform) {
+				this.transform.applyParent();
+			}
+			this.parent = null;
+			this.transform.buildMatrix();
+		}
+		if(parentObject == null) {
+			parentObject = iron_Scene.active.sceneParent;
+		}
+		this.parent = parentObject;
+		this.parent.children.push(this);
 		if(parentInverse) {
-			o.transform.applyParentInverse();
+			this.transform.applyParentInverse();
 		}
 	}
 	,remove: function() {
@@ -13244,6 +13275,8 @@ iron_object_Object.prototype = {
 			return;
 		}
 		this.animation = new iron_object_ObjectAnimation(this,oactions);
+	}
+	,setupMorphTargets: function() {
 	}
 	,__class__: iron_object_Object
 };
@@ -14753,6 +14786,7 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 });
 var iron_object_MeshObject = function(data,materials) {
 	this.prevMatrix = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+	this.morphTarget = null;
 	this.force_context = null;
 	this.skip_context = null;
 	this.tilesheet = null;
@@ -14822,6 +14856,11 @@ iron_object_MeshObject.prototype = $extend(iron_object_Object.prototype,{
 			}
 		}
 		iron_object_Object.prototype.setupAnimation.call(this,oactions);
+	}
+	,setupMorphTargets: function() {
+		if(this.data.raw.morph_target != null) {
+			this.morphTarget = new iron_object_MorphTarget(this.data.raw.morph_target);
+		}
 	}
 	,setupParticleSystem: function(sceneName,pref) {
 		if(this.particleSystems == null) {
@@ -15095,6 +15134,44 @@ iron_object_MeshObject.prototype = $extend(iron_object_Object.prototype,{
 	}
 	,__class__: iron_object_MeshObject
 });
+var iron_object_MorphTarget = function(data) {
+	this.morphMap = null;
+	this.morphBlockSize = 0;
+	this.morphImageSize = 0;
+	this.numMorphTargets = 0;
+	var _gthis = this;
+	this.morphWeights = data.morph_target_defaults;
+	this.scaling = data.morph_scale;
+	this.offset = data.morph_offset;
+	this.numMorphTargets = data.num_morph_targets;
+	this.morphImageSize = data.morph_img_size;
+	this.morphBlockSize = data.morph_block_size;
+	iron_data_Data.getImage(data.morph_target_data_file + "_morph_pos.png",function(img) {
+		if(img != null) {
+			_gthis.morphDataPos = img;
+		}
+	});
+	iron_data_Data.getImage(data.morph_target_data_file + "_morph_nor.png",function(img) {
+		if(img != null) {
+			_gthis.morphDataNor = img;
+		}
+	});
+	this.morphMap = new haxe_ds_StringMap();
+	var i = 0;
+	var _g = 0;
+	var _g1 = data.morph_target_ref;
+	while(_g < _g1.length) {
+		var name = _g1[_g];
+		++_g;
+		this.morphMap.h[name] = i;
+		++i;
+	}
+};
+$hxClasses["iron.object.MorphTarget"] = iron_object_MorphTarget;
+iron_object_MorphTarget.__name__ = true;
+iron_object_MorphTarget.prototype = {
+	__class__: iron_object_MorphTarget
+};
 var iron_object_ObjectAnimation = function(object,oactions) {
 	this.object = object;
 	this.oactions = oactions;
@@ -15581,6 +15658,7 @@ iron_object_Particle.prototype = {
 };
 var iron_object_SpeakerObject = function(data) {
 	this.channels = [];
+	this.sound = null;
 	this.paused = false;
 	var _gthis = this;
 	iron_object_Object.call(this);
@@ -15653,55 +15731,58 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 			iron_App.removeUpdate($bind(this,this.update));
 			return;
 		}
-		var cam = iron_Scene.active.camera;
-		var _this = cam.transform.world;
-		var x = _this.self._30;
-		var y = _this.self._31;
-		var z = _this.self._32;
-		var w = _this.self._33;
-		if(w == null) {
-			w = 1.0;
+		if(this.data.attenuation > 0) {
+			var _this = iron_Scene.active.camera.transform.world;
+			var x = _this.self._30;
+			var y = _this.self._31;
+			var z = _this.self._32;
+			var w = _this.self._33;
+			if(w == null) {
+				w = 1.0;
+			}
+			if(z == null) {
+				z = 0.0;
+			}
+			if(y == null) {
+				y = 0.0;
+			}
+			if(x == null) {
+				x = 0.0;
+			}
+			var v1_x = x;
+			var v1_y = y;
+			var v1_z = z;
+			var v1_w = w;
+			var _this = this.transform.world;
+			var x = _this.self._30;
+			var y = _this.self._31;
+			var z = _this.self._32;
+			var w = _this.self._33;
+			if(w == null) {
+				w = 1.0;
+			}
+			if(z == null) {
+				z = 0.0;
+			}
+			if(y == null) {
+				y = 0.0;
+			}
+			if(x == null) {
+				x = 0.0;
+			}
+			var v2_x = x;
+			var v2_y = y;
+			var v2_z = z;
+			var v2_w = w;
+			var vx = v1_x - v2_x;
+			var vy = v1_y - v2_y;
+			var vz = v1_z - v2_z;
+			var distance = Math.sqrt(vx * vx + vy * vy + vz * vz);
+			this.volume = 1.0 / (1.0 + this.data.attenuation * (distance - 1.0));
+			this.volume *= this.data.volume;
+		} else {
+			this.volume = this.data.volume;
 		}
-		if(z == null) {
-			z = 0.0;
-		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var loc1_x = x;
-		var loc1_y = y;
-		var loc1_z = z;
-		var loc1_w = w;
-		var _this = this.transform.world;
-		var x = _this.self._30;
-		var y = _this.self._31;
-		var z = _this.self._32;
-		var w = _this.self._33;
-		if(w == null) {
-			w = 1.0;
-		}
-		if(z == null) {
-			z = 0.0;
-		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var loc2_x = x;
-		var loc2_y = y;
-		var loc2_z = z;
-		var loc2_w = w;
-		var vx = loc1_x - loc2_x;
-		var vy = loc1_y - loc2_y;
-		var vz = loc1_z - loc2_z;
-		var d = Math.sqrt(vx * vx + vy * vy + vz * vz);
-		d *= this.data.attenuation;
-		this.volume = (1.0 - Math.min(d / 100,1)) * this.data.volume;
 		var _g = 0;
 		var _g1 = this.channels;
 		while(_g < _g1.length) {
@@ -15716,7 +15797,6 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 			HxOverrides.remove(iron_Scene.active.speakers,this);
 		}
 		iron_object_Object.prototype.remove.call(this);
-		iron_App.removeUpdate($bind(this,this.update));
 	}
 	,__class__: iron_object_SpeakerObject
 });
@@ -19762,10 +19842,22 @@ iron_object_Uniforms.setObjectConstant = function(g,object,location,c) {
 	} else if(c.type == "vec2") {
 		var vx = null;
 		var vy = null;
-		if(c.link == "_tilesheetOffset") {
+		switch(c.link) {
+		case "_morphDataDim":
+			var mt = (js_Boot.__cast(object , iron_object_MeshObject)).morphTarget;
+			vx = mt.numMorphTargets;
+			vy = mt.morphBlockSize / mt.morphImageSize;
+			break;
+		case "_morphScaleOffset":
+			var mt = (js_Boot.__cast(object , iron_object_MeshObject)).morphTarget;
+			vx = mt.scaling;
+			vy = mt.offset;
+			break;
+		case "_tilesheetOffset":
 			var ts = (js_Boot.__cast(object , iron_object_MeshObject)).tilesheet;
 			vx = ts.tileX;
 			vy = ts.tileY;
+			break;
 		}
 		if(vx == null && iron_object_Uniforms.externalVec2Links != null) {
 			var _g = 0;
@@ -19823,10 +19915,15 @@ iron_object_Uniforms.setObjectConstant = function(g,object,location,c) {
 		g.setFloat(location,f);
 	} else if(c.type == "floats") {
 		var fa = null;
-		if(c.link == "_skinBones") {
+		switch(c.link) {
+		case "_morphWeights":
+			fa = (js_Boot.__cast(object , iron_object_MeshObject)).morphTarget.morphWeights;
+			break;
+		case "_skinBones":
 			if(object.animation != null) {
 				fa = (js_Boot.__cast(object.animation , iron_object_BoneAnimation)).skinBuffer;
 			}
+			break;
 		}
 		if(fa == null && iron_object_Uniforms.externalFloatsLinks != null) {
 			var _g = 0;
@@ -22623,7 +22720,14 @@ kha_SystemImpl.init2 = function(defaultWidth,defaultHeight,backbufferFormat) {
 	kha_SystemImpl.gamepads[3] = new kha_input_Gamepad(3);
 	kha_SystemImpl.gamepadStates[3] = new kha_GamepadStates();
 	window.addEventListener("gamepadconnected",function(e) {
-		kha_input_Gamepad.sendConnectEvent(e.gamepad.index);
+		var pad = e.gamepad;
+		kha_input_Gamepad.sendConnectEvent(pad.index);
+		var _g = 0;
+		var _g1 = pad.buttons.length;
+		while(_g < _g1) {
+			var i = _g++;
+			kha_SystemImpl.gamepadStates[pad.index].buttons[i] = 0;
+		}
 	});
 	window.addEventListener("gamepaddisconnected",function(e) {
 		kha_input_Gamepad.sendDisconnectEvent(e.gamepad.index);
@@ -22757,7 +22861,7 @@ kha_SystemImpl.loadFinished = function(defaultWidth,defaultHeight) {
 		kha_SystemImpl.gl2 = true;
 		kha_Shaders.init();
 	} catch( _g ) {
-		haxe_Log.trace("Could not initialize WebGL 2, falling back to WebGL.",{ fileName : "kha/SystemImpl.hx", lineNumber : 372, className : "kha.SystemImpl", methodName : "loadFinished"});
+		haxe_Log.trace("Could not initialize WebGL 2, falling back to WebGL.",{ fileName : "kha/SystemImpl.hx", lineNumber : 376, className : "kha.SystemImpl", methodName : "loadFinished"});
 	}
 	if(!kha_SystemImpl.gl2) {
 		try {
@@ -22779,7 +22883,7 @@ kha_SystemImpl.loadFinished = function(defaultWidth,defaultHeight) {
 			gl = true;
 			kha_Shaders.init();
 		} catch( _g ) {
-			haxe_Log.trace("Could not initialize WebGL, falling back to <canvas>.",{ fileName : "kha/SystemImpl.hx", lineNumber : 400, className : "kha.SystemImpl", methodName : "loadFinished"});
+			haxe_Log.trace("Could not initialize WebGL, falling back to <canvas>.",{ fileName : "kha/SystemImpl.hx", lineNumber : 404, className : "kha.SystemImpl", methodName : "loadFinished"});
 		}
 	}
 	kha_SystemImpl.setCanvas(canvas);
@@ -23048,7 +23152,7 @@ kha_SystemImpl.unlockSound = function() {
 			context.resume().then(function(c) {
 				kha_SystemImpl.soundEnabled = true;
 			}).catch(function(err) {
-				haxe_Log.trace(err,{ fileName : "kha/SystemImpl.hx", lineNumber : 734, className : "kha.SystemImpl", methodName : "unlockSound"});
+				haxe_Log.trace(err,{ fileName : "kha/SystemImpl.hx", lineNumber : 738, className : "kha.SystemImpl", methodName : "unlockSound"});
 			});
 		}
 		kha_audio2_Audio.wakeChannels();
@@ -24008,9 +24112,12 @@ kha_arrays_ByteArray._new = function(buffer,byteOffset,byteLength) {
 	return this1;
 };
 kha_arrays_ByteArray.make = function(byteLength) {
-	return kha_arrays_ByteArray._new(kha_arrays_ByteBuffer._new(byteLength));
+	return kha_arrays_ByteArray._new(kha_arrays_ByteBuffer.create(byteLength));
 };
 var kha_arrays_ByteBuffer = {};
+kha_arrays_ByteBuffer.create = function(length) {
+	return kha_arrays_ByteBuffer._new(length);
+};
 kha_arrays_ByteBuffer._new = function(length) {
 	var this1 = new ArrayBuffer(length);
 	return this1;
@@ -36325,7 +36432,7 @@ var kha_graphics4_SimplePipelineCache = function(pipeline,texture) {
 		projectionLocation = pipeline.getConstantLocation("projectionMatrix");
 	} catch( _g ) {
 		var x = haxe_Exception.caught(_g).unwrap();
-		haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 57, className : "kha.graphics4.SimplePipelineCache", methodName : "new"});
+		haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 58, className : "kha.graphics4.SimplePipelineCache", methodName : "new"});
 	}
 	var textureLocation = null;
 	if(texture) {
@@ -36333,7 +36440,7 @@ var kha_graphics4_SimplePipelineCache = function(pipeline,texture) {
 			textureLocation = pipeline.getTextureUnit("tex");
 		} catch( _g ) {
 			var x = haxe_Exception.caught(_g).unwrap();
-			haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 66, className : "kha.graphics4.SimplePipelineCache", methodName : "new"});
+			haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 67, className : "kha.graphics4.SimplePipelineCache", methodName : "new"});
 		}
 	}
 	this.pipeline = new kha_graphics4_InternalPipeline(pipeline,projectionLocation,textureLocation);
@@ -36355,7 +36462,7 @@ var kha_graphics4_PerFramebufferPipelineCache = function(pipeline,texture) {
 		projectionLocation = pipeline.getConstantLocation("projectionMatrix");
 	} catch( _g ) {
 		var x = haxe_Exception.caught(_g).unwrap();
-		haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 89, className : "kha.graphics4.PerFramebufferPipelineCache", methodName : "new"});
+		haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 90, className : "kha.graphics4.PerFramebufferPipelineCache", methodName : "new"});
 	}
 	var textureLocation = null;
 	if(texture) {
@@ -36363,7 +36470,7 @@ var kha_graphics4_PerFramebufferPipelineCache = function(pipeline,texture) {
 			textureLocation = pipeline.getTextureUnit("tex");
 		} catch( _g ) {
 			var x = haxe_Exception.caught(_g).unwrap();
-			haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 98, className : "kha.graphics4.PerFramebufferPipelineCache", methodName : "new"});
+			haxe_Log.trace(x,{ fileName : "kha/graphics4/Graphics2.hx", lineNumber : 99, className : "kha.graphics4.PerFramebufferPipelineCache", methodName : "new"});
 		}
 	}
 	this.pipelines.push(new kha_graphics4_InternalPipeline(pipeline,projectionLocation,textureLocation));
@@ -36551,73 +36658,73 @@ kha_graphics4_ColoredShaderPainter.prototype = {
 		}
 	}
 	,setRectVertices: function(bottomleftx,bottomlefty,topleftx,toplefty,toprightx,toprighty,bottomrightx,bottomrighty) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.bufferIndex * 7 * 4;
+		var baseIndex = kha_graphics4_ColoredShaderPainter.bufferIndex * 4 * 4;
 		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32(baseIndex * 4,bottomleftx,true);
 		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 1) * 4,bottomlefty,true);
 		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 2) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 7) * 4,topleftx,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 8) * 4,toplefty,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 9) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 14) * 4,toprightx,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 15) * 4,toprighty,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 16) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 21) * 4,bottomrightx,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 22) * 4,bottomrighty,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 23) * 4,-5.0,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 4) * 4,topleftx,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 5) * 4,toplefty,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 6) * 4,-5.0,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 8) * 4,toprightx,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 9) * 4,toprighty,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 10) * 4,-5.0,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 12) * 4,bottomrightx,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 13) * 4,bottomrighty,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 14) * 4,-5.0,true);
 	}
 	,setRectColors: function(opacity,color) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.bufferIndex * 7 * 4;
+		var baseIndex = kha_graphics4_ColoredShaderPainter.bufferIndex * 4 * 4 * 4;
 		var a = opacity * ((color >>> 24) * 0.00392156862745098);
 		var r = a * (((color & 16711680) >>> 16) * 0.00392156862745098);
 		var g = a * (((color & 65280) >>> 8) * 0.00392156862745098);
 		var b = a * ((color & 255) * 0.00392156862745098);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 3) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 4) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 5) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 6) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 10) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 11) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 12) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 13) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 17) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 18) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 19) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 20) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 24) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 25) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 26) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.rectVertices.setFloat32((baseIndex + 27) * 4,a,true);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 12,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 12 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 12 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 12 + 3,a * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 28,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 28 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 28 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 28 + 3,a * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 44,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 44 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 44 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 44 + 3,a * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 60,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 60 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 60 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.rectVertices.setUint8(baseIndex + 60 + 3,a * 255 | 0);
 	}
 	,setTriVertices: function(x1,y1,x2,y2,x3,y3) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 7 * 3;
+		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 4 * 3;
 		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32(baseIndex * 4,x1,true);
 		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 1) * 4,y1,true);
 		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 2) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 7) * 4,x2,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 8) * 4,y2,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 9) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 14) * 4,x3,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 15) * 4,y3,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 16) * 4,-5.0,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 4) * 4,x2,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 5) * 4,y2,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 6) * 4,-5.0,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 8) * 4,x3,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 9) * 4,y3,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 10) * 4,-5.0,true);
 	}
 	,setTriColors: function(opacity,color) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 7 * 3;
+		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 4 * 4 * 3;
 		var a = opacity * ((color >>> 24) * 0.00392156862745098);
 		var r = a * (((color & 16711680) >>> 16) * 0.00392156862745098);
 		var g = a * (((color & 65280) >>> 8) * 0.00392156862745098);
 		var b = a * ((color & 255) * 0.00392156862745098);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 3) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 4) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 5) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 6) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 10) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 11) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 12) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 13) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 17) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 18) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 19) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 20) * 4,a,true);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 12,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 12 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 12 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 12 + 3,a * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 28,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 28 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 28 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 28 + 3,a * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 44,r * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 44 + 1,g * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 44 + 2,b * 255 | 0);
+		kha_graphics4_ColoredShaderPainter.triangleVertices.setUint8(baseIndex + 44 + 3,a * 255 | 0);
 	}
 	,drawBuffer: function(trisDone) {
 		if(kha_graphics4_ColoredShaderPainter.bufferIndex == 0) {
@@ -36996,8 +37103,8 @@ kha_graphics4_Graphics2.upperPowerOfTwo = function(v) {
 kha_graphics4_Graphics2.createImageVertexStructure = function() {
 	var structure = new kha_graphics4_VertexStructure();
 	structure.add("vertexPosition",2);
-	structure.add("texPosition",1);
-	structure.add("vertexColor",3);
+	structure.add("vertexUV",1);
+	structure.add("vertexColor",16);
 	return structure;
 };
 kha_graphics4_Graphics2.createImagePipeline = function(structure) {
@@ -37014,7 +37121,7 @@ kha_graphics4_Graphics2.createImagePipeline = function(structure) {
 kha_graphics4_Graphics2.createColoredVertexStructure = function() {
 	var structure = new kha_graphics4_VertexStructure();
 	structure.add("vertexPosition",2);
-	structure.add("vertexColor",3);
+	structure.add("vertexColor",16);
 	return structure;
 };
 kha_graphics4_Graphics2.createColoredPipeline = function(structure) {
@@ -37031,7 +37138,7 @@ kha_graphics4_Graphics2.createColoredPipeline = function(structure) {
 kha_graphics4_Graphics2.createTextVertexStructure = function() {
 	var structure = new kha_graphics4_VertexStructure();
 	structure.add("vertexPosition",2);
-	structure.add("texPosition",1);
+	structure.add("vertexUV",1);
 	structure.add("vertexColor",3);
 	return structure;
 };
@@ -37281,14 +37388,6 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		var p4_x = x1;
 		var p4_y = y1;
 		var _this = this.imagePainter;
-		var bottomleftx = p1_x;
-		var bottomlefty = p1_y;
-		var topleftx = p2_x;
-		var toplefty = p2_y;
-		var toprightx = p3_x;
-		var toprighty = p3_y;
-		var bottomrightx = p4_x;
-		var bottomrighty = p4_y;
 		var opacity = this.get_opacity();
 		var color = this.get_color();
 		var tex = img;
@@ -37299,47 +37398,47 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		var g = ((color & 65280) >>> 8) * 0.00392156862745098;
 		var b = (color & 255) * 0.00392156862745098;
 		var a = (color >>> 24) * 0.00392156862745098 * opacity;
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 5) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 6) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 7) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 8) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 14) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 15) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 16) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 17) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 23) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 24) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 25) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 26) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 32) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 33) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 34) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 35) * 4,a,true);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 3,a * 255 | 0);
 		var right = tex.get_width() / tex.get_realWidth();
 		var bottom = tex.get_height() / tex.get_realHeight();
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 3) * 4,0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 4) * 4,bottom,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 12) * 4,0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 13) * 4,0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 21) * 4,right,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 22) * 4,0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 30) * 4,right,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 31) * 4,bottom,true);
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex * 4,bottomleftx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 1) * 4,bottomlefty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 2) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 9) * 4,topleftx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 10) * 4,toplefty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 11) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 18) * 4,toprightx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 19) * 4,toprighty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 20) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 27) * 4,bottomrightx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 28) * 4,bottomrighty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 29) * 4,-5.0,true);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 12,0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 16,bottom,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 36,0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 40,0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 60,right,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 64,0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 84,right,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 88,bottom,true);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex,p1_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 4,p1_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 8,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 24,p2_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 28,p2_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 32,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 48,p3_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 52,p3_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 56,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 72,p4_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 76,p4_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 80,-5.0,true);
 		++kha_graphics4_ImageShaderPainter.bufferIndex;
 		kha_graphics4_ImageShaderPainter.lastTexture = tex;
 	}
@@ -37449,14 +37548,6 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		var p4_x = x1;
 		var p4_y = y1;
 		var _this = this.imagePainter;
-		var bottomleftx = p1_x;
-		var bottomlefty = p1_y;
-		var topleftx = p2_x;
-		var toplefty = p2_y;
-		var toprightx = p3_x;
-		var toprighty = p3_y;
-		var bottomrightx = p4_x;
-		var bottomrighty = p4_y;
 		var opacity = this.get_opacity();
 		var color = this.get_color();
 		var tex = img;
@@ -37467,49 +37558,49 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		var top = sy / tex.get_realHeight();
 		var right = (sx + sw) / tex.get_realWidth();
 		var bottom = (sy + sh) / tex.get_realHeight();
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 3) * 4,left,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 4) * 4,bottom,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 12) * 4,left,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 13) * 4,top,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 21) * 4,right,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 22) * 4,top,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 30) * 4,right,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 31) * 4,bottom,true);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 12,left,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 16,bottom,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 36,left,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 40,top,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 60,right,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 64,top,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 84,right,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 88,bottom,true);
 		var r = ((color & 16711680) >>> 16) * 0.00392156862745098;
 		var g = ((color & 65280) >>> 8) * 0.00392156862745098;
 		var b = (color & 255) * 0.00392156862745098;
 		var a = (color >>> 24) * 0.00392156862745098 * opacity;
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 5) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 6) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 7) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 8) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 14) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 15) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 16) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 17) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 23) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 24) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 25) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 26) * 4,a,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 32) * 4,r,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 33) * 4,g,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 34) * 4,b,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 35) * 4,a,true);
-		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 9 * 4;
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex * 4,bottomleftx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 1) * 4,bottomlefty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 2) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 9) * 4,topleftx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 10) * 4,toplefty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 11) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 18) * 4,toprightx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 19) * 4,toprighty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 20) * 4,-5.0,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 27) * 4,bottomrightx,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 28) * 4,bottomrighty,true);
-		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32((baseIndex + 29) * 4,-5.0,true);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 20 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 44 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 68 + 3,a * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92,r * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 1,g * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 2,b * 255 | 0);
+		kha_graphics4_ImageShaderPainter.rectVertices.setUint8(baseIndex + 92 + 3,a * 255 | 0);
+		var baseIndex = (kha_graphics4_ImageShaderPainter.bufferIndex - kha_graphics4_ImageShaderPainter.bufferStart) * 6 * 4 * 4;
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex,p1_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 4,p1_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 8,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 24,p2_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 28,p2_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 32,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 48,p3_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 52,p3_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 56,-5.0,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 72,p4_x,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 76,p4_y,true);
+		kha_graphics4_ImageShaderPainter.rectVertices.setFloat32(baseIndex + 80,-5.0,true);
 		++kha_graphics4_ImageShaderPainter.bufferIndex;
 		kha_graphics4_ImageShaderPainter.lastTexture = tex;
 	}
@@ -38641,29 +38732,7 @@ var kha_graphics4_VertexBuffer = function(vertexCount,structure,usage,instanceDa
 	while(_g < _g1.length) {
 		var element = _g1[_g];
 		++_g;
-		switch(element.data) {
-		case 0:
-			this.myStride += 4;
-			break;
-		case 1:
-			this.myStride += 8;
-			break;
-		case 2:
-			this.myStride += 12;
-			break;
-		case 3:
-			this.myStride += 16;
-			break;
-		case 4:
-			this.myStride += 64;
-			break;
-		case 5:
-			this.myStride += 4;
-			break;
-		case 6:
-			this.myStride += 8;
-			break;
-		}
+		this.myStride += kha_graphics4_VertexStructure.dataByteSize(element.data);
 	}
 	this.buffer = kha_SystemImpl.gl.createBuffer();
 	this._data = kha_arrays_ByteArray.make(vertexCount * this.myStride);
@@ -38703,41 +38772,91 @@ var kha_graphics4_VertexBuffer = function(vertexCount,structure,usage,instanceDa
 			size = 16;
 			type = 5126;
 			break;
-		case 5:
+		case 5:case 7:
+			size = 1;
+			type = 5120;
+			break;
+		case 6:case 8:
+			size = 1;
+			type = 5121;
+			break;
+		case 10:case 12:
+			size = 2;
+			type = 5121;
+			break;
+		case 9:case 11:
+			size = 2;
+			type = 5120;
+			break;
+		case 13:case 15:
+			size = 4;
+			type = 5120;
+			break;
+		case 14:case 16:
+			size = 4;
+			type = 5121;
+			break;
+		case 17:case 19:
+			size = 1;
+			type = 5122;
+			break;
+		case 18:case 20:
+			size = 1;
+			type = 5123;
+			break;
+		case 21:case 23:
 			size = 2;
 			type = 5122;
 			break;
-		case 6:
+		case 22:case 24:
+			size = 2;
+			type = 5123;
+			break;
+		case 25:case 27:
 			size = 4;
 			type = 5122;
+			break;
+		case 26:case 28:
+			size = 4;
+			type = 5123;
+			break;
+		case 29:
+			size = 1;
+			type = 5124;
+			break;
+		case 30:
+			size = 1;
+			type = 5125;
+			break;
+		case 31:
+			size = 2;
+			type = 5124;
+			break;
+		case 32:
+			size = 2;
+			type = 5125;
+			break;
+		case 33:
+			size = 3;
+			type = 5124;
+			break;
+		case 34:
+			size = 3;
+			type = 5125;
+			break;
+		case 35:
+			size = 4;
+			type = 5124;
+			break;
+		case 36:
+			size = 4;
+			type = 5125;
 			break;
 		}
 		this.sizes[index] = size;
 		this.offsets[index] = offset;
 		this.types[index] = type;
-		switch(element.data) {
-		case 0:
-			offset += 4;
-			break;
-		case 1:
-			offset += 8;
-			break;
-		case 2:
-			offset += 12;
-			break;
-		case 3:
-			offset += 16;
-			break;
-		case 4:
-			offset += 64;
-			break;
-		case 5:
-			offset += 4;
-			break;
-		case 6:
-			offset += 8;
-			break;
-		}
+		offset += kha_graphics4_VertexStructure.dataByteSize(element.data);
 		++index;
 	}
 	kha_SystemImpl.gl.bindBuffer(34962,this.buffer);
@@ -38853,6 +38972,40 @@ var kha_graphics4_VertexStructure = function() {
 };
 $hxClasses["kha.graphics4.VertexStructure"] = kha_graphics4_VertexStructure;
 kha_graphics4_VertexStructure.__name__ = true;
+kha_graphics4_VertexStructure.dataByteSize = function(data) {
+	switch(data) {
+	case 0:
+		return 4;
+	case 1:
+		return 8;
+	case 2:
+		return 12;
+	case 3:
+		return 16;
+	case 4:
+		return 64;
+	case 5:case 6:case 7:case 8:
+		return 1;
+	case 9:case 10:case 11:case 12:
+		return 2;
+	case 13:case 14:case 15:case 16:
+		return 4;
+	case 17:case 18:case 19:case 20:
+		return 2;
+	case 21:case 22:case 23:case 24:
+		return 4;
+	case 25:case 26:case 27:case 28:
+		return 8;
+	case 29:case 30:
+		return 4;
+	case 31:case 32:
+		return 8;
+	case 33:case 34:
+		return 12;
+	case 35:case 36:
+		return 16;
+	}
+};
 kha_graphics4_VertexStructure.prototype = {
 	add: function(name,data) {
 		this.elements.push(new kha_graphics4_VertexElement(name,data));
@@ -38866,27 +39019,9 @@ kha_graphics4_VertexStructure.prototype = {
 		var _g1 = this.elements.length;
 		while(_g < _g1) {
 			var i = _g++;
-			byteSize += this.dataByteSize(this.elements[i].data);
+			byteSize += kha_graphics4_VertexStructure.dataByteSize(this.elements[i].data);
 		}
 		return byteSize;
-	}
-	,dataByteSize: function(data) {
-		switch(data) {
-		case 0:
-			return 4;
-		case 1:
-			return 8;
-		case 2:
-			return 12;
-		case 3:
-			return 16;
-		case 4:
-			return 64;
-		case 5:
-			return 4;
-		case 6:
-			return 8;
-		}
 	}
 	,get: function(index) {
 		return this.elements[index];
@@ -40400,7 +40535,6 @@ kha_js_graphics4_ConstantLocation.prototype = {
 var kha_js_graphics4_Graphics = function(renderTarget) {
 	this.matrix3Cache = kha_arrays_Float32Array._new(9);
 	this.matrixCache = kha_arrays_Float32Array._new(16);
-	this.useVertexAttributes = 0;
 	this.isDepthAttachment = false;
 	this.isCubeMap = false;
 	this.colorMaskAlpha = true;
@@ -40631,16 +40765,16 @@ kha_js_graphics4_Graphics.prototype = {
 	}
 	,setVertexBuffer: function(vertexBuffer) {
 		var _g = 0;
-		var _g1 = this.useVertexAttributes;
+		var _g1 = kha_js_graphics4_Graphics.useVertexAttributes;
 		while(_g < _g1) {
 			var i = _g++;
 			kha_SystemImpl.gl.disableVertexAttribArray(i);
 		}
-		this.useVertexAttributes = (js_Boot.__cast(vertexBuffer , kha_graphics4_VertexBuffer)).set(0);
+		kha_js_graphics4_Graphics.useVertexAttributes = (js_Boot.__cast(vertexBuffer , kha_graphics4_VertexBuffer)).set(0);
 	}
 	,setVertexBuffers: function(vertexBuffers) {
 		var _g = 0;
-		var _g1 = this.useVertexAttributes;
+		var _g1 = kha_js_graphics4_Graphics.useVertexAttributes;
 		while(_g < _g1) {
 			var i = _g++;
 			kha_SystemImpl.gl.disableVertexAttribArray(i);
@@ -40652,7 +40786,7 @@ kha_js_graphics4_Graphics.prototype = {
 			++_g;
 			offset += (js_Boot.__cast(vertexBuffer , kha_graphics4_VertexBuffer)).set(offset);
 		}
-		this.useVertexAttributes = offset;
+		kha_js_graphics4_Graphics.useVertexAttributes = offset;
 	}
 	,setIndexBuffer: function(indexBuffer) {
 		this.indicesCount = indexBuffer.count();
@@ -43089,11 +43223,11 @@ kha_Shaders.downsample_depth_fragData0 = "s783:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvb
 kha_Shaders.painter_colored_fragData0 = "s223:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwppbiBoaWdocCB2ZWM0IGZyYWdtZW50Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBGcmFnQ29sb3IgPSBmcmFnbWVudENvbG9yOwp9Cgo";
 kha_Shaders.painter_colored_vertData0 = "s311:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWM0IGZyYWdtZW50Q29sb3I7CmluIHZlYzQgdmVydGV4Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9Qb3NpdGlvbiA9IHByb2plY3Rpb25NYXRyaXggKiB2ZWM0KHZlcnRleFBvc2l0aW9uLCAxLjApOwogICAgZnJhZ21lbnRDb2xvciA9IHZlcnRleENvbG9yOwp9Cgo";
 kha_Shaders.painter_image_fragData0 = "s487:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKaW4gaGlnaHAgdmVjNCBjb2xvcjsKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjNCB0ZXhjb2xvciA9IHRleHR1cmUodGV4LCB0ZXhDb29yZCkgKiBjb2xvcjsKICAgIGhpZ2hwIHZlYzMgXzMyID0gdGV4Y29sb3IueHl6ICogY29sb3IudzsKICAgIHRleGNvbG9yID0gdmVjNChfMzIueCwgXzMyLnksIF8zMi56LCB0ZXhjb2xvci53KTsKICAgIEZyYWdDb2xvciA9IHRleGNvbG9yOwp9Cgo";
-kha_Shaders.painter_image_vertData0 = "s380:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHRleFBvc2l0aW9uOwpvdXQgdmVjNCBjb2xvcjsKaW4gdmVjNCB2ZXJ0ZXhDb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIGdsX1Bvc2l0aW9uID0gcHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb24sIDEuMCk7CiAgICB0ZXhDb29yZCA9IHRleFBvc2l0aW9uOwogICAgY29sb3IgPSB2ZXJ0ZXhDb2xvcjsKfQoK";
+kha_Shaders.painter_image_vertData0 = "s372:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHZlcnRleFVWOwpvdXQgdmVjNCBjb2xvcjsKaW4gdmVjNCB2ZXJ0ZXhDb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIGdsX1Bvc2l0aW9uID0gcHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb24sIDEuMCk7CiAgICB0ZXhDb29yZCA9IHZlcnRleFVWOwogICAgY29sb3IgPSB2ZXJ0ZXhDb2xvcjsKfQoK";
 kha_Shaders.painter_text_fragData0 = "s367:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwppbiBoaWdocCB2ZWM0IGZyYWdtZW50Q29sb3I7CmluIGhpZ2hwIHZlYzIgdGV4Q29vcmQ7Cgp2b2lkIG1haW4oKQp7CiAgICBGcmFnQ29sb3IgPSB2ZWM0KGZyYWdtZW50Q29sb3IueHl6LCB0ZXh0dXJlKHRleCwgdGV4Q29vcmQpLnggKiBmcmFnbWVudENvbG9yLncpOwp9Cgo";
-kha_Shaders.painter_text_vertData0 = "s402:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHRleFBvc2l0aW9uOwpvdXQgdmVjNCBmcmFnbWVudENvbG9yOwppbiB2ZWM0IHZlcnRleENvbG9yOwoKdm9pZCBtYWluKCkKewogICAgZ2xfUG9zaXRpb24gPSBwcm9qZWN0aW9uTWF0cml4ICogdmVjNCh2ZXJ0ZXhQb3NpdGlvbiwgMS4wKTsKICAgIHRleENvb3JkID0gdGV4UG9zaXRpb247CiAgICBmcmFnbWVudENvbG9yID0gdmVydGV4Q29sb3I7Cn0KCg";
+kha_Shaders.painter_text_vertData0 = "s394:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHZlcnRleFVWOwpvdXQgdmVjNCBmcmFnbWVudENvbG9yOwppbiB2ZWM0IHZlcnRleENvbG9yOwoKdm9pZCBtYWluKCkKewogICAgZ2xfUG9zaXRpb24gPSBwcm9qZWN0aW9uTWF0cml4ICogdmVjNCh2ZXJ0ZXhQb3NpdGlvbiwgMS4wKTsKICAgIHRleENvb3JkID0gdmVydGV4VVY7CiAgICBmcmFnbWVudENvbG9yID0gdmVydGV4Q29sb3I7Cn0KCg";
 kha_Shaders.painter_video_fragData0 = "s487:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKaW4gaGlnaHAgdmVjNCBjb2xvcjsKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjNCB0ZXhjb2xvciA9IHRleHR1cmUodGV4LCB0ZXhDb29yZCkgKiBjb2xvcjsKICAgIGhpZ2hwIHZlYzMgXzMyID0gdGV4Y29sb3IueHl6ICogY29sb3IudzsKICAgIHRleGNvbG9yID0gdmVjNChfMzIueCwgXzMyLnksIF8zMi56LCB0ZXhjb2xvci53KTsKICAgIEZyYWdDb2xvciA9IHRleGNvbG9yOwp9Cgo";
-kha_Shaders.painter_video_vertData0 = "s380:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHRleFBvc2l0aW9uOwpvdXQgdmVjNCBjb2xvcjsKaW4gdmVjNCB2ZXJ0ZXhDb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIGdsX1Bvc2l0aW9uID0gcHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb24sIDEuMCk7CiAgICB0ZXhDb29yZCA9IHRleFBvc2l0aW9uOwogICAgY29sb3IgPSB2ZXJ0ZXhDb2xvcjsKfQoK";
+kha_Shaders.painter_video_vertData0 = "s372:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHZlcnRleFVWOwpvdXQgdmVjNCBjb2xvcjsKaW4gdmVjNCB2ZXJ0ZXhDb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIGdsX1Bvc2l0aW9uID0gcHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb24sIDEuMCk7CiAgICB0ZXhDb29yZCA9IHZlcnRleFVWOwogICAgY29sb3IgPSB2ZXJ0ZXhDb2xvcjsKfQoK";
 kha_Shaders.pass_copy_fragData0 = "s279:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKb3V0IGhpZ2hwIHZlYzQgZnJhZ0NvbG9yOwppbiBoaWdocCB2ZWMyIHRleENvb3JkOwoKdm9pZCBtYWluKCkKewogICAgZnJhZ0NvbG9yID0gdGV4dHVyZUxvZCh0ZXgsIHRleENvb3JkLCAwLjApOwp9Cgo";
 kha_Shaders.pass_vertData0 = "s203:I3ZlcnNpb24gMzAwIGVzCgpvdXQgdmVjMiB0ZXhDb29yZDsKaW4gdmVjMiBwb3M7Cgp2b2lkIG1haW4oKQp7CiAgICB0ZXhDb29yZCA9IChwb3MgKiB2ZWMyKDAuNSkpICsgdmVjMigwLjUpOwogICAgZ2xfUG9zaXRpb24gPSB2ZWM0KHBvcywgMC4wLCAxLjApOwp9Cgo";
 kha_Shaders.pass_viewray2_vertData0 = "s400:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgaW52UDsKCm91dCB2ZWMyIHRleENvb3JkOwppbiB2ZWMyIHBvczsKb3V0IHZlYzMgdmlld1JheTsKCnZvaWQgbWFpbigpCnsKICAgIHRleENvb3JkID0gKHBvcyAqIHZlYzIoMC41KSkgKyB2ZWMyKDAuNSk7CiAgICBnbF9Qb3NpdGlvbiA9IHZlYzQocG9zLCAwLjAsIDEuMCk7CiAgICB2ZWM0IHYgPSB2ZWM0KHBvcy54LCBwb3MueSwgMS4wLCAxLjApOwogICAgdiA9IHZlYzQoaW52UCAqIHYpOwogICAgdmlld1JheSA9IHZlYzModi54eSAvIHZlYzIodi56KSwgMS4wKTsKfQoK";
@@ -43163,6 +43297,7 @@ kha_internal_HdrFormat.exposurePattern = new EReg("EXPOSURE=\\s*([0-9]*[.][0-9]*
 kha_internal_HdrFormat.formatPattern = new EReg("FORMAT=32-bit_rle_rgbe","i");
 kha_internal_HdrFormat.widthHeightPattern = new EReg("-Y ([0-9]+) \\+X ([0-9]+)","i");
 kha_js_Sound.loading = [];
+kha_js_graphics4_Graphics.useVertexAttributes = 0;
 kha_netsync_ControllerBuilder.nextId = 0;
 zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -14079703, WINDOW_TINT_COL : -1, ACCENT_COL : -13027015, ACCENT_HOVER_COL : -12369085, ACCENT_SELECT_COL : -11513776, BUTTON_COL : -13092808, BUTTON_TEXT_COL : -1513499, BUTTON_HOVER_COL : -11974327, BUTTON_PRESSED_COL : -15000805, TEXT_COL : -1513499, LABEL_COL : -3618616, SEPARATOR_COL : -14671840, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -14540254, PANEL_BG_COL : -12895429, FONT_SIZE : 13, ELEMENT_W : 100, ELEMENT_H : 24, ELEMENT_OFFSET : 4, ARROW_SIZE : 5, BUTTON_H : 22, CHECK_SIZE : 15, CHECK_SELECT_SIZE : 8, SCROLL_W : 9, TEXT_OFFSET : 8, TAB_W : 6, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0, FULL_TABS : false};
 zui_Zui.alwaysRedrawWindow = true;

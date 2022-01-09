@@ -274,102 +274,8 @@ iron_Trait.prototype = {
 		this._lateUpdate.push(f);
 		iron_App.notifyOnLateUpdate(f);
 	}
-	,notifyOnRender2D: function(f) {
-		if(this._render2D == null) {
-			this._render2D = [];
-		}
-		this._render2D.push(f);
-		iron_App.notifyOnRender2D(f);
-	}
 	,__class__: iron_Trait
 };
-var arm_VirtualGamepad = function() {
-	this.rightLocked = false;
-	this.leftLocked = false;
-	this.rightStickY = 0;
-	this.rightStickX = 0;
-	this.leftStickY = 0;
-	this.leftStickX = 0;
-	this.rightPadY = 0;
-	this.rightPadX = 0;
-	this.leftPadY = 0;
-	this.leftPadX = 0;
-	this.colorB = -3200189;
-	this.colorA = -7829368;
-	this.sizeRatio = 2.2;
-	this.offset = 45;
-	this.radius = 100;
-	this.gamepad = 0;
-	var _gthis = this;
-	iron_Trait.call(this);
-	this.notifyOnInit(function() {
-		_gthis.gamepad_ = iron_system_Input.getGamepad(_gthis.gamepad);
-		_gthis.notifyOnUpdate($bind(_gthis,_gthis.update));
-		_gthis.notifyOnRender2D($bind(_gthis,_gthis.render2D));
-	});
-};
-$hxClasses["arm.VirtualGamepad"] = arm_VirtualGamepad;
-arm_VirtualGamepad.__name__ = true;
-arm_VirtualGamepad.__super__ = iron_Trait;
-arm_VirtualGamepad.prototype = $extend(iron_Trait.prototype,{
-	update: function() {
-		var r = this.radius;
-		var o = this.offset;
-		this.leftPadX = r + o;
-		this.rightPadX = kha_System.windowWidth() - r - o;
-		this.leftPadY = this.rightPadY = kha_System.windowHeight() - r - o;
-		var mouse = iron_system_Input.getMouse();
-		if(mouse.started()) {
-			var vx = mouse.x - this.leftPadX;
-			var vy = mouse.y - this.leftPadY;
-			this.leftLocked = Math.sqrt(vx * vx + vy * vy) <= r;
-		} else if(mouse.released()) {
-			this.leftLocked = false;
-		}
-		if(this.leftLocked) {
-			this.leftStickX = mouse.x - this.leftPadX | 0;
-			this.leftStickY = mouse.y - this.leftPadY | 0;
-			if(Math.sqrt(this.leftStickX * this.leftStickX + this.leftStickY * this.leftStickY) > r) {
-				this.leftStickX = r * (this.leftStickX / Math.sqrt(this.leftStickX * this.leftStickX + this.leftStickY * this.leftStickY)) | 0;
-				this.leftStickY = r * (this.leftStickY / Math.sqrt(this.leftStickX * this.leftStickX + this.leftStickY * this.leftStickY)) | 0;
-			}
-		} else {
-			this.leftStickX = this.leftStickY = 0;
-		}
-		if(mouse.started()) {
-			var vx = mouse.x - this.rightPadX;
-			var vy = mouse.y - this.rightPadY;
-			this.rightLocked = Math.sqrt(vx * vx + vy * vy) <= r;
-		} else if(mouse.released()) {
-			this.rightLocked = false;
-		}
-		if(this.rightLocked) {
-			this.rightStickX = mouse.x - this.rightPadX | 0;
-			this.rightStickY = mouse.y - this.rightPadY | 0;
-			if(Math.sqrt(this.rightStickX * this.rightStickX + this.rightStickY * this.rightStickY) > r) {
-				this.rightStickX = r * (this.rightStickX / Math.sqrt(this.rightStickX * this.rightStickX + this.rightStickY * this.rightStickY)) | 0;
-				this.rightStickY = r * (this.rightStickY / Math.sqrt(this.rightStickX * this.rightStickX + this.rightStickY * this.rightStickY)) | 0;
-			}
-		} else {
-			this.rightStickX = this.rightStickY = 0;
-		}
-		this.gamepad_.axisListener(0,this.leftStickX / r);
-		this.gamepad_.axisListener(1,this.leftStickY / r);
-		this.gamepad_.axisListener(2,this.rightStickY / r);
-		this.gamepad_.axisListener(3,this.rightStickX / r);
-	}
-	,render2D: function(g) {
-		var r = this.radius;
-		var r2 = r / this.sizeRatio | 0;
-		g.set_color(this.colorA);
-		kha_graphics2_GraphicsExtension.fillCircle(g,this.leftPadX,this.leftPadY,r);
-		kha_graphics2_GraphicsExtension.fillCircle(g,this.rightPadX,this.rightPadY,r);
-		g.set_color(this.colorB);
-		kha_graphics2_GraphicsExtension.fillCircle(g,this.leftPadX + this.leftStickX,this.leftPadY + this.leftStickY,r2);
-		kha_graphics2_GraphicsExtension.fillCircle(g,this.rightPadX + this.rightStickX,this.rightPadY + this.rightStickY,r2);
-	}
-	,__class__: arm_VirtualGamepad
-});
 var armory_logicnode_LogicTree = function() {
 	iron_Trait.call(this);
 };
@@ -390,14 +296,15 @@ arm_node_NodeTree.__name__ = true;
 arm_node_NodeTree.__super__ = armory_logicnode_LogicTree;
 arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 	add: function() {
-		var _SetObjectLocation_001 = new armory_logicnode_SetLocationNode(this);
-		_SetObjectLocation_001.inputs.length = 4;
-		_SetObjectLocation_001.outputs.length = 1;
+		var _SetObjectRotation = new armory_logicnode_SetRotationNode(this);
+		_SetObjectRotation.property0 = "Euler Angles";
+		_SetObjectRotation.inputs.length = 3;
+		_SetObjectRotation.outputs.length = 1;
 		var _g = 0;
-		var _g1 = _SetObjectLocation_001.outputs.length;
+		var _g1 = _SetObjectRotation.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_SetObjectLocation_001.outputs[i] = [];
+			_SetObjectRotation.outputs[i] = [];
 		}
 		var _OnUpdate_001 = new armory_logicnode_OnUpdateNode(this);
 		_OnUpdate_001.property0 = "Update";
@@ -409,8 +316,8 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 			var i = _g++;
 			_OnUpdate_001.outputs[i] = [];
 		}
-		armory_logicnode_LogicNode.addLink(_OnUpdate_001,_SetObjectLocation_001,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectLocation_001,0,1);
+		armory_logicnode_LogicNode.addLink(_OnUpdate_001,_SetObjectRotation,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectRotation,0,1);
 		var _GamepadCoords_001 = new armory_logicnode_GamepadCoordsNode(this);
 		_GamepadCoords_001.inputs.length = 1;
 		_GamepadCoords_001.outputs.length = 6;
@@ -425,52 +332,111 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,new armory_logicnode_VectorNode(this,0.0,0.0,0.0),3,0);
 		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,new armory_logicnode_FloatNode(this,0.0),4,0);
 		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,new armory_logicnode_FloatNode(this,0.0),5,0);
-		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,_SetObjectLocation_001,0,2);
+		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,_SetObjectRotation,1,2);
+		armory_logicnode_LogicNode.addLink(_SetObjectRotation,new armory_logicnode_NullNode(this),0,0);
+		var _Vector = new armory_logicnode_VectorNode(this);
+		_Vector.inputs.length = 3;
+		_Vector.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _Vector.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_Vector.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,1);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,2);
+		armory_logicnode_LogicNode.addLink(_Vector,new armory_logicnode_VectorNode(this,0.0,0.0,0.0),0,0);
+		var _SeparateXYZ = new armory_logicnode_SeparateVectorNode(this);
+		_SeparateXYZ.inputs.length = 1;
+		_SeparateXYZ.outputs.length = 3;
+		var _g = 0;
+		var _g1 = _SeparateXYZ.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_SeparateXYZ.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_SeparateXYZ,0,0);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ,new armory_logicnode_FloatNode(this,0.0),0,0);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ,new armory_logicnode_FloatNode(this,0.0),1,0);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ,new armory_logicnode_FloatNode(this,0.0),2,0);
+		var _Vector_001 = new armory_logicnode_VectorNode(this);
+		_Vector_001.inputs.length = 3;
+		_Vector_001.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _Vector_001.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_Vector_001.outputs[i] = [];
+		}
+		var _Math = new armory_logicnode_MathNode(this);
+		_Math.property0 = "Multiply";
+		_Math.property1 = false;
+		_Math.inputs.length = 2;
+		_Math.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _Math.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_Math.outputs[i] = [];
+		}
+		var _SeparateXYZ_001 = new armory_logicnode_SeparateVectorNode(this);
+		_SeparateXYZ_001.inputs.length = 1;
+		_SeparateXYZ_001.outputs.length = 3;
+		var _g = 0;
+		var _g1 = _SeparateXYZ_001.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_SeparateXYZ_001.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_SeparateXYZ_001,0,0);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ_001,new armory_logicnode_FloatNode(this,0.0),2,0);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ_001,_Math,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,-1.0),_Math,0,1);
+		armory_logicnode_LogicNode.addLink(_Math,_Vector_001,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector_001,0,1);
+		armory_logicnode_LogicNode.addLink(_SeparateXYZ_001,_Vector_001,1,2);
+		armory_logicnode_LogicNode.addLink(_Vector_001,new armory_logicnode_VectorNode(this,0.0,0.0,0.0),0,0);
+		var _Print = new armory_logicnode_PrintNode(this);
+		_Print.inputs.length = 2;
+		_Print.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _Print.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_Print.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_NullNode(this),_Print,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_StringNode(this,""),_Print,0,1);
+		armory_logicnode_LogicNode.addLink(_Print,new armory_logicnode_NullNode(this),0,0);
+		var _SetObjectLocation = new armory_logicnode_SetLocationNode(this);
+		_SetObjectLocation.inputs.length = 4;
+		_SetObjectLocation.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _SetObjectLocation.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_SetObjectLocation.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(_OnUpdate_001,_SetObjectLocation,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectLocation,0,1);
+		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,_SetObjectLocation,0,2);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_BooleanNode(this,false),_SetObjectLocation,0,3);
+		armory_logicnode_LogicNode.addLink(_SetObjectLocation,new armory_logicnode_NullNode(this),0,0);
+		var _SetObjectLocation_001 = new armory_logicnode_SetLocationNode(this);
+		_SetObjectLocation_001.inputs.length = 4;
+		_SetObjectLocation_001.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _SetObjectLocation_001.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_SetObjectLocation_001.outputs[i] = [];
+		}
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_NullNode(this),_SetObjectLocation_001,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectLocation_001,0,1);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_SetObjectLocation_001,0,2);
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_BooleanNode(this,false),_SetObjectLocation_001,0,3);
 		armory_logicnode_LogicNode.addLink(_SetObjectLocation_001,new armory_logicnode_NullNode(this),0,0);
-		var _SetObjectRotation = new armory_logicnode_SetRotationNode(this);
-		_SetObjectRotation.property0 = "Euler Angles";
-		_SetObjectRotation.inputs.length = 4;
-		_SetObjectRotation.outputs.length = 1;
-		var _g = 0;
-		var _g1 = _SetObjectRotation.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_SetObjectRotation.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(_OnUpdate_001,_SetObjectRotation,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectRotation,0,1);
-		armory_logicnode_LogicNode.addLink(_GamepadCoords_001,_SetObjectRotation,1,2);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_SetObjectRotation,0,3);
-		armory_logicnode_LogicNode.addLink(_SetObjectRotation,new armory_logicnode_NullNode(this),0,0);
-		var _RotateObject = new armory_logicnode_RotateObjectNode(this);
-		_RotateObject.property0 = "Local";
-		_RotateObject.inputs.length = 3;
-		_RotateObject.outputs.length = 1;
-		var _g = 0;
-		var _g1 = _RotateObject.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_RotateObject.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_NullNode(this),_RotateObject,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_RotateObject,0,1);
-		var _Rotation = new armory_logicnode_RotationNode(this);
-		_Rotation.property0 = "EulerAngles";
-		_Rotation.property1 = "Rad";
-		_Rotation.property2 = "XYZ";
-		_Rotation.inputs.length = 2;
-		_Rotation.outputs.length = 1;
-		var _g = 0;
-		var _g1 = _Rotation.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_Rotation.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_Rotation,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Rotation,0,1);
-		armory_logicnode_LogicNode.addLink(_Rotation,_RotateObject,0,2);
-		armory_logicnode_LogicNode.addLink(_RotateObject,new armory_logicnode_NullNode(this),0,0);
 	}
 	,__class__: arm_node_NodeTree
 });
@@ -662,6 +628,166 @@ armory_logicnode_LogicNodeLink.__name__ = true;
 armory_logicnode_LogicNodeLink.prototype = {
 	__class__: armory_logicnode_LogicNodeLink
 };
+var armory_logicnode_MathNode = function(tree) {
+	armory_logicnode_LogicNode.call(this,tree);
+};
+$hxClasses["armory.logicnode.MathNode"] = armory_logicnode_MathNode;
+armory_logicnode_MathNode.__name__ = true;
+armory_logicnode_MathNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_MathNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	get: function(from) {
+		var r = 0.0;
+		switch(this.property0) {
+		case "Abs":
+			var _this = this.inputs[0];
+			r = Math.abs(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Add":
+			var _g = 0;
+			var _g1 = this.inputs;
+			while(_g < _g1.length) {
+				var inp = _g1[_g];
+				++_g;
+				r += inp.fromNode.get(inp.fromIndex);
+			}
+			break;
+		case "Arccosine":
+			var _this = this.inputs[0];
+			r = Math.acos(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Arcsine":
+			var _this = this.inputs[0];
+			r = Math.asin(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Arctan2":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = Math.atan2(r1,_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Arctangent":
+			var _this = this.inputs[0];
+			r = Math.atan(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Ceil":
+			var _this = this.inputs[0];
+			r = Math.ceil(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Cosine":
+			var _this = this.inputs[0];
+			r = Math.cos(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Divide":
+			var _this = this.inputs[0];
+			r = _this.fromNode.get(_this.fromIndex);
+			var i = 1;
+			while(i < this.inputs.length) {
+				var _this = this.inputs[i];
+				r /= _this.fromNode.get(_this.fromIndex);
+				++i;
+			}
+			break;
+		case "Exp":
+			var _this = this.inputs[0];
+			r = Math.exp(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Floor":
+			var _this = this.inputs[0];
+			r = Math.floor(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Fract":
+			var _this = this.inputs[0];
+			var v = _this.fromNode.get(_this.fromIndex);
+			r = v - (v | 0);
+			break;
+		case "Greater Than":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = r1 > _this.fromNode.get(_this.fromIndex) ? 1.0 : 0.0;
+			break;
+		case "Less Than":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = r1 < _this.fromNode.get(_this.fromIndex) ? 1.0 : 0.0;
+			break;
+		case "Logarithm":
+			var _this = this.inputs[0];
+			r = Math.log(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Max":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = Math.max(r1,_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Min":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = Math.min(r1,_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Modulo":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = r1 % _this.fromNode.get(_this.fromIndex);
+			break;
+		case "Multiply":
+			var _this = this.inputs[0];
+			r = _this.fromNode.get(_this.fromIndex);
+			var i = 1;
+			while(i < this.inputs.length) {
+				var _this = this.inputs[i];
+				r *= _this.fromNode.get(_this.fromIndex);
+				++i;
+			}
+			break;
+		case "Power":
+			var _this = this.inputs[0];
+			var r1 = _this.fromNode.get(_this.fromIndex);
+			var _this = this.inputs[1];
+			r = Math.pow(r1,_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Round":
+			var _this = this.inputs[0];
+			r = Math.round(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Sine":
+			var _this = this.inputs[0];
+			r = Math.sin(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Square Root":
+			var _this = this.inputs[0];
+			r = Math.sqrt(_this.fromNode.get(_this.fromIndex));
+			break;
+		case "Subtract":
+			var _this = this.inputs[0];
+			r = _this.fromNode.get(_this.fromIndex);
+			var i = 1;
+			while(i < this.inputs.length) {
+				var _this = this.inputs[i];
+				r -= _this.fromNode.get(_this.fromIndex);
+				++i;
+			}
+			break;
+		case "Tangent":
+			var _this = this.inputs[0];
+			r = Math.tan(_this.fromNode.get(_this.fromIndex));
+			break;
+		}
+		if(this.property1) {
+			if(r < 0.0) {
+				r = 0.0;
+			} else if(r > 1.0) {
+				r = 1.0;
+			}
+		}
+		return r;
+	}
+	,__class__: armory_logicnode_MathNode
+});
 var armory_logicnode_NullNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
 };
@@ -718,336 +844,43 @@ armory_logicnode_OnUpdateNode.prototype = $extend(armory_logicnode_LogicNode.pro
 	}
 	,__class__: armory_logicnode_OnUpdateNode
 });
-var armory_logicnode_RotateObjectNode = function(tree) {
-	this.property0 = "Local";
+var armory_logicnode_PrintNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
 };
-$hxClasses["armory.logicnode.RotateObjectNode"] = armory_logicnode_RotateObjectNode;
-armory_logicnode_RotateObjectNode.__name__ = true;
-armory_logicnode_RotateObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotateObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+$hxClasses["armory.logicnode.PrintNode"] = armory_logicnode_PrintNode;
+armory_logicnode_PrintNode.__name__ = true;
+armory_logicnode_PrintNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_PrintNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
 	run: function(from) {
 		var _this = this.inputs[1];
-		var object = _this.fromNode.get(_this.fromIndex);
-		var _this = this.inputs[2];
-		var q = _this.fromNode.get(_this.fromIndex);
-		if(object == null || q == null) {
-			return;
-		}
-		var l = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-		if(l == 0.0) {
-			q.x = 0;
-			q.y = 0;
-			q.z = 0;
-			q.w = 0;
-		} else {
-			l = 1.0 / l;
-			q.x *= l;
-			q.y *= l;
-			q.z *= l;
-			q.w *= l;
-		}
-		switch(this.property0) {
-		case "Global":
-			var _this = object.transform.rot;
-			var q2 = object.transform.rot;
-			var q1x = q.x;
-			var q1y = q.y;
-			var q1z = q.z;
-			var q1w = q.w;
-			var q2x = q2.x;
-			var q2y = q2.y;
-			var q2z = q2.z;
-			var q2w = q2.w;
-			_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-			_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-			_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-			_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-			break;
-		case "Local":
-			var _this = object.transform.rot;
-			var q1x = _this.x;
-			var q1y = _this.y;
-			var q1z = _this.z;
-			var q1w = _this.w;
-			var q2x = q.x;
-			var q2y = q.y;
-			var q2z = q.z;
-			var q2w = q.w;
-			_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-			_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-			_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-			_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-			break;
-		}
-		object.transform.buildMatrix();
+		var value = _this.fromNode.get(_this.fromIndex);
+		haxe_Log.trace(value,{ fileName : "Sources/armory/logicnode/PrintNode.hx", lineNumber : 15, className : "armory.logicnode.PrintNode", methodName : "run"});
 		this.runOutput(0);
 	}
-	,__class__: armory_logicnode_RotateObjectNode
+	,__class__: armory_logicnode_PrintNode
 });
-var armory_logicnode_RotationNode = function(tree,x,y,z,w) {
-	this.input_length = 0;
+var armory_logicnode_SeparateVectorNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
-	this.value = new iron_math_Quat();
-	if(x != null) {
-		var _this = this.value;
-		_this.x = x;
-		_this.y = y;
-		_this.z = z;
-		_this.w = w;
-	}
-	var _g = 0;
-	var _g1 = this.inputs;
-	while(_g < _g1.length) {
-		var input = _g1[_g];
-		++_g;
-		if(input != null) {
-			this.input_length += 1;
-		} else {
-			break;
-		}
-	}
 };
-$hxClasses["armory.logicnode.RotationNode"] = armory_logicnode_RotationNode;
-armory_logicnode_RotationNode.__name__ = true;
-armory_logicnode_RotationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+$hxClasses["armory.logicnode.SeparateVectorNode"] = armory_logicnode_SeparateVectorNode;
+armory_logicnode_SeparateVectorNode.__name__ = true;
+armory_logicnode_SeparateVectorNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_SeparateVectorNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
 	get: function(from) {
-		if(this.inputs.length == 0) {
-			return this.value;
+		var _this = this.inputs[0];
+		var vector = _this.fromNode.get(_this.fromIndex);
+		if(vector == null) {
+			return 0.0;
 		}
-		switch(this.property0) {
-		case "AxisAngle":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vec = _this.fromNode.get(_this.fromIndex);
-				var _this = this.inputs[1];
-				var angle = _this.fromNode.get(_this.fromIndex);
-				if(this.property1 == "Deg") {
-					angle *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var s = Math.sin(angle * 0.5);
-				_this.x = vec.x * s;
-				_this.y = vec.y * s;
-				_this.z = vec.z * s;
-				_this.w = Math.cos(angle * 0.5);
-				var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
-				if(l == 0.0) {
-					_this.x = 0;
-					_this.y = 0;
-					_this.z = 0;
-					_this.w = 0;
-				} else {
-					l = 1.0 / l;
-					_this.x *= l;
-					_this.y *= l;
-					_this.z *= l;
-					_this.w *= l;
-				}
-			}
-			break;
-		case "EulerAngles":
-			if(this.inputs[0] != null) {
-				var vec_x = 0.0;
-				var vec_y = 0.0;
-				var vec_z = 0.0;
-				var vec_w = 1.0;
-				var _this = this.inputs[0];
-				var v = _this.fromNode.get(_this.fromIndex);
-				vec_x = v.x;
-				vec_y = v.y;
-				vec_z = v.z;
-				vec_w = v.w;
-				if(this.property1 == "Deg") {
-					vec_x *= 0.017453292519943295;
-					vec_y *= 0.017453292519943295;
-					vec_z *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var order = this.property2;
-				var c1 = Math.cos(vec_x / 2);
-				var c2 = Math.cos(vec_y / 2);
-				var c3 = Math.cos(vec_z / 2);
-				var s1 = Math.sin(vec_x / 2);
-				var s2 = Math.sin(vec_y / 2);
-				var s3 = Math.sin(vec_z / 2);
-				var x = s1;
-				var y = 0;
-				var z = 0;
-				var w = c1;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qx_x = x;
-				var qx_y = y;
-				var qx_z = z;
-				var qx_w = w;
-				var x = 0;
-				var y = s2;
-				var z = 0;
-				var w = c2;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qy_x = x;
-				var qy_y = y;
-				var qy_z = z;
-				var qy_w = w;
-				var x = 0;
-				var y = 0;
-				var z = s3;
-				var w = c3;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qz_x = x;
-				var qz_y = y;
-				var qz_z = z;
-				var qz_w = w;
-				if(order.charAt(2) == "X") {
-					_this.x = qx_x;
-					_this.y = qx_y;
-					_this.z = qx_z;
-					_this.w = qx_w;
-				} else if(order.charAt(2) == "Y") {
-					_this.x = qy_x;
-					_this.y = qy_y;
-					_this.z = qy_z;
-					_this.w = qy_w;
-				} else {
-					_this.x = qz_x;
-					_this.y = qz_y;
-					_this.z = qz_z;
-					_this.w = qz_w;
-				}
-				if(order.charAt(1) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(1) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-				if(order.charAt(0) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(0) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-			}
-			break;
-		case "Quaternion":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vect = _this.fromNode.get(_this.fromIndex);
-				this.value.x = vect.x;
-				this.value.y = vect.y;
-				this.value.z = vect.z;
-				var _this = this.inputs[1];
-				var tmp = _this.fromNode.get(_this.fromIndex);
-				this.value.w = tmp;
-			}
-			break;
-		default:
-			return this.property0;
+		if(from == 0) {
+			return vector.x;
+		} else if(from == 1) {
+			return vector.y;
+		} else {
+			return vector.z;
 		}
-		return this.value;
 	}
-	,__class__: armory_logicnode_RotationNode
+	,__class__: armory_logicnode_SeparateVectorNode
 });
 var armory_logicnode_SetLocationNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
@@ -1216,6 +1049,26 @@ armory_logicnode_SetRotationNode.prototype = $extend(armory_logicnode_LogicNode.
 		this.runOutput(0);
 	}
 	,__class__: armory_logicnode_SetRotationNode
+});
+var armory_logicnode_StringNode = function(tree,value) {
+	if(value == null) {
+		value = "";
+	}
+	armory_logicnode_LogicNode.call(this,tree);
+	this.value = value;
+};
+$hxClasses["armory.logicnode.StringNode"] = armory_logicnode_StringNode;
+armory_logicnode_StringNode.__name__ = true;
+armory_logicnode_StringNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_StringNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	get: function(from) {
+		if(this.inputs.length > 0) {
+			var _this = this.inputs[0];
+			return _this.fromNode.get(_this.fromIndex);
+		}
+		return this.value;
+	}
+	,__class__: armory_logicnode_StringNode
 });
 var armory_logicnode_VectorNode = function(tree,x,y,z) {
 	this.value = new iron_math_Vec4();
@@ -2154,7 +2007,7 @@ armory_system_Starter.main = function(scene,mode,resize,min,max,w,h,msaa,vsync,g
 			windowFeatures |= 2;
 		}
 		try {
-			kha_System.start(new kha_SystemOptions("gamepad",c.window_w,c.window_h,new kha_WindowOptions(null,-1,-1,800,600,-1,true,windowFeatures,windowMode),new kha_FramebufferOptions(60,c.window_vsync,32,16,8,c.window_msaa)),function($window) {
+			kha_System.start(new kha_SystemOptions("logic_gamepad",c.window_w,c.window_h,new kha_WindowOptions(null,-1,-1,800,600,-1,true,windowFeatures,windowMode),new kha_FramebufferOptions(60,c.window_vsync,32,16,8,c.window_msaa)),function($window) {
 				iron_App.init(function() {
 					iron_Scene.setActive(scene,function(object) {
 						iron_RenderPath.setActive(getRenderPath());
@@ -3624,9 +3477,6 @@ iron_App.removeLateUpdate = function(f) {
 iron_App.removeRender = function(f) {
 	HxOverrides.remove(iron_App.traitRenders,f);
 };
-iron_App.notifyOnRender2D = function(f) {
-	iron_App.traitRenders2D.push(f);
-};
 iron_App.removeRender2D = function(f) {
 	HxOverrides.remove(iron_App.traitRenders2D,f);
 };
@@ -4406,10 +4256,9 @@ iron_Scene.setActive = function(sceneName,done) {
 		return;
 	}
 	iron_Scene.framePassed = false;
-	var removeWorldShader = null;
 	if(iron_Scene.active != null) {
 		if(iron_Scene.active.raw.world_ref != null) {
-			removeWorldShader = "shader_datas/World_" + iron_Scene.active.raw.world_ref + "/World_" + iron_Scene.active.raw.world_ref;
+			iron_RenderPath.active.unloadShader("shader_datas/World_" + iron_Scene.active.raw.world_ref + "/World_" + iron_Scene.active.raw.world_ref);
 		}
 		iron_Scene.active.remove();
 	}
@@ -4417,9 +4266,6 @@ iron_Scene.setActive = function(sceneName,done) {
 		iron_Scene.create(format,function(o) {
 			if(done != null) {
 				done(o);
-			}
-			if(removeWorldShader != null) {
-				iron_RenderPath.active.unloadShader(removeWorldShader);
 			}
 			if(format.world_ref != null) {
 				iron_RenderPath.active.loadShader("shader_datas/World_" + format.world_ref + "/World_" + format.world_ref);
@@ -4593,7 +4439,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 859, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 848, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -5000,14 +4846,12 @@ iron_Scene.prototype = {
 							var group = _g1[_g];
 							++_g;
 							if(group.name == groupRef) {
-								spawnedObject.transform.applyParent();
 								spawnedObject.transform.translate(-group.instance_offset.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),-group.instance_offset.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN),-group.instance_offset.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN));
 								break;
 							}
 						}
 					}
 					if((spawned += 1) == object_refs.length) {
-						groupOwner.transform.reset();
 						done();
 					}
 				});
@@ -9984,15 +9828,6 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 		if(iron_Scene.active != null) {
 			HxOverrides.remove(iron_Scene.active.lights,this);
 		}
-		var rp = iron_RenderPath.active;
-		if(rp.light == this) {
-			rp.light = null;
-		}
-		if(rp.point == this) {
-			rp.point = null;
-		} else if(rp.sun == this) {
-			rp.sun = null;
-		}
 		iron_object_Object.prototype.remove.call(this);
 	}
 	,buildMatrix: function(camera) {
@@ -11676,8 +11511,9 @@ iron_object_Particle.prototype = {
 	__class__: iron_object_Particle
 };
 var iron_object_SpeakerObject = function(data) {
-	this.channels = [];
 	this.paused = false;
+	this.channels = [];
+	this.sound = null;
 	var _gthis = this;
 	iron_object_Object.call(this);
 	this.data = data;
@@ -11797,13 +11633,13 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 		var vz = loc1_z - loc2_z;
 		var d = Math.sqrt(vx * vx + vy * vy + vz * vz);
 		d *= this.data.attenuation;
-		this.volume = (1.0 - Math.min(d / 100,1)) * this.data.volume;
+		var vol = 1.0 - Math.min(d / 100,1);
 		var _g = 0;
 		var _g1 = this.channels;
 		while(_g < _g1.length) {
 			var c = _g1[_g];
 			++_g;
-			c.set_volume(this.volume);
+			c.set_volume(vol * this.data.volume);
 		}
 	}
 	,remove: function() {
@@ -11812,7 +11648,6 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 			HxOverrides.remove(iron_Scene.active.speakers,this);
 		}
 		iron_object_Object.prototype.remove.call(this);
-		iron_App.removeUpdate($bind(this,this.update));
 	}
 	,__class__: iron_object_SpeakerObject
 });
@@ -12533,62 +12368,6 @@ iron_object_Transform.prototype = {
 		this.decompose();
 		this.buildMatrix();
 	}
-	,applyParent: function() {
-		var pt = this.object.parent.transform;
-		pt.buildMatrix();
-		var _this = this.local;
-		var m = pt.world;
-		var a00 = _this.self._00;
-		var a01 = _this.self._01;
-		var a02 = _this.self._02;
-		var a03 = _this.self._03;
-		var a10 = _this.self._10;
-		var a11 = _this.self._11;
-		var a12 = _this.self._12;
-		var a13 = _this.self._13;
-		var a20 = _this.self._20;
-		var a21 = _this.self._21;
-		var a22 = _this.self._22;
-		var a23 = _this.self._23;
-		var a30 = _this.self._30;
-		var a31 = _this.self._31;
-		var a32 = _this.self._32;
-		var a33 = _this.self._33;
-		var b0 = m.self._00;
-		var b1 = m.self._10;
-		var b2 = m.self._20;
-		var b3 = m.self._30;
-		_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._01;
-		b1 = m.self._11;
-		b2 = m.self._21;
-		b3 = m.self._31;
-		_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._02;
-		b1 = m.self._12;
-		b2 = m.self._22;
-		b3 = m.self._32;
-		_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._03;
-		b1 = m.self._13;
-		b2 = m.self._23;
-		b3 = m.self._33;
-		_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		this.decompose();
-		this.buildMatrix();
-	}
 	,__class__: iron_object_Transform
 };
 var kha_math_FastMatrix3 = function(_00,_10,_20,_01,_11,_21,_02,_12,_22) {
@@ -12864,157 +12643,11 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 	var light = iron_RenderPath.active.light;
 	if(c.type == "mat4") {
 		var m = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_biasLightViewProjectionMatrix":
-				if(light != null) {
-					var _this = iron_object_Uniforms.helpMat;
-					var m1 = light.VP;
-					_this.self._00 = m1.self._00;
-					_this.self._01 = m1.self._01;
-					_this.self._02 = m1.self._02;
-					_this.self._03 = m1.self._03;
-					_this.self._10 = m1.self._10;
-					_this.self._11 = m1.self._11;
-					_this.self._12 = m1.self._12;
-					_this.self._13 = m1.self._13;
-					_this.self._20 = m1.self._20;
-					_this.self._21 = m1.self._21;
-					_this.self._22 = m1.self._22;
-					_this.self._23 = m1.self._23;
-					_this.self._30 = m1.self._30;
-					_this.self._31 = m1.self._31;
-					_this.self._32 = m1.self._32;
-					_this.self._33 = m1.self._33;
-					var _this = iron_object_Uniforms.helpMat;
-					var m1 = iron_object_Uniforms.biasMat;
-					var a00 = _this.self._00;
-					var a01 = _this.self._01;
-					var a02 = _this.self._02;
-					var a03 = _this.self._03;
-					var a10 = _this.self._10;
-					var a11 = _this.self._11;
-					var a12 = _this.self._12;
-					var a13 = _this.self._13;
-					var a20 = _this.self._20;
-					var a21 = _this.self._21;
-					var a22 = _this.self._22;
-					var a23 = _this.self._23;
-					var a30 = _this.self._30;
-					var a31 = _this.self._31;
-					var a32 = _this.self._32;
-					var a33 = _this.self._33;
-					var b0 = m1.self._00;
-					var b1 = m1.self._10;
-					var b2 = m1.self._20;
-					var b3 = m1.self._30;
-					_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._01;
-					b1 = m1.self._11;
-					b2 = m1.self._21;
-					b3 = m1.self._31;
-					_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._02;
-					b1 = m1.self._12;
-					b2 = m1.self._22;
-					b3 = m1.self._32;
-					_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._03;
-					b1 = m1.self._13;
-					b2 = m1.self._23;
-					b3 = m1.self._33;
-					_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					m = iron_object_Uniforms.helpMat;
-				}
-				break;
-			case "_inverseProjectionMatrix":
+		switch(c.link) {
+		case "_biasLightViewProjectionMatrix":
+			if(light != null) {
 				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = m1.self._00;
-				var a01 = m1.self._01;
-				var a02 = m1.self._02;
-				var a03 = m1.self._03;
-				var a10 = m1.self._10;
-				var a11 = m1.self._11;
-				var a12 = m1.self._12;
-				var a13 = m1.self._13;
-				var a20 = m1.self._20;
-				var a21 = m1.self._21;
-				var a22 = m1.self._22;
-				var a23 = m1.self._23;
-				var a30 = m1.self._30;
-				var a31 = m1.self._31;
-				var a32 = m1.self._32;
-				var a33 = m1.self._33;
-				var b00 = a00 * a11 - a01 * a10;
-				var b01 = a00 * a12 - a02 * a10;
-				var b02 = a00 * a13 - a03 * a10;
-				var b03 = a01 * a12 - a02 * a11;
-				var b04 = a01 * a13 - a03 * a11;
-				var b05 = a02 * a13 - a03 * a12;
-				var b06 = a20 * a31 - a21 * a30;
-				var b07 = a20 * a32 - a22 * a30;
-				var b08 = a20 * a33 - a23 * a30;
-				var b09 = a21 * a32 - a22 * a31;
-				var b10 = a21 * a33 - a23 * a31;
-				var b11 = a22 * a33 - a23 * a32;
-				var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-				if(det == 0.0) {
-					_this.self._00 = 1.0;
-					_this.self._01 = 0.0;
-					_this.self._02 = 0.0;
-					_this.self._03 = 0.0;
-					_this.self._10 = 0.0;
-					_this.self._11 = 1.0;
-					_this.self._12 = 0.0;
-					_this.self._13 = 0.0;
-					_this.self._20 = 0.0;
-					_this.self._21 = 0.0;
-					_this.self._22 = 1.0;
-					_this.self._23 = 0.0;
-					_this.self._30 = 0.0;
-					_this.self._31 = 0.0;
-					_this.self._32 = 0.0;
-					_this.self._33 = 1.0;
-				} else {
-					det = 1.0 / det;
-					_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
-					_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
-					_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
-					_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
-					_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
-					_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
-					_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
-					_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
-					_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
-					_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
-					_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
-					_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
-					_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
-					_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
-					_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
-					_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
-				}
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_inverseViewProjectionMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
+				var m1 = light.VP;
 				_this.self._00 = m1.self._00;
 				_this.self._01 = m1.self._01;
 				_this.self._02 = m1.self._02;
@@ -13032,150 +12665,7 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				_this.self._32 = m1.self._32;
 				_this.self._33 = m1.self._33;
 				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = iron_object_Uniforms.helpMat;
-				var a00 = m1.self._00;
-				var a01 = m1.self._01;
-				var a02 = m1.self._02;
-				var a03 = m1.self._03;
-				var a10 = m1.self._10;
-				var a11 = m1.self._11;
-				var a12 = m1.self._12;
-				var a13 = m1.self._13;
-				var a20 = m1.self._20;
-				var a21 = m1.self._21;
-				var a22 = m1.self._22;
-				var a23 = m1.self._23;
-				var a30 = m1.self._30;
-				var a31 = m1.self._31;
-				var a32 = m1.self._32;
-				var a33 = m1.self._33;
-				var b00 = a00 * a11 - a01 * a10;
-				var b01 = a00 * a12 - a02 * a10;
-				var b02 = a00 * a13 - a03 * a10;
-				var b03 = a01 * a12 - a02 * a11;
-				var b04 = a01 * a13 - a03 * a11;
-				var b05 = a02 * a13 - a03 * a12;
-				var b06 = a20 * a31 - a21 * a30;
-				var b07 = a20 * a32 - a22 * a30;
-				var b08 = a20 * a33 - a23 * a30;
-				var b09 = a21 * a32 - a22 * a31;
-				var b10 = a21 * a33 - a23 * a31;
-				var b11 = a22 * a33 - a23 * a32;
-				var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-				if(det == 0.0) {
-					_this.self._00 = 1.0;
-					_this.self._01 = 0.0;
-					_this.self._02 = 0.0;
-					_this.self._03 = 0.0;
-					_this.self._10 = 0.0;
-					_this.self._11 = 1.0;
-					_this.self._12 = 0.0;
-					_this.self._13 = 0.0;
-					_this.self._20 = 0.0;
-					_this.self._21 = 0.0;
-					_this.self._22 = 1.0;
-					_this.self._23 = 0.0;
-					_this.self._30 = 0.0;
-					_this.self._31 = 0.0;
-					_this.self._32 = 0.0;
-					_this.self._33 = 1.0;
-				} else {
-					det = 1.0 / det;
-					_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
-					_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
-					_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
-					_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
-					_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
-					_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
-					_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
-					_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
-					_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
-					_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
-					_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
-					_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
-					_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
-					_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
-					_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
-					_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
-				}
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_lightViewProjectionMatrix":
-				if(light != null) {
-					m = light.VP;
-				}
-				break;
-			case "_prevViewProjectionMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.prevV;
-				_this.self._00 = m1.self._00;
-				_this.self._01 = m1.self._01;
-				_this.self._02 = m1.self._02;
-				_this.self._03 = m1.self._03;
-				_this.self._10 = m1.self._10;
-				_this.self._11 = m1.self._11;
-				_this.self._12 = m1.self._12;
-				_this.self._13 = m1.self._13;
-				_this.self._20 = m1.self._20;
-				_this.self._21 = m1.self._21;
-				_this.self._22 = m1.self._22;
-				_this.self._23 = m1.self._23;
-				_this.self._30 = m1.self._30;
-				_this.self._31 = m1.self._31;
-				_this.self._32 = m1.self._32;
-				_this.self._33 = m1.self._33;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
+				var m1 = iron_object_Uniforms.biasMat;
 				var a00 = _this.self._00;
 				var a01 = _this.self._01;
 				var a02 = _this.self._02;
@@ -13225,235 +12715,517 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
 				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_projectionMatrix":
-				m = camera.P;
-				break;
-			case "_skydomeMatrix":
-				var tr = camera.transform;
-				var _this = iron_object_Uniforms.helpVec;
-				_this.x = tr.world.self._30;
-				_this.y = tr.world.self._31;
-				_this.z = tr.world.self._32 - 3.5;
-				_this.w = 1.0;
-				var bounds = camera.data.raw.far_plane * 0.95;
-				var _this = iron_object_Uniforms.helpVec2;
-				_this.x = bounds;
-				_this.y = bounds;
-				_this.z = bounds;
-				_this.w = 1.0;
-				var _this = iron_object_Uniforms.helpMat;
-				var loc = iron_object_Uniforms.helpVec;
-				var quat = iron_object_Uniforms.helpQuat;
-				var sc = iron_object_Uniforms.helpVec2;
-				var x = quat.x;
-				var y = quat.y;
-				var z = quat.z;
-				var w = quat.w;
-				var x2 = x + x;
-				var y2 = y + y;
-				var z2 = z + z;
-				var xx = x * x2;
-				var xy = x * y2;
-				var xz = x * z2;
-				var yy = y * y2;
-				var yz = y * z2;
-				var zz = z * z2;
-				var wx = w * x2;
-				var wy = w * y2;
-				var wz = w * z2;
-				_this.self._00 = 1.0 - (yy + zz);
-				_this.self._10 = xy - wz;
-				_this.self._20 = xz + wy;
-				_this.self._01 = xy + wz;
-				_this.self._11 = 1.0 - (xx + zz);
-				_this.self._21 = yz - wx;
-				_this.self._02 = xz - wy;
-				_this.self._12 = yz + wx;
-				_this.self._22 = 1.0 - (xx + yy);
+			}
+			break;
+		case "_inverseProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = m1.self._00;
+			var a01 = m1.self._01;
+			var a02 = m1.self._02;
+			var a03 = m1.self._03;
+			var a10 = m1.self._10;
+			var a11 = m1.self._11;
+			var a12 = m1.self._12;
+			var a13 = m1.self._13;
+			var a20 = m1.self._20;
+			var a21 = m1.self._21;
+			var a22 = m1.self._22;
+			var a23 = m1.self._23;
+			var a30 = m1.self._30;
+			var a31 = m1.self._31;
+			var a32 = m1.self._32;
+			var a33 = m1.self._33;
+			var b00 = a00 * a11 - a01 * a10;
+			var b01 = a00 * a12 - a02 * a10;
+			var b02 = a00 * a13 - a03 * a10;
+			var b03 = a01 * a12 - a02 * a11;
+			var b04 = a01 * a13 - a03 * a11;
+			var b05 = a02 * a13 - a03 * a12;
+			var b06 = a20 * a31 - a21 * a30;
+			var b07 = a20 * a32 - a22 * a30;
+			var b08 = a20 * a33 - a23 * a30;
+			var b09 = a21 * a32 - a22 * a31;
+			var b10 = a21 * a33 - a23 * a31;
+			var b11 = a22 * a33 - a23 * a32;
+			var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+			if(det == 0.0) {
+				_this.self._00 = 1.0;
+				_this.self._01 = 0.0;
+				_this.self._02 = 0.0;
 				_this.self._03 = 0.0;
+				_this.self._10 = 0.0;
+				_this.self._11 = 1.0;
+				_this.self._12 = 0.0;
 				_this.self._13 = 0.0;
+				_this.self._20 = 0.0;
+				_this.self._21 = 0.0;
+				_this.self._22 = 1.0;
 				_this.self._23 = 0.0;
 				_this.self._30 = 0.0;
 				_this.self._31 = 0.0;
 				_this.self._32 = 0.0;
 				_this.self._33 = 1.0;
-				var x = sc.x;
-				var y = sc.y;
-				var z = sc.z;
-				_this.self._00 *= x;
-				_this.self._01 *= x;
-				_this.self._02 *= x;
-				_this.self._03 *= x;
-				_this.self._10 *= y;
-				_this.self._11 *= y;
-				_this.self._12 *= y;
-				_this.self._13 *= y;
-				_this.self._20 *= z;
-				_this.self._21 *= z;
-				_this.self._22 *= z;
-				_this.self._23 *= z;
-				_this.self._30 = loc.x;
-				_this.self._31 = loc.y;
-				_this.self._32 = loc.z;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_transposeViewMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
-				_this.self._00 = m1.self._00;
-				_this.self._01 = m1.self._01;
-				_this.self._02 = m1.self._02;
-				_this.self._03 = m1.self._03;
-				_this.self._10 = m1.self._10;
-				_this.self._11 = m1.self._11;
-				_this.self._12 = m1.self._12;
-				_this.self._13 = m1.self._13;
-				_this.self._20 = m1.self._20;
-				_this.self._21 = m1.self._21;
-				_this.self._22 = m1.self._22;
-				_this.self._23 = m1.self._23;
-				_this.self._30 = m1.self._30;
-				_this.self._31 = m1.self._31;
-				_this.self._32 = m1.self._32;
-				_this.self._33 = m1.self._33;
-				var _this = iron_object_Uniforms.helpMat;
-				var f = _this.self._01;
-				_this.self._01 = _this.self._10;
-				_this.self._10 = f;
-				f = _this.self._02;
-				_this.self._02 = _this.self._20;
-				_this.self._20 = f;
-				f = _this.self._12;
-				_this.self._12 = _this.self._21;
-				_this.self._21 = f;
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_viewMatrix":
-				m = camera.V;
-				break;
-			case "_viewProjectionMatrix":
-				m = camera.VP;
-				break;
-			default:
-				return false;
+			} else {
+				det = 1.0 / det;
+				_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+				_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+				_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+				_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+				_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+				_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+				_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+				_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+				_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+				_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+				_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+				_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+				_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+				_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+				_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+				_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
 			}
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_inverseViewProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = iron_object_Uniforms.helpMat;
+			var a00 = m1.self._00;
+			var a01 = m1.self._01;
+			var a02 = m1.self._02;
+			var a03 = m1.self._03;
+			var a10 = m1.self._10;
+			var a11 = m1.self._11;
+			var a12 = m1.self._12;
+			var a13 = m1.self._13;
+			var a20 = m1.self._20;
+			var a21 = m1.self._21;
+			var a22 = m1.self._22;
+			var a23 = m1.self._23;
+			var a30 = m1.self._30;
+			var a31 = m1.self._31;
+			var a32 = m1.self._32;
+			var a33 = m1.self._33;
+			var b00 = a00 * a11 - a01 * a10;
+			var b01 = a00 * a12 - a02 * a10;
+			var b02 = a00 * a13 - a03 * a10;
+			var b03 = a01 * a12 - a02 * a11;
+			var b04 = a01 * a13 - a03 * a11;
+			var b05 = a02 * a13 - a03 * a12;
+			var b06 = a20 * a31 - a21 * a30;
+			var b07 = a20 * a32 - a22 * a30;
+			var b08 = a20 * a33 - a23 * a30;
+			var b09 = a21 * a32 - a22 * a31;
+			var b10 = a21 * a33 - a23 * a31;
+			var b11 = a22 * a33 - a23 * a32;
+			var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+			if(det == 0.0) {
+				_this.self._00 = 1.0;
+				_this.self._01 = 0.0;
+				_this.self._02 = 0.0;
+				_this.self._03 = 0.0;
+				_this.self._10 = 0.0;
+				_this.self._11 = 1.0;
+				_this.self._12 = 0.0;
+				_this.self._13 = 0.0;
+				_this.self._20 = 0.0;
+				_this.self._21 = 0.0;
+				_this.self._22 = 1.0;
+				_this.self._23 = 0.0;
+				_this.self._30 = 0.0;
+				_this.self._31 = 0.0;
+				_this.self._32 = 0.0;
+				_this.self._33 = 1.0;
+			} else {
+				det = 1.0 / det;
+				_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+				_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+				_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+				_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+				_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+				_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+				_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+				_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+				_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+				_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+				_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+				_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+				_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+				_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+				_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+				_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+			}
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_lightViewProjectionMatrix":
+			if(light != null) {
+				m = light.VP;
+			}
+			break;
+		case "_prevViewProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.prevV;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_projectionMatrix":
+			m = camera.P;
+			break;
+		case "_skydomeMatrix":
+			var tr = camera.transform;
+			var _this = iron_object_Uniforms.helpVec;
+			_this.x = tr.world.self._30;
+			_this.y = tr.world.self._31;
+			_this.z = tr.world.self._32 - 3.5;
+			_this.w = 1.0;
+			var bounds = camera.data.raw.far_plane * 0.95;
+			var _this = iron_object_Uniforms.helpVec2;
+			_this.x = bounds;
+			_this.y = bounds;
+			_this.z = bounds;
+			_this.w = 1.0;
+			var _this = iron_object_Uniforms.helpMat;
+			var loc = iron_object_Uniforms.helpVec;
+			var quat = iron_object_Uniforms.helpQuat;
+			var sc = iron_object_Uniforms.helpVec2;
+			var x = quat.x;
+			var y = quat.y;
+			var z = quat.z;
+			var w = quat.w;
+			var x2 = x + x;
+			var y2 = y + y;
+			var z2 = z + z;
+			var xx = x * x2;
+			var xy = x * y2;
+			var xz = x * z2;
+			var yy = y * y2;
+			var yz = y * z2;
+			var zz = z * z2;
+			var wx = w * x2;
+			var wy = w * y2;
+			var wz = w * z2;
+			_this.self._00 = 1.0 - (yy + zz);
+			_this.self._10 = xy - wz;
+			_this.self._20 = xz + wy;
+			_this.self._01 = xy + wz;
+			_this.self._11 = 1.0 - (xx + zz);
+			_this.self._21 = yz - wx;
+			_this.self._02 = xz - wy;
+			_this.self._12 = yz + wx;
+			_this.self._22 = 1.0 - (xx + yy);
+			_this.self._03 = 0.0;
+			_this.self._13 = 0.0;
+			_this.self._23 = 0.0;
+			_this.self._30 = 0.0;
+			_this.self._31 = 0.0;
+			_this.self._32 = 0.0;
+			_this.self._33 = 1.0;
+			var x = sc.x;
+			var y = sc.y;
+			var z = sc.z;
+			_this.self._00 *= x;
+			_this.self._01 *= x;
+			_this.self._02 *= x;
+			_this.self._03 *= x;
+			_this.self._10 *= y;
+			_this.self._11 *= y;
+			_this.self._12 *= y;
+			_this.self._13 *= y;
+			_this.self._20 *= z;
+			_this.self._21 *= z;
+			_this.self._22 *= z;
+			_this.self._23 *= z;
+			_this.self._30 = loc.x;
+			_this.self._31 = loc.y;
+			_this.self._32 = loc.z;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_transposeViewMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var f = _this.self._01;
+			_this.self._01 = _this.self._10;
+			_this.self._10 = f;
+			f = _this.self._02;
+			_this.self._02 = _this.self._20;
+			_this.self._20 = f;
+			f = _this.self._12;
+			_this.self._12 = _this.self._21;
+			_this.self._21 = f;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_viewMatrix":
+			m = camera.V;
+			break;
+		case "_viewProjectionMatrix":
+			m = camera.VP;
+			break;
 		}
-		g.setMatrix(location,m != null ? m.self : new kha_math_FastMatrix4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
-		return true;
+		if(m != null) {
+			g.setMatrix(location,m.self);
+			return true;
+		}
 	} else if(c.type == "vec4") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
-		var w = 0;
-		if(w == null) {
-			w = 1.0;
-		}
 		_this.x = 0;
 		_this.y = 0;
 		_this.z = 0;
-		_this.w = w;
-		var _g = c.link;
-		return false;
+		_this.w = 1.0;
+		if(v != null) {
+			g.setFloat4(location,v.x,v.y,v.z,v.w);
+			return true;
+		}
 	} else if(c.type == "vec3") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
@@ -13461,183 +13233,174 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		_this.y = 0;
 		_this.z = 0;
 		_this.w = 1.0;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_backgroundCol":
-				if(camera.data.raw.clear_color != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					var y = camera.data.raw.clear_color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					var z = camera.data.raw.clear_color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.x = camera.data.raw.clear_color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-				}
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraLook":
-				var _this = new iron_math_Vec4(-camera.transform.world.self._20,-camera.transform.world.self._21,-camera.transform.world.self._22);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraPosition":
+		switch(c.link) {
+		case "_backgroundCol":
+			if(camera.data.raw.clear_color != null) {
 				var _this = iron_object_Uniforms.helpVec;
-				_this.x = camera.transform.world.self._30;
-				_this.y = camera.transform.world.self._31;
-				_this.z = camera.transform.world.self._32;
+				var y = camera.data.raw.clear_color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				var z = camera.data.raw.clear_color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.x = camera.data.raw.clear_color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+			}
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraLook":
+			var _this = new iron_math_Vec4(-camera.transform.world.self._20,-camera.transform.world.self._21,-camera.transform.world.self._22);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraPosition":
+			var _this = iron_object_Uniforms.helpVec;
+			_this.x = camera.transform.world.self._30;
+			_this.y = camera.transform.world.self._31;
+			_this.z = camera.transform.world.self._32;
+			_this.w = 1.0;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraRight":
+			var _this = new iron_math_Vec4(camera.transform.world.self._00,camera.transform.world.self._01,camera.transform.world.self._02);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraUp":
+			var _this = new iron_math_Vec4(camera.transform.world.self._10,camera.transform.world.self._11,camera.transform.world.self._12);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_hosekSunDirection":
+			var w = iron_Scene.active.world;
+			if(w != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				var y = w.raw.sun_direction.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				var z = w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) > 0 ? w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) : 0;
+				_this.x = w.raw.sun_direction.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.y = y;
+				_this.z = z;
 				_this.w = 1.0;
 				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraRight":
-				var _this = new iron_math_Vec4(camera.transform.world.self._00,camera.transform.world.self._01,camera.transform.world.self._02);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraUp":
-				var _this = new iron_math_Vec4(camera.transform.world.self._10,camera.transform.world.self._11,camera.transform.world.self._12);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_hosekSunDirection":
-				var w = iron_Scene.active.world;
-				if(w != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					var y = w.raw.sun_direction.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					var z = w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) > 0 ? w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) : 0;
-					_this.x = w.raw.sun_direction.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_lightDirection":
-				if(light != null) {
-					var _this = new iron_math_Vec4(light.V.self._02,light.V.self._12,light.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_lightPosition":
-				if(light != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					_this.x = light.transform.world.self._30;
-					_this.y = light.transform.world.self._31;
-					_this.z = light.transform.world.self._32;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_pointColor":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var str = point.visible ? point.data.raw.strength : 0.0;
-					var _this = iron_object_Uniforms.helpVec;
-					var y = point.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					var z = point.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.x = point.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_pointPosition":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					_this.x = point.transform.world.self._30;
-					_this.y = point.transform.world.self._31;
-					_this.z = point.transform.world.self._32;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_spotDirection":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var _this = new iron_math_Vec4(point.V.self._02,point.V.self._12,point.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_sunColor":
-				var sun = iron_RenderPath.active.sun;
-				if(sun != null) {
-					var str = sun.visible ? sun.data.raw.strength : 0.0;
-					var _this = iron_object_Uniforms.helpVec;
-					var y = sun.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					var z = sun.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.x = sun.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_sunDirection":
-				var sun = iron_RenderPath.active.sun;
-				if(sun != null) {
-					var _this = new iron_math_Vec4(sun.V.self._02,sun.V.self._12,sun.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			default:
-				return false;
 			}
+			break;
+		case "_lightDirection":
+			if(light != null) {
+				var _this = new iron_math_Vec4(light.V.self._02,light.V.self._12,light.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_lightPosition":
+			if(light != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				_this.x = light.transform.world.self._30;
+				_this.y = light.transform.world.self._31;
+				_this.z = light.transform.world.self._32;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_pointColor":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var str = point.visible ? point.data.raw.strength : 0.0;
+				var _this = iron_object_Uniforms.helpVec;
+				var y = point.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				var z = point.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.x = point.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_pointPosition":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				_this.x = point.transform.world.self._30;
+				_this.y = point.transform.world.self._31;
+				_this.z = point.transform.world.self._32;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_spotDirection":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var _this = new iron_math_Vec4(point.V.self._02,point.V.self._12,point.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_sunColor":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var str = sun.visible ? sun.data.raw.strength : 0.0;
+				var _this = iron_object_Uniforms.helpVec;
+				var y = sun.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				var z = sun.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.x = sun.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_sunDirection":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var _this = new iron_math_Vec4(sun.V.self._02,sun.V.self._12,sun.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
 		}
 		if(v != null) {
 			g.setFloat3(location,v.x,v.y,v.z);
-		} else {
-			g.setFloat3(location,0.0,0.0,0.0);
+			return true;
 		}
-		return true;
 	} else if(c.type == "vec2") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
@@ -13645,178 +13408,164 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		_this.y = 0;
 		_this.z = 0;
 		_this.w = 1.0;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_aspectRatio":
+		switch(c.link) {
+		case "_aspectRatio":
+			v = iron_object_Uniforms.helpVec;
+			v.x = iron_RenderPath.active.currentH / iron_RenderPath.active.currentW;
+			v.y = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
+			v.x = v.x > 1.0 ? 1.0 : v.x;
+			v.y = v.y > 1.0 ? 1.0 : v.y;
+			break;
+		case "_cameraPlane":
+			v = iron_object_Uniforms.helpVec;
+			v.x = camera.data.raw.near_plane;
+			v.y = camera.data.raw.far_plane;
+			break;
+		case "_cameraPlaneProj":
+			var near = camera.data.raw.near_plane;
+			var far = camera.data.raw.far_plane;
+			v = iron_object_Uniforms.helpVec;
+			v.x = far / (far - near);
+			v.y = -far * near / (far - near);
+			break;
+		case "_lightPlane":
+			if(light != null) {
 				v = iron_object_Uniforms.helpVec;
-				v.x = iron_RenderPath.active.currentH / iron_RenderPath.active.currentW;
-				v.y = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
-				v.x = v.x > 1.0 ? 1.0 : v.x;
-				v.y = v.y > 1.0 ? 1.0 : v.y;
-				break;
-			case "_cameraPlane":
-				v = iron_object_Uniforms.helpVec;
-				v.x = camera.data.raw.near_plane;
-				v.y = camera.data.raw.far_plane;
-				break;
-			case "_cameraPlaneProj":
-				var near = camera.data.raw.near_plane;
-				var far = camera.data.raw.far_plane;
-				v = iron_object_Uniforms.helpVec;
-				v.x = far / (far - near);
-				v.y = -far * near / (far - near);
-				break;
-			case "_lightPlane":
-				if(light != null) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = light.data.raw.near_plane;
-					v.y = light.data.raw.far_plane;
-				}
-				break;
-			case "_lightPlaneProj":
-				if(light != null) {
-					var near = light.data.raw.near_plane;
-					var far = light.data.raw.far_plane;
-					var a = far + near;
-					var b = far - near;
-					var f2 = 2.0;
-					var c1 = f2 * far * near;
-					v = iron_object_Uniforms.helpVec;
-					v.x = a / b;
-					v.y = c1 / b;
-				}
-				break;
-			case "_screenSize":
-				v = iron_object_Uniforms.helpVec;
-				v.x = iron_RenderPath.active.currentW;
-				v.y = iron_RenderPath.active.currentH;
-				break;
-			case "_screenSizeInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0 / iron_RenderPath.active.currentW;
-				v.y = 1.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_shadowMapSize":
-				if(light != null && light.data.raw.cast_shadow) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = v.y = light.data.raw.shadowmap_size;
-				}
-				break;
-			case "_spotData":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = point.data.raw.spot_size;
-					v.y = v.x - point.data.raw.spot_blend;
-				}
-				break;
-			case "_vec2x":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0;
-				v.y = 0.0;
-				break;
-			case "_vec2x2":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 2.0;
-				v.y = 0.0;
-				break;
-			case "_vec2x2Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 2.0 / iron_RenderPath.active.currentW;
-				v.y = 0.0;
-				break;
-			case "_vec2xInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0 / iron_RenderPath.active.currentW;
-				v.y = 0.0;
-				break;
-			case "_vec2y":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 1.0;
-				break;
-			case "_vec2y2":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 2.0;
-				break;
-			case "_vec2y2Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 2.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_vec2y3":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 3.0;
-				break;
-			case "_vec2y3Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 3.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_vec2yInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 1.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_windowSize":
-				v = iron_object_Uniforms.helpVec;
-				v.x = kha_System.windowWidth();
-				v.y = kha_System.windowHeight();
-				break;
-			default:
-				return false;
+				v.x = light.data.raw.near_plane;
+				v.y = light.data.raw.far_plane;
 			}
+			break;
+		case "_lightPlaneProj":
+			if(light != null) {
+				var near = light.data.raw.near_plane;
+				var far = light.data.raw.far_plane;
+				var a = far + near;
+				var b = far - near;
+				var f2 = 2.0;
+				var c1 = f2 * far * near;
+				v = iron_object_Uniforms.helpVec;
+				v.x = a / b;
+				v.y = c1 / b;
+			}
+			break;
+		case "_screenSize":
+			v = iron_object_Uniforms.helpVec;
+			v.x = iron_RenderPath.active.currentW;
+			v.y = iron_RenderPath.active.currentH;
+			break;
+		case "_screenSizeInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0 / iron_RenderPath.active.currentW;
+			v.y = 1.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_shadowMapSize":
+			if(light != null && light.data.raw.cast_shadow) {
+				v = iron_object_Uniforms.helpVec;
+				v.x = v.y = light.data.raw.shadowmap_size;
+			}
+			break;
+		case "_spotData":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				v = iron_object_Uniforms.helpVec;
+				v.x = point.data.raw.spot_size;
+				v.y = v.x - point.data.raw.spot_blend;
+			}
+			break;
+		case "_vec2x":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0;
+			v.y = 0.0;
+			break;
+		case "_vec2x2":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 2.0;
+			v.y = 0.0;
+			break;
+		case "_vec2x2Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 2.0 / iron_RenderPath.active.currentW;
+			v.y = 0.0;
+			break;
+		case "_vec2xInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0 / iron_RenderPath.active.currentW;
+			v.y = 0.0;
+			break;
+		case "_vec2y":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 1.0;
+			break;
+		case "_vec2y2":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 2.0;
+			break;
+		case "_vec2y2Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 2.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_vec2y3":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 3.0;
+			break;
+		case "_vec2y3Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 3.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_vec2yInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 1.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_windowSize":
+			v = iron_object_Uniforms.helpVec;
+			v.x = kha_System.windowWidth();
+			v.y = kha_System.windowHeight();
+			break;
 		}
 		if(v != null) {
 			g.setFloat2(location,v.x,v.y);
-		} else {
-			g.setFloat2(location,0.0,0.0);
+			return true;
 		}
-		return true;
 	} else if(c.type == "float") {
 		var f = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_aspectRatioF":
-				f = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
-				break;
-			case "_aspectRatioWindowF":
-				f = kha_System.windowWidth() / kha_System.windowHeight();
-				break;
-			case "_envmapStrength":
-				f = iron_Scene.active.world == null ? 0.0 : iron_Scene.active.world.probe.raw.strength;
-				break;
-			case "_fieldOfView":
-				f = camera.data.raw.fov;
-				break;
-			case "_frameScale":
-				f = iron_RenderPath.active.frameTime / iron_system_Time.get_delta();
-				break;
-			case "_pointShadowsBias":
-				var point = iron_RenderPath.active.point;
-				f = point == null ? 0.0 : point.data.raw.shadows_bias;
-				break;
-			case "_sunShadowsBias":
-				var sun = iron_RenderPath.active.sun;
-				f = sun == null ? 0.0 : sun.data.raw.shadows_bias;
-				break;
-			case "_time":
-				f = kha_Scheduler.time();
-				break;
-			default:
-				return false;
-			}
+		switch(c.link) {
+		case "_aspectRatioF":
+			f = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
+			break;
+		case "_aspectRatioWindowF":
+			f = kha_System.windowWidth() / kha_System.windowHeight();
+			break;
+		case "_envmapStrength":
+			f = iron_Scene.active.world == null ? 0.0 : iron_Scene.active.world.probe.raw.strength;
+			break;
+		case "_fieldOfView":
+			f = camera.data.raw.fov;
+			break;
+		case "_frameScale":
+			f = iron_RenderPath.active.frameTime / iron_system_Time.get_delta();
+			break;
+		case "_pointShadowsBias":
+			var point = iron_RenderPath.active.point;
+			f = point == null ? 0.0 : point.data.raw.shadows_bias;
+			break;
+		case "_sunShadowsBias":
+			var sun = iron_RenderPath.active.sun;
+			f = sun == null ? 0.0 : sun.data.raw.shadows_bias;
+			break;
+		case "_time":
+			f = kha_Scheduler.time();
+			break;
 		}
-		g.setFloat(location,f != null ? f : 0);
-		return true;
+		if(f != null) {
+			g.setFloat(location,f);
+			return true;
+		}
 	} else if(c.type == "floats") {
 		var fa = null;
 		switch(c.link) {
@@ -13842,17 +13591,14 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		}
 	} else if(c.type == "int") {
 		var i = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else if(_g == "_envmapNumMipmaps") {
+		if(c.link == "_envmapNumMipmaps") {
 			var w = iron_Scene.active.world;
 			i = w != null ? w.probe.raw.radiance_mipmaps + 1 - 2 : 1;
-		} else {
-			return false;
 		}
-		g.setInt(location,i != null ? i : 0);
-		return true;
+		if(i != null) {
+			g.setInt(location,i);
+			return true;
+		}
 	}
 	return false;
 };
@@ -16212,27 +15958,6 @@ iron_system_Mouse.prototype = $extend(iron_system_VirtualInput.prototype,{
 		var tmp = this.buttonsDown[1] = this.buttonsDown[2] = false;
 		this.buttonsDown[0] = tmp;
 		this.endFrame();
-	}
-	,buttonIndex: function(button) {
-		if(button == "left") {
-			return 0;
-		} else if(button == "right") {
-			return 1;
-		} else {
-			return 2;
-		}
-	}
-	,started: function(button) {
-		if(button == null) {
-			button = "left";
-		}
-		return this.buttonsStarted[this.buttonIndex(button)];
-	}
-	,released: function(button) {
-		if(button == null) {
-			button = "left";
-		}
-		return this.buttonsReleased[this.buttonIndex(button)];
 	}
 	,downListener: function(index,x,y) {
 		this.buttonsDown[index] = true;
@@ -23949,19 +23674,11 @@ kha_graphics2_Graphics.prototype = {
 	}
 	,end: function() {
 	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-	}
-	,set_color: function(color) {
-		return -16777216;
-	}
 	,get_fontSize: function() {
 		return this.myFontSize;
 	}
-	,get_opacity: function() {
-		return this.opacities[this.opacities.length - 1];
-	}
 	,__class__: kha_graphics2_Graphics
-	,__properties__: {get_opacity:"get_opacity",get_fontSize:"get_fontSize",set_color:"set_color"}
+	,__properties__: {get_fontSize:"get_fontSize"}
 };
 var kha_graphics2_Graphics1 = function(canvas) {
 	this.canvas = canvas;
@@ -23971,38 +23688,6 @@ kha_graphics2_Graphics1.__name__ = true;
 kha_graphics2_Graphics1.__interfaces__ = [kha_graphics1_Graphics];
 kha_graphics2_Graphics1.prototype = {
 	__class__: kha_graphics2_Graphics1
-};
-var kha_graphics2_GraphicsExtension = function() { };
-$hxClasses["kha.graphics2.GraphicsExtension"] = kha_graphics2_GraphicsExtension;
-kha_graphics2_GraphicsExtension.__name__ = true;
-kha_graphics2_GraphicsExtension.fillCircle = function(g2,cx,cy,radius,segments) {
-	if(segments == null) {
-		segments = 0;
-	}
-	if(kha_SystemImpl.gl == null) {
-		var g = g2;
-		g.fillCircle(cx,cy,radius);
-		return;
-	}
-	if(segments <= 0) {
-		segments = Math.floor(10 * Math.sqrt(radius));
-	}
-	var theta = 2 * Math.PI / segments;
-	var c = Math.cos(theta);
-	var s = Math.sin(theta);
-	var x = radius;
-	var y = 0.0;
-	var _g = 0;
-	var _g1 = segments;
-	while(_g < _g1) {
-		var n = _g++;
-		var px = x + cx;
-		var py = y + cy;
-		var t = x;
-		x = c * x - s * y;
-		y = c * y + s * t;
-		g2.fillTriangle(px,py,x + cx,y + cy,cx,cy);
-	}
 };
 var kha_graphics4_ConstantLocation = function() { };
 $hxClasses["kha.graphics4.ConstantLocation"] = kha_graphics4_ConstantLocation;
@@ -24433,37 +24118,6 @@ kha_graphics4_ColoredShaderPainter.prototype = {
 			kha_graphics4_ColoredShaderPainter.triangleIndexBuffer.unlock();
 		}
 	}
-	,setTriVertices: function(x1,y1,x2,y2,x3,y3) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 7 * 3;
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32(baseIndex * 4,x1,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 1) * 4,y1,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 2) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 7) * 4,x2,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 8) * 4,y2,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 9) * 4,-5.0,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 14) * 4,x3,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 15) * 4,y3,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 16) * 4,-5.0,true);
-	}
-	,setTriColors: function(opacity,color) {
-		var baseIndex = kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 7 * 3;
-		var a = opacity * ((color >>> 24) * 0.00392156862745098);
-		var r = a * (((color & 16711680) >>> 16) * 0.00392156862745098);
-		var g = a * (((color & 65280) >>> 8) * 0.00392156862745098);
-		var b = a * ((color & 255) * 0.00392156862745098);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 3) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 4) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 5) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 6) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 10) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 11) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 12) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 13) * 4,a,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 17) * 4,r,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 18) * 4,g,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 19) * 4,b,true);
-		kha_graphics4_ColoredShaderPainter.triangleVertices.setFloat32((baseIndex + 20) * 4,a,true);
-	}
 	,drawBuffer: function(trisDone) {
 		if(kha_graphics4_ColoredShaderPainter.bufferIndex == 0) {
 			return;
@@ -24498,17 +24152,6 @@ kha_graphics4_ColoredShaderPainter.prototype = {
 		this.g.drawIndexedVertices(0,kha_graphics4_ColoredShaderPainter.triangleBufferIndex * 3);
 		kha_graphics4_ColoredShaderPainter.triangleBufferIndex = 0;
 		kha_graphics4_ColoredShaderPainter.triangleVertices = kha_graphics4_ColoredShaderPainter.triangleVertexBuffer.lock();
-	}
-	,fillTriangle: function(opacity,color,x1,y1,x2,y2,x3,y3) {
-		if(kha_graphics4_ColoredShaderPainter.bufferIndex > 0) {
-			this.drawBuffer(true);
-		}
-		if(kha_graphics4_ColoredShaderPainter.triangleBufferIndex + 1 >= 1000) {
-			this.drawTriBuffer(false);
-		}
-		this.setTriColors(opacity,color);
-		this.setTriVertices(x1,y1,x2,y2,x3,y3);
-		++kha_graphics4_ColoredShaderPainter.triangleBufferIndex;
 	}
 	,__class__: kha_graphics4_ColoredShaderPainter
 };
@@ -24801,88 +24444,8 @@ kha_graphics4_Graphics2.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		this.coloredPainter.setProjection(this.projectionMatrix);
 		this.textPainter.setProjection(this.projectionMatrix);
 	}
-	,get_color: function() {
-		return this.myColor;
-	}
 	,set_color: function(color) {
 		return this.myColor = color;
-	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-		this.imagePainter.end();
-		this.textPainter.end();
-		var _this = this.transformations[this.transformationIndex];
-		var x = x1;
-		var y = y1;
-		if(y == null) {
-			y = 0;
-		}
-		if(x == null) {
-			x = 0;
-		}
-		var value_x = x;
-		var value_y = y;
-		var w = _this._02 * value_x + _this._12 * value_y + _this._22;
-		var x = (_this._00 * value_x + _this._10 * value_y + _this._20) / w;
-		var y = (_this._01 * value_x + _this._11 * value_y + _this._21) / w;
-		var x1 = x;
-		var y1 = y;
-		if(y1 == null) {
-			y1 = 0;
-		}
-		if(x1 == null) {
-			x1 = 0;
-		}
-		var p1_x = x1;
-		var p1_y = y1;
-		var _this = this.transformations[this.transformationIndex];
-		var x = x2;
-		var y = y2;
-		if(y == null) {
-			y = 0;
-		}
-		if(x == null) {
-			x = 0;
-		}
-		var value_x = x;
-		var value_y = y;
-		var w = _this._02 * value_x + _this._12 * value_y + _this._22;
-		var x = (_this._00 * value_x + _this._10 * value_y + _this._20) / w;
-		var y = (_this._01 * value_x + _this._11 * value_y + _this._21) / w;
-		var x1 = x;
-		var y1 = y;
-		if(y1 == null) {
-			y1 = 0;
-		}
-		if(x1 == null) {
-			x1 = 0;
-		}
-		var p2_x = x1;
-		var p2_y = y1;
-		var _this = this.transformations[this.transformationIndex];
-		var x = x3;
-		var y = y3;
-		if(y == null) {
-			y = 0;
-		}
-		if(x == null) {
-			x = 0;
-		}
-		var value_x = x;
-		var value_y = y;
-		var w = _this._02 * value_x + _this._12 * value_y + _this._22;
-		var x = (_this._00 * value_x + _this._10 * value_y + _this._20) / w;
-		var y = (_this._01 * value_x + _this._11 * value_y + _this._21) / w;
-		var x1 = x;
-		var y1 = y;
-		if(y1 == null) {
-			y1 = 0;
-		}
-		if(x1 == null) {
-			x1 = 0;
-		}
-		var p3_x = x1;
-		var p3_y = y1;
-		this.coloredPainter.fillTriangle(this.get_opacity(),this.get_color(),p1_x,p1_y,p2_x,p2_y,p3_x,p3_y);
 	}
 	,begin: function(clear,clearColor) {
 		if(clear == null) {
@@ -26528,19 +26091,6 @@ kha_js_CanvasGraphics.prototype = $extend(kha_graphics2_Graphics.prototype,{
 		this.canvas.fillStyle = "rgba(" + ((color & 16711680) >>> 16) + "," + ((color & 65280) >>> 8) + "," + (color & 255) + "," + (color >>> 24) * 0.00392156862745098 + ")";
 		return color;
 	}
-	,fillCircle: function(cx,cy,radius) {
-		this.canvas.beginPath();
-		this.canvas.arc(cx,cy,radius,0,2 * Math.PI,false);
-		this.canvas.fill();
-	}
-	,fillTriangle: function(x1,y1,x2,y2,x3,y3) {
-		this.canvas.beginPath();
-		this.canvas.moveTo(x1,y1);
-		this.canvas.lineTo(x2,y2);
-		this.canvas.lineTo(x3,y3);
-		this.canvas.closePath();
-		this.canvas.fill();
-	}
 	,__class__: kha_js_CanvasGraphics
 });
 var kha_js_MobileWebAudio = function() { };
@@ -27529,7 +27079,6 @@ var Class = { };
 var Enum = { };
 haxe_ds_ObjectMap.count = 0;
 js_Boot.__toStr = ({ }).toString;
-arm_VirtualGamepad.__meta__ = { fields : { gamepad : { prop : null}, radius : { prop : null}, offset : { prop : null}, sizeRatio : { prop : null}}};
 armory_renderpath_HosekWilkieData.datasetRGB1 = [-1.099459e+000,-1.335146e-001,-4.083223e+000,5.919603e+000,-1.104166e-001,1.600158e+000,-1.326538e-006,4.917807e+000,5.127716e-001,-1.169858e+000,-1.832793e-001,9.694744e-001,9.495762e-002,-4.738918e-002,2.194171e-001,1.095749e-001,3.603604e+000,3.815119e-001,-9.665225e-001,-1.403888e-001,5.194457e+000,-1.107607e+000,-8.135181e-001,4.969661e+000,-2.300508e-001,-2.489350e+000,1.279158e+000,-1.292508e+000,-1.299552e-001,-2.071404e+000,-4.752482e-002,1.215598e+000,-1.904179e+000,3.027985e-001,8.707768e+000,6.332446e-002,-9.264666e-001,-1.696780e-001,4.574070e+000,-4.232936e-001,-7.575833e+000,5.079755e+000,-2.576343e-001,-4.506805e+000,6.908129e-001,-1.139072e+000,-1.796056e-001,1.923311e+000,6.788529e+000,-2.364389e+000,-1.064041e+000,1.717010e-001,1.534681e+000,5.015810e-001,-1.107257e+000,-1.384411e-001,-4.285744e+000,5.713157e+000,-1.015992e-001,1.372638e+000,6.555893e-002,5.127514e+000,6.550471e-001,-1.187337e+000,-1.969013e-001,8.551048e-001,5.289708e-002,-7.626406e-002,1.733153e-002,1.779454e-001,3.801038e+000,4.742709e-001,-9.685321e-001,-1.553308e-001,4.732492e+000,-1.178935e+000,-7.852791e-001,4.604492e+000,-2.666518e-001,-2.367663e+000,1.177527e+000,-1.252817e+000,-5.129949e-002,-2.800433e+000,-1.295992e-002,1.308964e+000,-2.204331e+000,7.276011e-001,8.699265e+000,1.188388e-001,-9.459509e-001,-2.322133e-001,4.375041e+000,-1.712018e-001,-7.451681e+000,5.078019e+000,-4.223538e-001,-4.595561e+000,1.074719e+000,-1.125092e+000,-1.796750e-001,1.626399e+000,6.989743e+000,-2.406382e+000,-9.060383e-001,2.961611e-001,1.337715e+000,5.438140e-001,-1.135338e+000,-1.716160e-001,-1.499253e+000,2.373491e+000,-1.654023e-001,9.566404e-001,1.113453e-001,4.528473e+000,6.579439e-001,-1.132780e+000,-1.456214e-001,-1.736672e+000,1.756589e+000,-1.087003e-001,3.757927e-001,2.525070e-001,7.178513e+000,5.003814e-001,-1.167176e+000,-2.927225e-001,5.727667e+000,-3.139244e+000,-6.425204e-001,2.822634e+000,-1.457812e-001,-6.787080e+000,1.017072e+000,-1.042529e+000,4.110823e-002,-4.000629e+000,4.362364e+000,1.090540e+000,-1.338674e+000,8.246964e-001,1.095249e+001,2.912211e-001,-1.061598e+000,-2.096143e-001,3.803155e+000,-7.977069e+000,-3.637880e+000,3.707671e+000,-1.903128e-001,-3.397953e+000,9.971500e-001,-1.073560e+000,-2.077964e-001,1.492052e+000,1.626322e+001,-5.015304e+000,-4.059889e-001,2.659782e-001,6.395380e-001,5.634436e-001,-1.172794e+000,-2.111186e-001,-1.360013e+000,1.604080e+000,-8.473723e-002,7.217312e-001,1.548030e-001,4.257010e+000,6.328974e-001,-1.238374e+000,-2.670827e-001,3.247678e-001,5.466311e-001,-7.425952e-001,5.276440e-001,2.678026e-002,5.484169e+000,6.814734e-001,-1.176923e+000,-2.574586e-001,2.304045e+000,-2.797678e+000,1.464405e+000,1.998552e+000,2.550559e-001,-4.199772e+000,7.544892e-001,-1.003284e+000,1.943984e-002,-2.145066e+000,1.030924e+001,-1.525413e+001,-2.023010e+000,5.448699e-001,8.159497e+000,5.539148e-001,-1.060017e+000,-2.037206e-001,2.483018e+000,-4.595459e+000,6.526991e+000,4.031804e+000,1.206513e-001,-2.586527e+000,7.875752e-001,-1.081141e+000,-2.123302e-001,1.092275e+000,2.683841e+000,-4.166938e+000,-1.396582e+000,4.371205e-001,1.030233e+000,6.664862e-001,-1.222392e+000,-2.651924e-001,-4.625037e-001,3.521964e-001,2.148855e-002,5.078494e-001,1.791590e-001,3.852516e+000,5.998216e-001,-1.424610e+000,-4.710155e-001,-1.826815e-001,1.786277e+000,-1.952442e+000,5.277612e-001,-1.773629e-002,2.415874e+000,6.701272e-001,-1.130655e+000,-1.358609e-001,9.171203e-001,-4.660394e+000,6.251162e+000,1.904529e+000,2.639668e-001,1.856130e+000,8.228440e-001,-9.739015e-001,-6.674749e-002,-4.768897e-001,1.248589e+001,-1.994688e+001,-2.353043e+000,5.885575e-001,1.287251e+000,4.830135e-001,-1.082178e+000,-1.974495e-001,1.050245e+000,-4.792855e+000,8.663406e+000,3.246969e+000,1.556731e-001,8.117442e-001,8.050376e-001,-1.063354e+000,-1.727108e-001,9.681592e-001,2.736077e+000,-4.969269e+000,-8.360570e-001,5.994612e-001,1.024039e+000,6.786935e-001,-1.261936e+000,-3.053676e-001,-4.262222e-001,4.000196e-001,-2.059388e-002,4.721802e-001,1.480028e-001,3.505343e+000,6.121337e-001,-1.681088e+000,-6.971919e-001,-1.105652e-001,7.437426e-001,-6.594399e-001,2.254221e-001,8.710195e-002,1.263913e+000,5.681865e-001,-9.453001e-001,3.460388e-002,6.067038e-001,-1.985128e+000,3.457236e+000,2.655483e+000,-1.162354e-002,3.304716e+000,1.001950e+000,-1.086609e+000,-2.029011e-001,-6.399170e-001,6.926885e+000,-1.512189e+001,-3.793051e+000,9.456120e-001,2.222222e-001,2.893725e-001,-1.041259e+000,-1.388790e-001,1.147331e+000,6.282086e+000,3.679836e+000,4.398314e+000,-1.355232e-001,1.031134e+000,9.273509e-001,-1.063473e+000,-1.916051e-001,6.556979e-001,-3.371891e-003,-3.699664e+000,-1.926783e+000,7.371154e-001,1.179975e+000,6.367068e-001,-1.336390e+000,-3.778927e-001,-7.259477e-001,2.270247e-001,4.627513e-001,1.366459e-001,2.637347e-001,3.292059e+000,4.998211e-001,-2.119878e+000,-1.055472e+000,5.422052e-001,7.826648e-001,-1.286065e+000,9.517905e-001,-1.432358e-001,-2.379816e-001,5.910513e-001,-7.761432e-001,2.124336e-001,-6.845184e-001,-9.812342e-001,4.347257e+000,9.671980e-001,3.773150e-001,5.789529e+000,9.646598e-001,-1.118734e+000,-3.513815e-001,5.500918e-001,9.449627e-001,-1.262070e+001,-1.825280e+000,4.731260e-001,-3.326892e+000,3.568768e-001,-1.026437e+000,-8.257946e-002,3.221701e-001,1.198372e+001,1.555130e+000,2.560304e+000,1.406465e-001,2.912858e+000,8.643181e-001,-1.069949e+000,-2.029607e-001,5.825042e-001,-2.398595e-003,-3.278335e+000,-1.349882e+000,7.208433e-001,8.505164e-001,6.625391e-001,-1.392309e+000,-4.454945e-001,-5.664000e-001,6.283393e-001,-3.761727e-001,6.949802e-001,7.748178e-002,3.192797e+000,5.968661e-001,-2.713405e+000,-1.395112e+000,2.029230e-001,1.877272e-001,-3.715859e-001,-1.652929e-001,2.385861e-001,-4.150768e-001,1.375467e-001,-9.588644e-001,2.433900e-002,-1.527493e+000,-9.632874e-001,5.496269e+000,1.094931e+000,2.004044e-001,6.084554e+000,1.369604e+000,-8.028546e-001,-2.473563e-001,1.617898e+000,2.073591e+000,-1.149446e+001,-8.394131e-001,2.726847e-001,-4.634538e+000,1.367293e-001,-1.198326e+000,-1.804865e-001,-3.565414e-001,4.073200e+000,1.662086e+000,1.239770e+000,3.367978e-001,2.997402e+000,9.360383e-001,-1.013531e+000,-1.859060e-001,5.799857e-001,1.331883e+001,-4.346873e+000,-1.113820e+000,5.275714e-001,8.045177e-001,6.496373e-001,-1.530103e+000,-6.107468e-001,-3.841771e-001,1.881508e+000,-1.464807e+000,6.654690e-001,-5.950797e-006,2.738912e+000,8.101012e-001,-2.415469e+000,-1.057499e+000,-4.161968e-001,-2.357548e+000,6.300296e-001,6.224915e-001,1.545048e-002,2.038561e+000,-1.339415e-001,-3.096796e+000,-1.465688e+000,-1.199232e+000,4.567061e+000,3.260980e+000,-9.794907e-001,8.950491e-001,2.049235e+000,1.331015e+000,2.713904e-001,2.852852e-001,1.202090e+000,-8.206784e+000,-5.805762e+000,1.804431e+000,-6.090648e-001,-1.990902e+000,3.288858e-001,-1.456580e+000,-3.455960e-001,-6.409257e-002,1.667697e+001,-2.311094e+000,-9.771104e-001,6.759863e-001,1.245136e+000,7.911932e-001,-9.860389e-001,-2.099564e-001,2.946650e-001,-3.547800e-003,-2.268313e+000,-6.205647e-002,4.705185e-001,8.657995e-001,6.856284e-001,-1.971736e+000,-9.414047e-001,-3.400557e-001,1.468763e+000,-1.474284e+000,5.501062e-001,-1.109750e-005,2.356370e+000,9.001702e-001,-1.589845e+000,-7.797079e-001,-5.582240e-001,-8.137376e-001,5.846617e-001,1.129459e-001,-2.658005e-002,2.707248e+000,-2.112486e-001,-6.940173e+000,-2.823963e+000,-1.620848e+000,1.090696e+000,2.391730e+000,1.370047e+000,5.890462e-001,1.728400e+000,1.331253e+000,1.293144e+000,-1.919778e-003,1.644206e+000,-8.666967e-001,-7.161953e+000,-1.385018e+000,-1.505374e-001,-1.388643e+000,2.530122e-001,-1.488880e+000,-2.495496e-001,-2.377137e-001,1.167714e+001,-8.617124e-001,1.053828e+000,1.992744e-001,3.633564e-001,8.553304e-001,-1.060891e+000,-4.035829e-001,2.823207e-001,-2.369798e-003,-1.876577e+000,-5.950265e-001,4.241017e-001,3.140802e-001,6.631669e-001,-1.101204e+000,-1.351353e-001,-4.030882e+000,6.096353e+000,-1.148599e-001,1.606507e+000,-1.555474e-006,4.436084e+000,5.973715e-001,-1.154597e+000,-1.923378e-001,8.512132e-001,2.934895e-001,-6.522777e-002,1.389077e-001,9.091469e-002,3.133307e+000,2.108541e-001,-1.031588e+000,-1.546804e-001,5.266214e+000,-9.491390e-001,-7.184867e-001,4.875626e+000,-1.911907e-001,-2.865642e+000,1.087895e+000,-1.159454e+000,-9.546699e-002,-1.508146e+000,-2.031411e-002,1.040653e+000,-2.333508e+000,2.540592e-001,8.594981e+000,9.316770e-002,-1.035940e+000,-2.021151e-001,4.719343e+000,-9.019318e-001,-7.858046e+000,3.901234e+000,-2.233137e-001,-4.344739e+000,6.550733e-001,-1.096669e+000,-1.558196e-001,2.057553e+000,6.274495e+000,-2.678352e+000,-1.814927e+000,1.550676e-001,1.903276e+000,4.998989e-001,-1.114209e+000,-1.473531e-001,-7.602914e+000,8.973685e+000,-4.980074e-002,1.289198e+000,8.366906e-002,4.557987e+000,6.118757e-001,-1.149397e+000,-1.981628e-001,4.914096e+000,-3.498986e+000,-6.257090e-002,1.667401e-001,1.048980e-001,2.284689e+000,5.935965e-001,-1.056121e+000,-1.456172e-001,4.272656e-001,2.912649e+000,-5.501745e-001,4.406542e+000,-1.387680e-001,1.245555e+000,9.733011e-001,-1.125047e+000,-4.003662e-002,1.058457e+000,-3.462236e+000,4.395278e-001,-2.395805e+000,5.177589e-001,4.866247e+000,4.253189e-001,-1.051444e+000,-2.804541e-001,3.364668e+000,3.293787e+000,-1.015741e+001,3.807407e+000,-3.592377e-001,-3.367415e+000,7.900825e-001,-1.093847e+000,-1.436965e-001,2.384780e+000,5.787070e+000,-2.445987e+000,-1.311171e+000,2.326563e-001,1.158439e+000,5.555416e-001,-1.134824e+000,-1.680468e-001,-3.325620e+000,4.458596e+000,-1.135063e-001,1.104500e+000,7.794544e-002,4.609952e+000,6.854854e-001,-1.143017e+000,-1.565926e-001,3.014687e-001,-1.763027e-001,-3.557925e-002,-2.342406e-001,2.528705e-001,5.884085e+000,4.750602e-001,-1.136801e+000,-2.907502e-001,3.682423e+000,-4.061202e-001,-8.728159e-001,4.001510e+000,-1.522202e-001,-5.528713e+000,1.044847e+000,-1.063652e+000,7.808107e-002,-1.983678e+000,3.648078e-001,2.102276e+000,-3.065050e+000,8.431951e-001,1.038830e+001,2.662834e-001,-1.061015e+000,-2.859814e-001,4.223615e+000,-2.290138e+000,-8.314010e+000,4.405718e+000,-4.613627e-001,-4.502910e+000,1.008383e+000,-1.106302e+000,-1.697123e-001,2.087196e+000,8.238929e+000,-2.992416e+000,-1.821776e+000,3.434859e-001,7.755179e-001,5.341190e-001,-1.171110e+000,-2.106304e-001,-1.614361e+000,2.378103e+000,-1.625969e-001,8.504483e-001,1.059312e-001,4.046256e+000,6.618227e-001,-1.200480e+000,-2.235733e-001,1.014390e+000,-1.174074e+000,-4.440180e-001,2.262406e-001,1.665868e-001,5.461829e+000,5.676310e-001,-1.223587e+000,-3.502622e-001,1.699106e+000,6.724266e-001,1.268567e+000,2.135102e+000,8.039374e-004,-5.221111e+000,9.445690e-001,-9.452673e-001,1.468459e-001,-1.335034e+000,4.346628e+000,-1.285652e+001,-1.807046e+000,8.175243e-001,9.301065e+000,3.656798e-001,-1.134681e+000,-3.310951e-001,3.571244e+000,-2.208948e+000,6.041580e+000,3.107577e+000,-3.112127e-001,-4.186351e+000,9.188333e-001,-1.083237e+000,-1.831394e-001,2.062654e+000,1.385424e+000,-5.004950e+000,-1.332669e+000,3.627352e-001,3.323150e-001,6.191181e-001,-1.211527e+000,-2.590617e-001,-1.660874e-001,3.627905e-001,-1.039258e-001,4.697924e-001,1.671653e-001,3.507497e+000,6.022506e-001,-1.433017e+000,-4.733592e-001,1.724445e-001,9.953236e-001,-1.874457e+000,4.432099e-001,1.715810e-002,2.339272e+000,6.441470e-001,-1.084920e+000,-1.587903e-001,8.999585e-001,-2.537516e+000,5.877859e+000,2.014554e+000,9.689141e-002,3.177242e-001,9.030399e-001,-1.008242e+000,2.793030e-003,-3.507469e-001,1.028300e+001,-2.080454e+001,-2.781026e+000,8.995090e-001,3.366951e+000,3.473867e-001,-1.103151e+000,-2.799598e-001,2.525791e+000,-4.255704e+000,9.903388e+000,3.722668e+000,-3.603941e-001,-1.303292e+000,9.369454e-001,-1.102235e+000,-2.025061e-001,2.085660e+000,1.686787e+000,-5.010957e+000,-1.656458e+000,4.584029e-001,-2.751759e-001,6.184162e-001,-1.256130e+000,-3.104904e-001,1.639350e-001,1.315502e-001,-7.297583e-001,4.778480e-001,1.259265e-001,3.012108e+000,6.202728e-001,-1.620114e+000,-6.552670e-001,-2.877157e-001,1.094371e+000,2.818914e-001,3.696830e-001,9.428521e-002,1.450951e+000,5.681308e-001,-9.686204e-001,-3.755647e-002,1.469980e+000,-3.103414e+000,2.856583e+000,1.883209e+000,-5.746099e-002,1.286383e+000,1.001751e+000,-1.089377e+000,-1.023062e-001,-1.498891e+000,1.066455e+001,-1.720184e+001,-2.759314e+000,1.061258e+000,2.910211e+000,2.624701e-001,-1.044681e+000,-2.156857e-001,3.230136e+000,-5.863862e-001,6.096640e+000,3.550019e+000,-4.255773e-001,-1.500033e+000,9.687696e-001,-1.133658e+000,-2.505101e-001,1.717840e+000,8.480428e-003,-5.011789e+000,-1.740989e+000,4.983430e-001,-2.081829e-001,6.088641e-001,-1.335366e+000,-3.863319e-001,-5.279971e-001,3.638324e-001,3.230699e-001,8.339707e-002,2.483293e-001,2.678646e+000,4.998346e-001,-2.004511e+000,-9.957121e-001,1.250807e+000,1.625025e-002,-3.410754e-001,7.858244e-001,-9.506757e-002,2.651876e-002,5.788643e-001,-8.714157e-001,1.192051e-001,-8.486879e-001,-3.702497e-001,1.818277e+000,1.103427e+000,2.454866e-001,3.841575e+000,9.847350e-001,-1.042618e+000,-2.285793e-001,3.620175e-001,2.983368e+000,-9.776844e+000,-1.971587e+000,6.691674e-001,-7.901947e-001,3.213200e-001,-1.099112e+000,-1.869868e-001,2.044065e+000,2.062964e+000,1.265668e+000,2.710130e+000,-1.099443e-001,2.179353e-001,9.024108e-001,-1.106985e+000,-2.396881e-001,1.809807e+000,8.523319e+000,-5.011788e+000,-1.590086e+000,3.248449e-001,-1.003187e-001,6.550606e-001,-1.421285e+000,-4.767024e-001,-3.885004e-001,8.274590e-001,-3.644229e-001,6.999513e-001,5.196710e-002,2.578431e+000,6.246310e-001,-2.611217e+000,-1.398846e+000,4.527425e-001,-5.932142e-001,2.224617e-001,-5.593581e-001,3.389633e-001,-7.767112e-001,6.536004e-002,-9.881543e-001,4.684782e-002,-8.616613e-001,8.799807e-001,4.003130e+000,1.739543e+000,-8.098378e-002,5.524802e+000,1.499673e+000,-7.544759e-001,-2.314808e-001,8.125770e-001,-7.724135e-001,-9.577645e+000,-1.629433e+000,6.790832e-001,-4.193895e+000,-2.526624e-002,-1.273719e+000,-2.187030e-001,1.401798e+000,5.231832e+000,7.405093e-001,1.775166e+000,-7.269476e-002,1.996087e+000,1.057450e+000,-1.046864e+000,-2.247559e-001,1.679449e+000,1.140057e+001,-4.948829e+000,-1.182664e+000,3.241038e-001,-2.470012e-001,6.115900e-001,-1.514607e+000,-5.985430e-001,-1.877610e-001,1.756930e+000,-1.314206e+000,6.115810e-001,-5.970460e-006,2.412975e+000,8.124304e-001,-2.308414e+000,-1.083797e+000,-1.179959e-001,-1.728246e+000,7.784742e-001,5.494505e-001,6.203168e-003,9.326251e-001,-1.419518e-001,-3.230837e+000,-1.438670e+000,-9.868286e-001,2.974393e+000,1.949339e+000,-6.337857e-001,8.160271e-001,3.278606e+000,1.354373e+000,5.149378e-001,2.754789e-001,1.040965e+000,-4.501186e+000,-3.399057e+000,9.661861e-001,-4.736173e-001,-4.037574e+000,2.794847e-001,-1.621870e+000,-3.192763e-001,8.786242e-001,9.785565e+000,-2.727652e+000,1.903691e-002,5.521261e-001,2.138764e+000,8.419871e-001,-9.951701e-001,-2.550607e-001,1.498952e+000,-2.737197e-003,-3.101832e+000,-5.921329e-001,2.864422e-001,-4.405218e-001,6.631410e-001,-1.902954e+000,-9.056918e-001,-2.069570e-001,1.191499e+000,-1.092577e+000,5.849556e-001,-9.649602e-006,2.048407e+000,9.001527e-001,-1.271627e+000,-7.193923e-001,-1.136606e-002,-1.167951e-001,3.286175e-003,-5.262827e-002,-2.473874e-002,1.716125e+000,-2.187133e-001,-7.647175e+000,-3.114129e+000,-1.490128e+000,-5.266488e-001,3.063090e+000,1.474262e+000,5.481458e-001,2.052174e+000,1.353089e+000,2.191403e+000,3.421120e-001,1.446510e+000,2.170943e+000,-7.768187e+000,-1.471207e+000,-1.456708e-001,-1.753574e+000,2.310576e-001,-1.932296e+000,-3.814739e-001,6.245422e-001,6.748294e+000,-3.060171e-001,1.067747e+000,2.500671e-001,-1.252596e-001,8.614611e-001,-9.471101e-001,-4.052640e-001,1.300174e+000,-3.951536e-003,-1.908284e+000,-5.385721e-001,2.133578e-001,-6.250292e-001,6.658012e-001];
 armory_renderpath_HosekWilkieData.datasetRGBRad1 = [1.962684e+000,1.159831e+000,4.450588e+000,5.079633e+000,4.437388e+000,4.324573e+000,1.946487e+000,1.287515e+000,3.703696e+000,8.782833e+000,3.440437e+000,5.160333e+000,1.882170e+000,1.335878e+000,2.648641e+000,1.358368e+001,3.105473e+000,5.907387e+000,1.738159e+000,1.624289e+000,-8.786695e-003,2.118253e+001,2.770255e+000,7.055672e+000,1.571896e+000,2.301786e+000,-4.028545e+000,2.966806e+001,1.630876e+000,8.711031e+000,1.475048e+000,2.679086e+000,-6.311315e+000,3.377896e+001,2.140975e+000,9.385283e+000,1.326174e+000,3.378759e+000,-9.831444e+000,3.942061e+001,2.852702e+000,1.082542e+001,1.153344e+000,3.967771e+000,-1.265181e+001,4.195016e+001,7.468239e+000,1.221350e+001,9.746081e-001,4.051626e+000,-1.298454e+001,3.754964e+001,1.749232e+001,1.420619e+001,8.448016e-001,3.181809e+000,-8.757338e+000,2.197962e+001,3.524033e+001,1.639549e+001,2.029623e+000,1.364434e+000,4.201529e+000,5.415099e+000,9.825839e+000,1.063328e+001,2.023126e+000,1.494728e+000,3.420413e+000,9.072178e+000,9.205157e+000,1.186639e+001,1.956307e+000,1.648665e+000,2.039712e+000,1.430239e+001,9.039526e+000,1.330453e+001,1.825053e+000,1.985022e+000,-8.036307e-001,2.202493e+001,9.415361e+000,1.517659e+001,1.650367e+000,2.593201e+000,-4.469328e+000,2.969817e+001,9.410977e+000,1.744850e+001,1.555202e+000,2.962925e+000,-6.608170e+000,3.329887e+001,1.064559e+001,1.850816e+001,1.412478e+000,3.439403e+000,-9.196616e+000,3.685077e+001,1.345341e+001,2.003128e+001,1.252990e+000,3.820805e+000,-1.115338e+001,3.721593e+001,2.014916e+001,2.182320e+001,1.091952e+000,3.663027e+000,-1.031330e+001,2.978985e+001,3.296835e+001,2.375450e+001,9.501691e-001,2.664579e+000,-5.545167e+000,1.281159e+001,5.154768e+001,2.574284e+001];
 armory_renderpath_HosekWilkieData.datasetRGB2 = [-1.140530e+000,-1.982747e-001,-7.512730e+000,8.403899e+000,-5.699038e-002,9.015907e-001,3.392161e-002,4.772522e+000,5.111184e-001,-1.165117e+000,-1.852955e-001,2.963684e+000,-2.262274e+000,-1.571683e-001,6.339974e-001,4.977879e-002,7.243307e+000,4.220053e-001,-1.169936e+000,-3.357429e-001,1.911291e+000,-2.391074e-001,-4.791643e-001,1.446113e+000,-9.178108e-002,-4.700239e+000,8.096219e-001,-1.060246e+000,-1.051633e-001,5.013829e-001,2.832309e+000,-3.707855e-001,1.523131e+000,9.163749e-002,5.604183e+000,7.208566e-001,-1.089753e+000,-2.382167e-001,2.360312e+000,-5.902562e+000,-8.799894e+000,1.377692e+000,-6.131633e-002,-1.415472e+000,6.124057e-001,-1.075481e+000,-1.242391e-001,1.425781e+000,8.810319e+000,-2.922646e+000,1.486520e+000,3.270580e-002,3.889783e+000,4.999482e-001,-1.149342e+000,-2.076337e-001,-7.446587e+000,8.014559e+000,-4.866227e-002,8.203043e-001,6.386483e-002,4.894198e+000,5.452051e-001,-1.120531e+000,-1.513311e-001,2.735504e+000,-2.417591e+000,-1.361114e-001,4.296342e-001,9.427488e-002,8.171403e+000,4.102448e-001,-1.226964e+000,-3.516378e-001,1.308298e+000,-5.097487e-002,-4.846783e-001,1.654619e+000,-1.134940e-001,-3.347854e+000,1.131147e+000,-9.664377e-001,2.767589e-002,1.658235e-001,2.407439e+000,-1.300304e-001,9.170958e-001,2.742895e-001,6.642633e+000,2.550064e-001,-1.153358e+000,-3.126223e-001,2.078934e+000,-5.857733e+000,-8.659848e+000,1.758505e+000,-9.616094e-002,-1.230863e+000,9.663832e-001,-1.053850e+000,-1.330743e-001,1.481738e+000,1.049485e+001,-3.528854e+000,9.142363e-001,1.244880e-001,2.644615e+000,5.001048e-001,-1.173687e+000,-2.360362e-001,-3.741454e+000,4.088507e+000,-7.528205e-002,6.645237e-001,7.718265e-002,4.651220e+000,5.586318e-001,-1.213757e+000,-2.589561e-001,7.132551e-001,-4.259327e-001,-1.980821e-001,3.627815e-001,4.666560e-002,5.807984e+000,5.847377e-001,-1.108794e+000,-2.259870e-001,1.574179e+000,-3.753731e-001,-5.984743e-001,1.659414e+000,-1.681021e-002,6.785219e-001,8.647325e-001,-1.060896e+000,-1.346690e-002,-7.529656e-001,1.711319e+000,-9.792435e-001,2.022433e-001,3.826487e-001,5.725157e+000,5.290714e-001,-1.085145e+000,-2.840715e-001,2.088029e+000,-4.935097e+000,-9.056542e+000,1.976149e+000,-3.912485e-002,-8.636064e-001,7.452125e-001,-1.077983e+000,-1.416633e-001,1.100848e+000,1.015875e+001,-2.943712e+000,5.255135e-001,2.164224e-001,2.941143e+000,6.699937e-001,-1.223293e+000,-2.867444e-001,-1.624136e+000,1.668299e+000,-9.537589e-002,5.015947e-001,1.130741e-001,4.244812e+000,5.082152e-001,-1.325342e+000,-4.280991e-001,4.705490e-001,6.926592e-002,-4.572587e-001,5.344144e-001,-2.554192e-002,3.093939e+000,6.639401e-001,-1.113581e+000,-1.192133e-001,4.011536e-001,7.011889e-001,2.052842e-001,9.880724e-001,1.807533e-002,4.690160e+000,8.576240e-001,-1.016063e+000,-1.038138e-001,-2.280391e-001,7.898918e-001,-1.127333e+001,2.074545e-001,5.388182e-001,1.364263e+000,4.660455e-001,-1.099582e+000,-2.228607e-001,1.332648e+000,5.135188e+000,1.653152e+000,1.417020e+000,-1.087532e-001,1.809275e+000,8.080874e-001,-1.064357e+000,-1.520775e-001,8.207368e-001,-1.323565e-003,-5.009523e+000,3.946298e-001,4.337902e-001,2.593198e+000,6.719172e-001,-1.278702e+000,-3.512866e-001,-4.511055e-001,3.895760e-001,-2.429672e-001,4.270577e-001,1.135348e-001,3.719130e+000,4.998867e-001,-1.580069e+000,-7.095475e-001,-3.198904e-001,1.715748e+000,-1.185915e+000,4.523161e-001,-1.026159e-002,7.927188e-001,5.538350e-001,-9.474023e-001,1.173703e-001,4.881381e-001,-2.618684e+000,3.251661e+000,1.213931e+000,-1.736274e-002,8.000768e+000,1.025998e+000,-1.129091e+000,-3.287694e-001,-3.524077e-001,3.352892e+000,-1.416073e+001,-8.485617e-001,6.560766e-001,-2.820937e+000,3.111303e-001,-1.030884e+000,-1.137581e-001,1.109855e+000,8.082276e+000,1.519214e+000,2.112433e+000,-1.592299e-001,3.675905e+000,8.703367e-001,-1.075192e+000,-1.627166e-001,3.514910e-001,1.168164e+000,-4.255822e+000,-6.015348e-001,6.265776e-001,2.884818e+000,6.548384e-001,-1.316017e+000,-3.889652e-001,-5.030854e-001,4.488704e-001,-3.186800e-001,4.570763e-001,8.909201e-002,3.659274e+000,5.011746e-001,-1.731876e+000,-8.493806e-001,1.194871e-001,2.002781e+000,-2.006547e+000,4.872233e-001,-2.854606e-002,2.662137e-001,4.611629e-001,-9.273680e-001,1.380954e-001,-3.302179e-001,-3.553265e+000,4.633345e+000,9.696729e-001,8.799775e-002,8.291129e+000,1.094451e+000,-1.099377e+000,-3.325392e-001,2.501063e-001,2.613712e+000,-1.328142e+001,-5.579527e-001,4.992081e-001,-3.504402e+000,3.022924e-001,-1.048420e+000,-1.227773e-001,5.845373e-001,1.105869e+001,3.813151e-002,1.330409e+000,1.978131e-002,3.959430e+000,8.396439e-001,-1.063233e+000,-1.560639e-001,2.840033e-001,8.751565e-001,-3.411820e+000,-1.436564e-001,5.846580e-001,2.899292e+000,6.799095e-001,-1.376715e+000,-4.541567e-001,-1.445491e+000,1.569898e+000,-1.390627e-001,5.558270e-001,4.109877e-002,3.349451e+000,5.516123e-001,-1.953391e+000,-1.035869e+000,1.690563e+000,-1.964690e-001,-7.787096e-001,5.799605e-001,2.945626e-002,4.217906e-002,2.451373e-001,-1.012422e+000,7.136451e-002,-1.862534e+000,-7.228653e-001,1.947997e-001,2.091805e-001,6.399233e-002,7.928994e+000,1.290733e+000,-9.706708e-001,-2.880950e-001,1.107797e+000,-2.731734e+000,-8.445995e+000,4.296774e-001,5.117648e-001,-3.824277e+000,1.761207e-001,-1.110611e+000,-1.789409e-001,2.108488e-001,2.071430e+001,-1.763174e+000,9.554695e-002,-2.943103e-002,3.422079e+000,8.815496e-001,-1.048334e+000,-1.614087e-001,2.475184e-001,2.146938e-002,-2.983901e+000,2.538224e-001,5.601370e-001,2.461925e+000,6.777394e-001,-1.393719e+000,-5.002724e-001,-2.408940e+000,2.680983e+000,-1.362825e-001,7.395067e-001,-3.300343e-006,3.260889e+000,8.132057e-001,-2.128663e+000,-1.151182e+000,2.923026e+000,-1.931838e+000,-4.426170e-001,2.309983e-001,-5.485890e-003,3.279529e-001,-2.229467e-001,-1.618022e+000,-3.766490e-001,-3.163544e+000,1.611608e+000,-3.967476e-001,3.933680e-001,3.006742e-001,6.835177e+000,1.613765e+000,-5.669064e-001,-1.481749e-001,2.071817e+000,-8.157422e+000,-5.988088e+000,2.387202e-001,1.447191e-001,-4.296385e+000,5.011258e-002,-1.241724e+000,-2.519348e-001,-1.908609e-001,2.952235e+001,-3.333660e+000,-1.837651e-002,1.022249e-001,2.929320e+000,8.867262e-001,-1.021670e+000,-1.667327e-001,1.789771e-001,-2.178108e-003,-2.641572e+000,-5.641484e-002,5.303758e-001,2.138196e+000,6.780350e-001,-1.669332e+000,-7.588708e-001,-2.993557e+000,3.178760e+000,-8.066442e-002,6.544672e-001,-8.089880e-006,2.628924e+000,9.001272e-001,-1.755806e+000,-8.735348e-001,3.258881e+000,-2.504785e+000,-3.300791e-001,1.180565e-001,-9.315982e-003,1.785154e+000,-3.205824e-001,-3.720277e+000,-1.733350e+000,-3.332272e+000,1.515869e+000,1.734218e-001,8.011956e-001,1.995440e-001,3.817666e+000,1.638502e+000,4.724641e-001,3.209828e-001,2.051443e+000,-5.105574e+000,-6.509139e+000,-4.232041e-001,2.598931e-001,-2.151756e+000,-3.493910e-003,-1.525600e+000,-4.897606e-001,-9.891121e-002,2.346818e+001,-2.278152e+000,1.681219e-001,-4.469389e-002,1.051000e+000,9.294666e-001,-9.908649e-001,-2.008182e-001,1.605143e-001,-2.463113e-003,-2.477349e+000,-1.218647e-001,4.750121e-001,1.460813e+000,6.661364e-001,-2.122119e+000,-1.125475e+000,-3.066599e+000,3.145078e+000,-5.411593e-002,5.133628e-001,-7.823408e-006,2.268448e+000,9.001416e-001,-1.528158e+000,-9.370249e-001,2.567559e+000,-1.591439e+000,-3.634460e-001,1.763256e-001,1.119624e-003,1.811848e+000,-2.637929e-001,-6.524387e+000,-2.673507e+000,-2.940472e+000,-6.025609e-001,7.852067e-001,1.073499e+000,-3.540435e-002,3.517416e+000,1.490466e+000,8.886026e-001,-9.681828e-002,1.430554e+000,4.993717e+000,-6.071355e+000,-6.053986e-001,5.092997e-001,-1.273010e+000,7.491329e-002,-1.481997e+000,-5.897282e-001,2.659264e-001,1.267239e+000,-5.741291e-001,5.983011e-002,-2.217312e-001,-3.016452e-001,9.260830e-001,-1.010943e+000,-2.075134e-001,5.066749e-002,1.470708e+001,-3.780501e+000,7.253223e-002,4.045458e-001,1.320164e+000,6.559925e-001,-1.129907e+000,-1.884011e-001,-8.047670e+000,9.035776e+000,-5.539419e-002,8.823349e-001,3.197135e-002,4.839388e+000,5.042822e-001,-1.133821e+000,-1.510781e-001,3.362822e+000,-2.453381e+000,-1.463925e-001,4.728708e-001,5.958140e-002,7.636300e+000,4.805162e-001,-1.176518e+000,-3.549902e-001,1.729044e+000,-2.160966e-001,-5.075865e-001,1.675584e+000,-8.906902e-002,-5.386842e+000,5.452218e-001,-1.043563e+000,-7.520975e-002,8.750644e-001,2.510518e+000,7.584882e-003,9.361250e-001,7.889083e-002,6.066644e+000,5.813108e-001,-1.081304e+000,-2.222253e-001,2.517638e+000,-4.453820e+000,-8.663691e+000,8.662558e-001,-4.802657e-002,-8.965449e-001,4.886656e-001,-1.083774e+000,-1.375469e-001,1.685818e+000,5.631120e+000,-3.100752e+000,4.045941e-001,2.346895e-002,3.390321e+000,5.008309e-001,-1.143158e+000,-2.058334e-001,-9.660198e+000,1.062394e+001,-4.434119e-002,8.607615e-001,3.177325e-002,4.416481e+000,5.918162e-001,-1.146773e+000,-1.727385e-001,4.626048e+000,-4.684602e+000,-8.307137e-002,1.619616e-001,1.484866e-001,7.572868e+000,2.681126e-001,-1.151324e+000,-3.099303e-001,4.125596e-001,2.340752e+000,-4.214444e-001,1.987375e+000,-1.913410e-001,-3.845978e+000,1.337311e+000,-1.034258e+000,-7.778759e-003,7.050094e-001,-8.036369e-001,3.138570e-001,2.469452e-001,3.559970e-001,7.485917e+000,4.790329e-002,-1.096568e+000,-2.673169e-001,2.575654e+000,-8.057121e-001,-8.884928e+000,1.416170e+000,-2.091315e-001,-1.543494e+000,1.065445e+000,-1.083304e+000,-1.528265e-001,1.697727e+000,2.503702e+000,-2.885296e+000,-1.298500e-001,1.548870e-001,2.479652e+000,5.066496e-001,-1.165736e+000,-2.329945e-001,-5.967964e+000,6.705959e+000,-5.931355e-002,7.485638e-001,3.913878e-002,4.221591e+000,6.183926e-001,-1.212422e+000,-2.545910e-001,2.418626e+000,-2.266104e+000,-1.102014e-001,1.363887e-002,1.055411e-001,5.648062e+000,4.557412e-001,-1.070436e+000,-2.163341e-001,7.098718e-001,7.843075e-001,-4.323930e-001,2.109823e+000,-9.589700e-002,-1.985193e-001,1.060428e+000,-1.104879e+000,-3.013622e-002,2.976276e-002,1.069707e+000,1.410000e-001,-4.880020e-001,4.452288e-001,6.418590e+000,3.195986e-001,-1.048969e+000,-2.655317e-001,2.689426e+000,-3.941038e+000,-9.506461e+000,1.837119e+000,-1.892124e-001,-1.562146e+000,9.043414e-001,-1.106145e+000,-1.601642e-001,1.544544e+000,7.388492e+000,-2.924600e+000,-4.328453e-001,1.763161e-001,2.523111e+000,5.851902e-001,-1.203666e+000,-2.776587e-001,-2.084286e+000,2.450840e+000,-8.746613e-002,5.258507e-001,7.983316e-002,3.860055e+000,5.486167e-001,-1.340448e+000,-4.230590e-001,3.462849e-001,4.707607e-001,-2.512626e-001,1.530746e-001,2.724218e-002,3.035216e+000,5.876133e-001,-1.014554e+000,-1.168790e-001,9.477794e-001,-1.061218e+000,-4.196730e-001,2.058832e+000,-5.989624e-002,3.058168e+000,9.763861e-001,-1.137388e+000,-9.854030e-002,-2.984893e-001,3.647820e+000,-6.585571e-001,-1.479180e+000,6.102932e-001,3.265914e+000,3.480333e-001,-1.021816e+000,-2.344957e-001,2.463671e+000,-7.240685e+000,-8.862697e+000,2.514058e+000,-2.122768e-001,-3.313968e-002,9.028136e-001,-1.126581e+000,-1.874347e-001,1.454154e+000,1.034398e+001,-3.237393e+000,-8.654927e-001,2.457248e-001,1.845769e+000,6.002482e-001,-1.263727e+000,-3.439354e-001,-1.786388e-001,3.980166e-001,-3.349517e-001,3.825166e-001,1.029225e-001,3.331096e+000,4.998955e-001,-1.530010e+000,-6.879698e-001,2.380415e-001,1.608216e+000,-1.682679e+000,3.546360e-001,-3.915220e-003,4.517655e-001,5.128605e-001,-9.685659e-001,9.480403e-002,6.076844e-002,-3.217561e+000,4.568074e+000,1.069299e+000,2.083638e-002,7.301088e+000,1.072165e+000,-1.113925e+000,-3.112382e-001,3.954133e-001,5.105907e+000,-1.456866e+001,-4.917378e-001,5.289909e-001,-2.678374e+000,3.014709e-001,-1.046864e+000,-1.215754e-001,1.778308e+000,4.661489e+000,2.565583e-001,1.353680e+000,-1.175767e-001,3.415972e+000,8.457746e-001,-1.104480e+000,-1.940913e-001,1.343668e+000,-1.759206e-003,-5.009204e+000,-4.186951e-001,3.125710e-001,1.628183e+000,6.720408e-001,-1.286902e+000,-3.781238e-001,-8.977253e-002,3.545393e-001,-4.866515e-001,3.843664e-001,8.281675e-002,3.122231e+000,5.046991e-001,-1.712597e+000,-8.549112e-001,4.809286e-001,1.515398e+000,-2.212211e+000,2.539029e-001,2.335997e-002,-6.089466e-002,4.268444e-001,-8.807283e-001,1.646097e-001,-4.437898e-001,-3.188247e+000,5.984417e+000,1.334779e+000,-4.026975e-002,7.546431e+000,1.175751e+000,-1.147253e+000,-3.538199e-001,6.101836e-001,4.437780e+000,-1.559813e+001,-1.103222e+000,6.242039e-001,-3.091472e+000,2.174290e-001,-1.038230e+000,-1.213475e-001,1.547505e+000,5.893176e+000,1.368738e+000,1.663127e+000,-1.377130e-001,3.185279e+000,8.736453e-001,-1.101026e+000,-1.874907e-001,1.272667e+000,3.596524e+000,-5.007243e+000,-6.352483e-001,3.048985e-001,1.931613e+000,6.788844e-001,-1.342753e+000,-4.384971e-001,-1.213491e+000,1.621399e+000,-1.551441e-001,5.614218e-001,2.591739e-002,2.958967e+000,5.782132e-001,-1.937684e+000,-1.066019e+000,1.913336e+000,-7.347719e-001,-5.916167e-001,1.587590e-001,1.092568e-001,-6.275002e-001,1.599071e-001,-9.302391e-001,1.486187e-001,-1.603835e+000,1.783713e-001,1.100461e+000,1.174181e+000,-1.602361e-001,7.868331e+000,1.468971e+000,-1.053631e+000,-3.727050e-001,1.114117e+000,-9.603286e-001,-1.062469e+001,-1.162140e+000,7.952797e-001,-4.478765e+000,-4.440862e-002,-1.083629e+000,-1.261405e-001,1.229344e+000,1.127825e+001,1.319010e-001,1.624729e+000,-2.825898e-001,3.661082e+000,1.036911e+000,-1.093950e+000,-2.067455e-001,1.258035e+000,7.548645e+000,-4.598387e+000,-8.944932e-001,3.292634e-001,1.311304e+000,6.291871e-001,-1.385867e+000,-5.068139e-001,-1.486490e+000,1.969049e+000,-1.698025e-001,6.629167e-001,-5.289365e-006,2.760315e+000,8.644368e-001,-2.107367e+000,-1.175639e+000,2.313241e+000,-1.001653e+000,-4.843139e-001,1.124485e-001,3.901494e-005,-3.502469e-001,-3.204780e-001,-1.475244e+000,-2.833055e-001,-2.085824e+000,1.192563e+000,-7.645200e-001,8.380081e-001,2.203580e-001,7.157885e+000,1.753702e+000,-6.644372e-001,-2.549735e-001,1.600273e+000,-8.589034e+000,-6.144718e+000,-7.599731e-001,2.898370e-001,-5.770923e+000,-9.656242e-002,-1.211687e+000,-1.653494e-001,8.393400e-001,2.792988e+001,-3.395461e+000,9.933752e-001,-3.976877e-002,3.776659e+000,9.546526e-001,-1.063757e+000,-2.037563e-001,1.117207e+000,-1.252806e-003,-3.332330e+000,-6.971409e-001,3.388719e-001,1.311398e+000,6.635171e-001,-1.678889e+000,-7.992295e-001,-2.421687e+000,2.871029e+000,-7.662842e-002,6.046208e-001,-7.598099e-006,2.002314e+000,9.001307e-001,-1.692144e+000,-8.804250e-001,3.060895e+000,-2.000009e+000,-3.183563e-001,8.385862e-002,-6.326713e-003,1.206639e+000,-3.369967e-001,-3.676795e+000,-1.719207e+000,-2.534697e+000,1.005285e+000,1.550407e-001,1.072910e+000,1.318094e-001,3.717018e+000,1.689191e+000,5.424542e-001,3.263528e-001,1.551055e+000,-3.841058e+000,-6.598996e+000,-1.201779e+000,3.530669e-001,-2.542945e+000,-6.482523e-002,-1.553849e+000,-4.576860e-001,9.324676e-001,1.950982e+001,-2.344516e+000,1.121020e+000,-1.221537e-001,7.285496e-001,9.582816e-001,-1.020650e+000,-2.215797e-001,1.009774e+000,-2.056855e-003,-2.740338e+000,-8.122355e-001,3.328967e-001,8.982766e-001,6.594676e-001,-2.247360e+000,-1.221267e+000,-3.072346e+000,3.385139e+000,-4.387559e-002,5.084887e-001,-7.418833e-006,1.750107e+000,9.001401e-001,-1.248499e+000,-8.442718e-001,3.062611e+000,-2.020314e+000,-2.815341e-001,5.254745e-002,3.345008e-003,1.433225e+000,-2.835911e-001,-7.004119e+000,-2.927978e+000,-2.649852e+000,7.971894e-001,5.466893e-001,1.442667e+000,-6.063912e-002,2.806194e+000,1.547429e+000,1.434882e+000,9.114639e-002,1.170089e+000,3.512808e-002,-5.861915e+000,-1.411843e+000,5.400486e-001,-7.746522e-001,2.386984e-002,-1.559053e+000,-5.502302e-001,1.200396e+000,1.347741e+001,-2.344397e+000,8.868907e-001,-3.292661e-001,-1.362105e+000,9.217826e-001,-1.044436e+000,-2.360719e-001,7.054471e-001,-2.904518e-003,-2.092829e+000,-5.119668e-001,4.174861e-001,9.687435e-001,6.588427e-001];
@@ -27573,9 +27122,9 @@ iron_App.lastw = -1;
 iron_App.lasth = -1;
 iron_Scene.uidCounter = 0;
 iron_Scene.framePassed = true;
-iron_data_ConstData.skydomeIndices = [261,8,7,258,5,4,265,12,11,257,2,156,262,9,8,259,6,5,179,12,265,0,3,2,263,10,9,260,7,6,1,4,3,264,11,10,6,17,16,179,23,12,3,14,13,10,21,20,7,18,17,4,15,14,11,22,21,8,19,18,5,16,15,12,23,22,2,13,156,9,20,19,16,27,26,23,34,33,13,24,156,20,31,30,17,28,27,179,34,23,14,25,24,21,32,31,18,29,28,15,26,25,22,33,32,19,30,29,29,40,39,26,37,36,33,44,43,30,41,40,27,38,37,34,45,44,24,35,156,31,42,41,28,39,38,179,45,34,25,36,35,32,43,42,39,50,49,179,56,45,36,47,46,43,54,53,40,51,50,37,48,47,44,55,54,41,52,51,38,49,48,45,56,55,35,46,156,42,53,52,52,63,62,49,60,59,56,67,66,46,57,156,53,64,63,50,61,60,179,67,56,47,58,57,54,65,64,51,62,61,48,59,58,55,66,65,62,73,72,59,70,69,66,77,76,63,74,73,60,71,70,67,78,77,57,68,156,64,75,74,61,72,71,179,78,67,58,69,68,65,76,75,75,86,85,72,83,82,179,89,78,69,80,79,76,87,86,73,84,83,70,81,80,77,88,87,74,85,84,71,82,81,78,89,88,68,79,156,85,96,95,82,93,92,89,100,99,79,90,156,86,97,96,83,94,93,179,100,89,80,91,90,87,98,97,84,95,94,81,92,91,88,99,98,98,109,108,95,106,105,92,103,102,99,110,109,96,107,106,93,104,103,100,111,110,90,101,156,97,108,107,94,105,104,179,111,100,91,102,101,101,112,156,108,119,118,105,116,115,179,122,111,102,113,112,109,120,119,106,117,116,103,114,113,110,121,120,107,118,117,104,115,114,111,122,121,121,132,131,118,129,128,115,126,125,122,133,132,112,123,156,119,130,129,116,127,126,179,133,122,113,124,123,120,131,130,117,128,127,114,125,124,124,135,134,131,142,141,128,139,138,125,136,135,132,143,142,129,140,139,126,137,136,133,144,143,123,134,156,130,141,140,127,138,137,179,144,133,144,155,154,134,145,156,141,152,151,138,149,148,179,155,144,135,146,145,142,153,152,139,150,149,136,147,146,143,154,153,140,151,150,137,148,147,147,159,158,154,166,165,151,163,162,148,160,159,155,167,166,145,157,156,152,164,163,149,161,160,179,167,155,146,158,157,153,165,164,150,162,161,179,178,167,158,169,168,165,176,175,162,173,172,159,170,169,166,177,176,163,174,173,160,171,170,167,178,177,157,168,156,164,175,174,161,172,171,171,183,182,178,190,189,168,180,156,175,187,186,172,184,183,179,190,178,169,181,180,176,188,187,173,185,184,170,182,181,177,189,188,174,186,185,182,193,192,189,200,199,186,197,196,183,194,193,190,201,200,180,191,156,187,198,197,184,195,194,179,201,190,181,192,191,188,199,198,185,196,195,195,206,205,179,212,201,192,203,202,199,210,209,196,207,206,193,204,203,200,211,210,197,208,207,194,205,204,201,212,211,191,202,156,198,209,208,205,216,215,212,223,222,202,213,156,209,220,219,206,217,216,179,223,212,203,214,213,210,221,220,207,218,217,204,215,214,211,222,221,208,219,218,218,229,228,215,226,225,222,233,232,219,230,229,216,227,226,223,234,233,213,224,156,220,231,230,217,228,227,179,234,223,214,225,224,221,232,231,228,239,238,179,245,234,225,236,235,232,243,242,229,240,239,226,237,236,233,244,243,230,241,240,227,238,237,234,245,244,224,235,156,231,242,241,241,252,251,238,249,248,245,256,255,235,246,156,242,253,252,239,250,249,179,256,245,236,247,246,243,254,253,240,251,250,237,248,247,244,255,254,251,260,259,248,1,0,255,264,263,252,261,260,249,258,1,256,265,264,246,257,156,253,262,261,250,259,258,179,265,256,247,0,257,254,263,262,261,7,260,258,4,1,265,11,264,262,8,261,259,5,258,0,2,257,263,9,262,260,6,259,1,3,0,264,10,263,6,16,5,3,13,2,10,20,9,7,17,6,4,14,3,11,21,10,8,18,7,5,15,4,12,22,11,9,19,8,16,26,15,23,33,22,20,30,19,17,27,16,14,24,13,21,31,20,18,28,17,15,25,14,22,32,21,19,29,18,29,39,28,26,36,25,33,43,32,30,40,29,27,37,26,34,44,33,31,41,30,28,38,27,25,35,24,32,42,31,39,49,38,36,46,35,43,53,42,40,50,39,37,47,36,44,54,43,41,51,40,38,48,37,45,55,44,42,52,41,52,62,51,49,59,48,56,66,55,53,63,52,50,60,49,47,57,46,54,64,53,51,61,50,48,58,47,55,65,54,62,72,61,59,69,58,66,76,65,63,73,62,60,70,59,67,77,66,64,74,63,61,71,60,58,68,57,65,75,64,75,85,74,72,82,71,69,79,68,76,86,75,73,83,72,70,80,69,77,87,76,74,84,73,71,81,70,78,88,77,85,95,84,82,92,81,89,99,88,86,96,85,83,93,82,80,90,79,87,97,86,84,94,83,81,91,80,88,98,87,98,108,97,95,105,94,92,102,91,99,109,98,96,106,95,93,103,92,100,110,99,97,107,96,94,104,93,91,101,90,108,118,107,105,115,104,102,112,101,109,119,108,106,116,105,103,113,102,110,120,109,107,117,106,104,114,103,111,121,110,121,131,120,118,128,117,115,125,114,122,132,121,119,129,118,116,126,115,113,123,112,120,130,119,117,127,116,114,124,113,124,134,123,131,141,130,128,138,127,125,135,124,132,142,131,129,139,128,126,136,125,133,143,132,130,140,129,127,137,126,144,154,143,141,151,140,138,148,137,135,145,134,142,152,141,139,149,138,136,146,135,143,153,142,140,150,139,137,147,136,147,158,146,154,165,153,151,162,150,148,159,147,155,166,154,152,163,151,149,160,148,146,157,145,153,164,152,150,161,149,158,168,157,165,175,164,162,172,161,159,169,158,166,176,165,163,173,162,160,170,159,167,177,166,164,174,163,161,171,160,171,182,170,178,189,177,175,186,174,172,183,171,169,180,168,176,187,175,173,184,172,170,181,169,177,188,176,174,185,173,182,192,181,189,199,188,186,196,185,183,193,182,190,200,189,187,197,186,184,194,183,181,191,180,188,198,187,185,195,184,195,205,194,192,202,191,199,209,198,196,206,195,193,203,192,200,210,199,197,207,196,194,204,193,201,211,200,198,208,197,205,215,204,212,222,211,209,219,208,206,216,205,203,213,202,210,220,209,207,217,206,204,214,203,211,221,210,208,218,207,218,228,217,215,225,214,222,232,221,219,229,218,216,226,215,223,233,222,220,230,219,217,227,216,214,224,213,221,231,220,228,238,227,225,235,224,232,242,231,229,239,228,226,236,225,233,243,232,230,240,229,227,237,226,234,244,233,231,241,230,241,251,240,238,248,237,245,255,244,242,252,241,239,249,238,236,246,235,243,253,242,240,250,239,237,247,236,244,254,243,251,259,250,248,0,247,255,263,254,252,260,251,249,1,248,256,264,255,253,261,252,250,258,249,247,257,246,254,262,253];
-iron_data_ConstData.skydomePos = [0.0,0.5,0.86603,0.0,0.70711,0.70711,0.06699,0.25,0.96593,0.12941,0.48296,0.86603,0.18301,0.68301,0.70711,0.22414,0.83652,0.5,0.25,0.93301,0.25882,0.25882,0.96593,-0.0,0.25,0.93301,-0.25882,0.22414,0.83652,-0.5,0.18301,0.68301,-0.70711,0.12941,0.48296,-0.86603,0.06699,0.25,-0.96593,0.12941,0.22414,0.96593,0.25,0.43301,0.86603,0.35355,0.61237,0.70711,0.43301,0.75,0.5,0.48296,0.83652,0.25882,0.5,0.86603,-0.0,0.48296,0.83652,-0.25882,0.43301,0.75,-0.5,0.35355,0.61237,-0.70711,0.25,0.43301,-0.86603,0.12941,0.22414,-0.96593,0.18301,0.18301,0.96593,0.35355,0.35355,0.86603,0.5,0.5,0.70711,0.61237,0.61237,0.5,0.68301,0.68301,0.25882,0.70711,0.70711,-0.0,0.68301,0.68301,-0.25882,0.61237,0.61237,-0.5,0.5,0.5,-0.70711,0.35355,0.35355,-0.86603,0.18301,0.18301,-0.96593,0.22414,0.12941,0.96593,0.43301,0.25,0.86603,0.61237,0.35355,0.70711,0.75,0.43301,0.5,0.83652,0.48296,0.25882,0.86603,0.5,-0.0,0.83652,0.48296,-0.25882,0.75,0.43301,-0.5,0.61237,0.35355,-0.70711,0.43301,0.25,-0.86603,0.22414,0.12941,-0.96593,0.25,0.06699,0.96593,0.48296,0.12941,0.86603,0.68301,0.18301,0.70711,0.83652,0.22414,0.5,0.93301,0.25,0.25882,0.96593,0.25882,-0.0,0.93301,0.25,-0.25882,0.83652,0.22414,-0.5,0.68301,0.18301,-0.70711,0.48296,0.12941,-0.86603,0.25,0.06699,-0.96593,0.25882,-0.0,0.96593,0.5,-0.0,0.86603,0.70711,-0.0,0.70711,0.86603,0.0,0.5,0.96593,-0.0,0.25882,1.0,-0.0,-0.0,0.96593,-0.0,-0.25882,0.86603,-0.0,-0.5,0.70711,-0.0,-0.70711,0.5,-0.0,-0.86603,0.25882,-0.0,-0.96593,0.25,-0.06699,0.96593,0.48296,-0.12941,0.86603,0.68301,-0.18301,0.70711,0.83652,-0.22414,0.5,0.93301,-0.25,0.25882,0.96593,-0.25882,-0.0,0.93301,-0.25,-0.25882,0.83652,-0.22414,-0.5,0.68301,-0.18301,-0.70711,0.48296,-0.12941,-0.86603,0.25,-0.06699,-0.96593,0.22414,-0.12941,0.96593,0.43301,-0.25,0.86603,0.61237,-0.35355,0.70711,0.75,-0.43301,0.5,0.83652,-0.48296,0.25882,0.86603,-0.5,-0.0,0.83652,-0.48296,-0.25882,0.75,-0.43301,-0.5,0.61237,-0.35355,-0.70711,0.43301,-0.25,-0.86603,0.22414,-0.12941,-0.96593,0.18301,-0.18301,0.96593,0.35355,-0.35355,0.86603,0.5,-0.5,0.70711,0.61237,-0.61237,0.5,0.68301,-0.68301,0.25882,0.70711,-0.70711,-0.0,0.68301,-0.68301,-0.25882,0.61237,-0.61237,-0.5,0.5,-0.5,-0.70711,0.35355,-0.35355,-0.86603,0.18301,-0.18301,-0.96593,0.12941,-0.22414,0.96593,0.25,-0.43301,0.86603,0.35355,-0.61237,0.70711,0.43301,-0.75,0.5,0.48296,-0.83652,0.25882,0.5,-0.86603,-0.0,0.48296,-0.83652,-0.25882,0.43301,-0.75,-0.5,0.35355,-0.61237,-0.70711,0.25,-0.43301,-0.86603,0.12941,-0.22414,-0.96593,0.06699,-0.25,0.96593,0.12941,-0.48296,0.86603,0.18301,-0.68301,0.70711,0.22414,-0.83652,0.5,0.25,-0.93301,0.25882,0.25882,-0.96593,-0.0,0.25,-0.93301,-0.25882,0.22414,-0.83652,-0.5,0.18301,-0.68301,-0.70711,0.12941,-0.48296,-0.86603,0.06699,-0.25,-0.96593,0.0,-0.25882,0.96593,-0.0,-0.5,0.86603,0.0,-0.70711,0.70711,0.0,-0.86603,0.5,0.0,-0.96593,0.25882,-0.0,-1.0,-0.0,0.0,-0.96593,-0.25882,0.0,-0.86603,-0.5,0.0,-0.70711,-0.70711,0.0,-0.5,-0.86603,0.0,-0.25882,-0.96593,-0.06699,-0.25,0.96593,-0.12941,-0.48296,0.86603,-0.18301,-0.68301,0.70711,-0.22414,-0.83652,0.5,-0.25,-0.93301,0.25882,-0.25882,-0.96593,-0.0,-0.25,-0.93301,-0.25882,-0.22414,-0.83652,-0.5,-0.18301,-0.68301,-0.70711,-0.12941,-0.48296,-0.86603,-0.06699,-0.25,-0.96593,-0.12941,-0.22414,0.96593,-0.25,-0.43301,0.86603,-0.35355,-0.61237,0.70711,-0.43301,-0.75,0.5,-0.48296,-0.83652,0.25882,-0.5,-0.86603,-0.0,-0.48296,-0.83652,-0.25882,-0.43301,-0.75,-0.5,-0.35355,-0.61237,-0.70711,-0.25,-0.43301,-0.86603,-0.12941,-0.22414,-0.96593,-0.0,-0.0,1.0,-0.18301,-0.18301,0.96593,-0.35355,-0.35355,0.86603,-0.5,-0.5,0.70711,-0.61237,-0.61237,0.5,-0.68301,-0.68301,0.25882,-0.70711,-0.70711,-0.0,-0.68301,-0.68301,-0.25882,-0.61237,-0.61237,-0.5,-0.5,-0.5,-0.70711,-0.35355,-0.35355,-0.86603,-0.18301,-0.18301,-0.96593,-0.22414,-0.12941,0.96593,-0.43301,-0.25,0.86603,-0.61237,-0.35355,0.70711,-0.75,-0.43301,0.5,-0.83652,-0.48296,0.25882,-0.86602,-0.5,-0.0,-0.83652,-0.48296,-0.25882,-0.75,-0.43301,-0.5,-0.61237,-0.35355,-0.70711,-0.43301,-0.25,-0.86603,-0.22414,-0.12941,-0.96593,0.0,-0.0,-1.0,-0.25,-0.06699,0.96593,-0.48296,-0.12941,0.86603,-0.68301,-0.18301,0.70711,-0.83652,-0.22414,0.5,-0.93301,-0.25,0.25882,-0.96593,-0.25882,-0.0,-0.93301,-0.25,-0.25882,-0.83652,-0.22414,-0.5,-0.68301,-0.18301,-0.70711,-0.48296,-0.12941,-0.86603,-0.25,-0.06699,-0.96593,-0.25882,-0.0,0.96593,-0.5,-0.0,0.86603,-0.70711,-0.0,0.70711,-0.86603,-0.0,0.5,-0.96593,-0.0,0.25882,-1.0,-0.0,-0.0,-0.96593,-0.0,-0.25882,-0.86603,-0.0,-0.5,-0.70711,-0.0,-0.70711,-0.5,-0.0,-0.86603,-0.25882,-0.0,-0.96593,-0.25,0.06699,0.96593,-0.48296,0.12941,0.86603,-0.68301,0.18301,0.70711,-0.83652,0.22414,0.5,-0.93301,0.25,0.25882,-0.96593,0.25882,-0.0,-0.93301,0.25,-0.25882,-0.83652,0.22414,-0.5,-0.68301,0.18301,-0.70711,-0.48296,0.12941,-0.86603,-0.25,0.06699,-0.96593,-0.22414,0.12941,0.96593,-0.43301,0.25,0.86603,-0.61237,0.35355,0.70711,-0.75,0.43301,0.5,-0.83652,0.48296,0.25882,-0.86602,0.5,-0.0,-0.83652,0.48296,-0.25882,-0.75,0.43301,-0.5,-0.61237,0.35355,-0.70711,-0.43301,0.25,-0.86603,-0.22414,0.12941,-0.96593,-0.18301,0.18301,0.96593,-0.35355,0.35355,0.86603,-0.5,0.5,0.70711,-0.61237,0.61237,0.5,-0.68301,0.68301,0.25882,-0.70711,0.70711,-0.0,-0.68301,0.68301,-0.25882,-0.61237,0.61237,-0.5,-0.5,0.5,-0.70711,-0.35355,0.35355,-0.86603,-0.18301,0.18301,-0.96593,-0.12941,0.22414,0.96593,-0.25,0.43301,0.86603,-0.35355,0.61237,0.70711,-0.43301,0.75,0.5,-0.48296,0.83652,0.25882,-0.5,0.86602,-0.0,-0.48296,0.83652,-0.25882,-0.43301,0.75,-0.5,-0.35355,0.61237,-0.70711,-0.25,0.43301,-0.86603,-0.12941,0.22414,-0.96593,-0.06699,0.25,0.96593,-0.12941,0.48296,0.86603,-0.18301,0.68301,0.70711,-0.22414,0.83652,0.5,-0.25,0.93301,0.25882,-0.25882,0.96593,-0.0,-0.25,0.93301,-0.25882,-0.22414,0.83652,-0.5,-0.18301,0.68301,-0.70711,-0.12941,0.48296,-0.86603,-0.06699,0.25,-0.96593,-0.0,0.25882,0.96593,-0.0,0.86603,0.5,-0.0,0.96593,0.25882,0.0,1.0,-0.0,-0.0,0.96593,-0.25882,-0.0,0.86603,-0.5,0.0,0.70711,-0.70711,0.0,0.5,-0.86603,-0.0,0.25882,-0.96593];
-iron_data_ConstData.skydomeNor = [0.0,-0.50807,-0.86132,0.0,-0.71246,-0.70172,-0.0696,-0.25975,-0.96317,-0.1315,-0.49075,-0.86132,-0.1844,-0.68818,-0.70172,-0.22483,-0.83909,-0.49536,-0.25018,-0.9337,-0.25615,-0.25882,-0.96593,-0.0,-0.25018,-0.9337,0.25615,-0.22483,-0.83909,0.49536,-0.1844,-0.68818,0.70172,-0.1315,-0.49075,0.86132,-0.0696,-0.25975,0.96317,-0.13445,-0.23288,-0.96317,-0.25403,-0.44,-0.86132,-0.35623,-0.61701,-0.70172,-0.43434,-0.75231,-0.49536,-0.48332,-0.83713,-0.25615,-0.5,-0.86603,0.0,-0.48332,-0.83713,0.25615,-0.43434,-0.75231,0.49536,-0.35623,-0.61701,0.70172,-0.25403,-0.44,0.86132,-0.13445,-0.23288,0.96317,-0.19015,-0.19015,-0.96317,-0.35926,-0.35926,-0.86132,-0.50378,-0.50378,-0.70172,-0.61426,-0.61426,-0.49536,-0.68352,-0.68352,-0.25615,-0.70711,-0.70711,0.0,-0.68352,-0.68352,0.25615,-0.61426,-0.61426,0.49536,-0.50378,-0.50378,0.70172,-0.35926,-0.35926,0.86132,-0.19015,-0.19015,0.96317,-0.23288,-0.13445,-0.96317,-0.44,-0.25403,-0.86132,-0.61701,-0.35623,-0.70172,-0.75231,-0.43434,-0.49536,-0.83713,-0.48332,-0.25615,-0.86603,-0.5,0.0,-0.83713,-0.48332,0.25615,-0.75231,-0.43434,0.49536,-0.61701,-0.35623,0.70172,-0.44,-0.25403,0.86132,-0.23288,-0.13445,0.96317,-0.25975,-0.0696,-0.96317,-0.49075,-0.1315,-0.86132,-0.68818,-0.1844,-0.70172,-0.83909,-0.22483,-0.49536,-0.9337,-0.25018,-0.25615,-0.96593,-0.25882,0.0,-0.9337,-0.25018,0.25615,-0.83909,-0.22483,0.49536,-0.68818,-0.1844,0.70172,-0.49075,-0.1315,0.86132,-0.25975,-0.0696,0.96317,-0.26891,-0.0,-0.96317,-0.50807,0.0,-0.86132,-0.71246,0.0,-0.70172,-0.86869,-0.0,-0.49536,-0.96664,0.0,-0.25615,-1.0,0.0,0.0,-0.96664,0.0,0.25615,-0.86869,0.0,0.49536,-0.71246,0.0,0.70172,-0.50807,0.0,0.86132,-0.26891,-0.0,0.96317,-0.25975,0.0696,-0.96317,-0.49075,0.1315,-0.86132,-0.68818,0.1844,-0.70172,-0.83909,0.22483,-0.49536,-0.9337,0.25018,-0.25615,-0.96593,0.25882,0.0,-0.9337,0.25018,0.25615,-0.83909,0.22483,0.49536,-0.68818,0.1844,0.70172,-0.49075,0.1315,0.86132,-0.25975,0.0696,0.96317,-0.23288,0.13445,-0.96317,-0.44,0.25403,-0.86132,-0.61701,0.35623,-0.70172,-0.75231,0.43434,-0.49536,-0.83713,0.48332,-0.25615,-0.86603,0.5,0.0,-0.83713,0.48332,0.25615,-0.75231,0.43434,0.49536,-0.61701,0.35623,0.70172,-0.44,0.25403,0.86132,-0.23288,0.13445,0.96317,-0.19015,0.19015,-0.96317,-0.35926,0.35926,-0.86132,-0.50378,0.50378,-0.70172,-0.61426,0.61426,-0.49536,-0.68352,0.68352,-0.25615,-0.70711,0.70711,0.0,-0.68352,0.68352,0.25615,-0.61426,0.61426,0.49536,-0.50378,0.50378,0.70172,-0.35926,0.35926,0.86132,-0.19015,0.19015,0.96317,-0.13445,0.23288,-0.96317,-0.25403,0.44,-0.86132,-0.35623,0.61701,-0.70172,-0.43434,0.75231,-0.49536,-0.48332,0.83713,-0.25615,-0.5,0.86603,0.0,-0.48332,0.83713,0.25615,-0.43434,0.75231,0.49536,-0.35623,0.61701,0.70172,-0.25403,0.44,0.86132,-0.13445,0.23288,0.96317,-0.0696,0.25975,-0.96317,-0.1315,0.49075,-0.86132,-0.1844,0.68818,-0.70172,-0.22483,0.83909,-0.49536,-0.25018,0.9337,-0.25615,-0.25882,0.96593,0.0,-0.25018,0.9337,0.25615,-0.22483,0.83909,0.49536,-0.1844,0.68818,0.70172,-0.1315,0.49075,0.86132,-0.0696,0.25975,0.96317,-0.0,0.26891,-0.96317,0.0,0.50807,-0.86132,0.0,0.71246,-0.70172,-0.0,0.86869,-0.49536,0.0,0.96664,-0.25615,0.0,1.0,0.0,-0.0,0.96664,0.25615,0.0,0.86869,0.49536,0.0,0.71246,0.70172,0.0,0.50807,0.86132,0.0,0.26891,0.96317,0.0696,0.25975,-0.96317,0.1315,0.49075,-0.86132,0.1844,0.68818,-0.70172,0.22483,0.83909,-0.49536,0.25018,0.9337,-0.25615,0.25882,0.96593,0.0,0.25018,0.9337,0.25615,0.22483,0.83909,0.49536,0.1844,0.68818,0.70172,0.1315,0.49075,0.86132,0.0696,0.25975,0.96317,0.13445,0.23288,-0.96317,0.25403,0.44,-0.86132,0.35623,0.61701,-0.70172,0.43434,0.75231,-0.49536,0.48332,0.83713,-0.25615,0.5,0.86603,0.0,0.48332,0.83713,0.25615,0.43434,0.75231,0.49536,0.35623,0.61701,0.70172,0.25403,0.44,0.86132,0.13445,0.23288,0.96317,0.0,0.0,-1.0,0.19015,0.19015,-0.96317,0.35926,0.35926,-0.86132,0.50378,0.50378,-0.70172,0.61426,0.61426,-0.49536,0.68352,0.68352,-0.25615,0.70711,0.70711,0.0,0.68352,0.68352,0.25615,0.61426,0.61426,0.49536,0.50378,0.50378,0.70172,0.35926,0.35926,0.86132,0.19015,0.19015,0.96317,0.23288,0.13445,-0.96317,0.44,0.25403,-0.86132,0.61701,0.35623,-0.70172,0.75231,0.43434,-0.49536,0.83713,0.48332,-0.25615,0.86603,0.5,0.0,0.83713,0.48332,0.25615,0.75231,0.43434,0.49536,0.61701,0.35623,0.70172,0.44,0.25403,0.86132,0.23288,0.13445,0.96317,0.0,-0.0,1.0,0.25975,0.0696,-0.96317,0.49075,0.1315,-0.86132,0.68818,0.1844,-0.70172,0.83909,0.22483,-0.49536,0.9337,0.25018,-0.25615,0.96593,0.25882,0.0,0.9337,0.25018,0.25615,0.83909,0.22483,0.49536,0.68818,0.1844,0.70172,0.49075,0.1315,0.86132,0.25975,0.0696,0.96317,0.26891,-0.0,-0.96317,0.50807,-0.0,-0.86132,0.71246,0.0,-0.70172,0.86869,0.0,-0.49536,0.96664,-0.0,-0.25615,1.0,-0.0,0.0,0.96664,0.0,0.25615,0.86869,0.0,0.49536,0.71246,-0.0,0.70172,0.50807,0.0,0.86132,0.26891,-0.0,0.96317,0.25975,-0.0696,-0.96317,0.49075,-0.1315,-0.86132,0.68818,-0.1844,-0.70172,0.83909,-0.22483,-0.49536,0.9337,-0.25018,-0.25615,0.96593,-0.25882,0.0,0.9337,-0.25018,0.25615,0.83909,-0.22483,0.49536,0.68818,-0.1844,0.70172,0.49075,-0.1315,0.86132,0.25975,-0.0696,0.96317,0.23288,-0.13445,-0.96317,0.44,-0.25403,-0.86132,0.61701,-0.35623,-0.70172,0.75231,-0.43434,-0.49536,0.83713,-0.48332,-0.25615,0.86603,-0.5,0.0,0.83713,-0.48332,0.25615,0.75231,-0.43434,0.49536,0.617,-0.35623,0.70172,0.44,-0.25403,0.86132,0.23288,-0.13445,0.96317,0.19015,-0.19015,-0.96317,0.35926,-0.35926,-0.86132,0.50378,-0.50378,-0.70172,0.61426,-0.61426,-0.49536,0.68352,-0.68352,-0.25615,0.70711,-0.70711,-0.0,0.68352,-0.68352,0.25615,0.61426,-0.61426,0.49536,0.50378,-0.50378,0.70172,0.35926,-0.35926,0.86132,0.19015,-0.19015,0.96317,0.13445,-0.23288,-0.96317,0.25403,-0.44,-0.86132,0.35623,-0.61701,-0.70172,0.43434,-0.75231,-0.49536,0.48332,-0.83713,-0.25615,0.5,-0.86603,0.0,0.48332,-0.83713,0.25615,0.43434,-0.75231,0.49536,0.35623,-0.617,0.70172,0.25403,-0.44,0.86132,0.13445,-0.23288,0.96317,0.0696,-0.25975,-0.96317,0.1315,-0.49075,-0.86132,0.1844,-0.68818,-0.70172,0.22483,-0.83909,-0.49536,0.25018,-0.9337,-0.25615,0.25882,-0.96593,0.0,0.25018,-0.9337,0.25615,0.22483,-0.83909,0.49536,0.1844,-0.68818,0.70172,0.1315,-0.49075,0.86132,0.0696,-0.25975,0.96317,0.0,-0.26891,-0.96317,0.0,-0.86869,-0.49536,0.0,-0.96664,-0.25615,0.0,-1.0,-0.0,0.0,-0.96664,0.25615,0.0,-0.86869,0.49536,0.0,-0.71246,0.70172,0.0,-0.50807,0.86132,0.0,-0.26891,0.96317];
+iron_data_ConstData.skydomeIndices = [263,10,9,261,7,6,265,14,13,2,11,10,1,8,7,4,15,14,260,5,49,3,12,11,262,9,8,160,15,4,0,6,5,264,13,12,8,19,18,15,26,25,5,16,49,12,23,22,9,20,19,160,26,15,6,17,16,13,24,23,10,21,20,7,18,17,14,25,24,11,22,21,18,29,28,25,36,35,22,33,32,19,30,29,26,37,36,16,27,49,23,34,33,20,31,30,160,37,26,17,28,27,24,35,34,21,32,31,31,42,41,160,48,37,28,39,38,35,46,45,32,43,42,29,40,39,36,47,46,33,44,43,30,41,40,37,48,47,27,38,49,34,45,44,41,53,52,48,60,59,38,50,49,45,57,56,42,54,53,160,60,48,39,51,50,46,58,57,43,55,54,40,52,51,47,59,58,44,56,55,55,66,65,52,63,62,59,70,69,56,67,66,53,64,63,60,71,70,50,61,49,57,68,67,54,65,64,160,71,60,51,62,61,58,69,68,65,76,75,160,82,71,62,73,72,69,80,79,66,77,76,63,74,73,70,81,80,67,78,77,64,75,74,71,82,81,61,72,49,68,79,78,78,89,88,75,86,85,82,93,92,72,83,49,79,90,89,76,87,86,160,93,82,73,84,83,80,91,90,77,88,87,74,85,84,81,92,91,88,99,98,85,96,95,92,103,102,89,100,99,86,97,96,93,104,103,83,94,49,90,101,100,87,98,97,160,104,93,84,95,94,91,102,101,101,112,111,98,109,108,160,115,104,95,106,105,102,113,112,99,110,109,96,107,106,103,114,113,100,111,110,97,108,107,104,115,114,94,105,49,111,122,121,108,119,118,115,126,125,105,116,49,112,123,122,109,120,119,160,126,115,106,117,116,113,124,123,110,121,120,107,118,117,114,125,124,124,135,134,121,132,131,118,129,128,125,136,135,122,133,132,119,130,129,126,137,136,116,127,49,123,134,133,120,131,130,160,137,126,117,128,127,127,138,49,134,145,144,131,142,141,160,148,137,128,139,138,135,146,145,132,143,142,129,140,139,136,147,146,133,144,143,130,141,140,137,148,147,147,158,157,144,155,154,141,152,151,148,159,158,138,149,49,145,156,155,142,153,152,160,159,148,139,150,149,146,157,156,143,154,153,140,151,150,150,162,161,157,169,168,154,166,165,151,163,162,158,170,169,155,167,166,152,164,163,159,171,170,149,161,49,156,168,167,153,165,164,160,171,159,171,182,181,161,172,49,168,179,178,165,176,175,160,182,171,162,173,172,169,180,179,166,177,176,163,174,173,170,181,180,167,178,177,164,175,174,174,185,184,181,192,191,178,189,188,175,186,185,182,193,192,172,183,49,179,190,189,176,187,186,160,193,182,173,184,183,180,191,190,177,188,187,160,204,193,184,195,194,191,202,201,188,199,198,185,196,195,192,203,202,189,200,199,186,197,196,193,204,203,183,194,49,190,201,200,187,198,197,197,208,207,204,215,214,194,205,49,201,212,211,198,209,208,160,215,204,195,206,205,202,213,212,199,210,209,196,207,206,203,214,213,200,211,210,207,218,217,214,225,224,211,222,221,208,219,218,215,226,225,205,216,49,212,223,222,209,220,219,160,226,215,206,217,216,213,224,223,210,221,220,220,231,230,160,237,226,217,228,227,224,235,234,221,232,231,218,229,228,225,236,235,222,233,232,219,230,229,226,237,236,216,227,49,223,234,233,230,241,240,237,248,247,227,238,49,234,245,244,231,242,241,160,248,237,228,239,238,235,246,245,232,243,242,229,240,239,236,247,246,233,244,243,243,254,253,240,251,250,247,258,257,244,255,254,241,252,251,248,259,258,238,249,49,245,256,255,242,253,252,160,259,248,239,250,249,246,257,256,253,262,1,160,4,259,250,0,260,257,264,3,254,263,262,251,261,0,258,265,264,255,2,263,252,1,261,259,4,265,249,260,49,256,3,2,263,9,262,261,6,0,265,13,264,2,10,263,1,7,261,4,14,265,3,11,2,262,8,1,0,5,260,264,12,3,8,18,7,15,25,14,12,22,11,9,19,8,6,16,5,13,23,12,10,20,9,7,17,6,14,24,13,11,21,10,18,28,17,25,35,24,22,32,21,19,29,18,26,36,25,23,33,22,20,30,19,17,27,16,24,34,23,21,31,20,31,41,30,28,38,27,35,45,34,32,42,31,29,39,28,36,46,35,33,43,32,30,40,29,37,47,36,34,44,33,41,52,40,48,59,47,45,56,44,42,53,41,39,50,38,46,57,45,43,54,42,40,51,39,47,58,46,44,55,43,55,65,54,52,62,51,59,69,58,56,66,55,53,63,52,60,70,59,57,67,56,54,64,53,51,61,50,58,68,57,65,75,64,62,72,61,69,79,68,66,76,65,63,73,62,70,80,69,67,77,66,64,74,63,71,81,70,68,78,67,78,88,77,75,85,74,82,92,81,79,89,78,76,86,75,73,83,72,80,90,79,77,87,76,74,84,73,81,91,80,88,98,87,85,95,84,92,102,91,89,99,88,86,96,85,93,103,92,90,100,89,87,97,86,84,94,83,91,101,90,101,111,100,98,108,97,95,105,94,102,112,101,99,109,98,96,106,95,103,113,102,100,110,99,97,107,96,104,114,103,111,121,110,108,118,107,115,125,114,112,122,111,109,119,108,106,116,105,113,123,112,110,120,109,107,117,106,114,124,113,124,134,123,121,131,120,118,128,117,125,135,124,122,132,121,119,129,118,126,136,125,123,133,122,120,130,119,117,127,116,134,144,133,131,141,130,128,138,127,135,145,134,132,142,131,129,139,128,136,146,135,133,143,132,130,140,129,137,147,136,147,157,146,144,154,143,141,151,140,148,158,147,145,155,144,142,152,141,139,149,138,146,156,145,143,153,142,140,150,139,150,161,149,157,168,156,154,165,153,151,162,150,158,169,157,155,166,154,152,163,151,159,170,158,156,167,155,153,164,152,171,181,170,168,178,167,165,175,164,162,172,161,169,179,168,166,176,165,163,173,162,170,180,169,167,177,166,164,174,163,174,184,173,181,191,180,178,188,177,175,185,174,182,192,181,179,189,178,176,186,175,173,183,172,180,190,179,177,187,176,184,194,183,191,201,190,188,198,187,185,195,184,192,202,191,189,199,188,186,196,185,193,203,192,190,200,189,187,197,186,197,207,196,204,214,203,201,211,200,198,208,197,195,205,194,202,212,201,199,209,198,196,206,195,203,213,202,200,210,199,207,217,206,214,224,213,211,221,210,208,218,207,215,225,214,212,222,211,209,219,208,206,216,205,213,223,212,210,220,209,220,230,219,217,227,216,224,234,223,221,231,220,218,228,217,225,235,224,222,232,221,219,229,218,226,236,225,223,233,222,230,240,229,237,247,236,234,244,233,231,241,230,228,238,227,235,245,234,232,242,231,229,239,228,236,246,235,233,243,232,243,253,242,240,250,239,247,257,246,244,254,243,241,251,240,248,258,247,245,255,244,242,252,241,239,249,238,246,256,245,253,1,252,250,260,249,257,3,256,254,262,253,251,0,250,258,264,257,255,263,254,252,261,251,259,265,258,256,2,255];
+iron_data_ConstData.skydomePos = [0.0,0.5,0.86603,0.0,0.86603,0.5,0.0,0.96593,-0.25882,0.0,0.86603,-0.5,0.0,0.25882,-0.96593,0.06699,0.25,0.96593,0.12941,0.48296,0.86603,0.18301,0.68301,0.70711,0.22414,0.83652,0.5,0.25,0.93301,0.25882,0.25882,0.96593,0.0,0.25,0.93301,-0.25882,0.22414,0.83652,-0.5,0.18301,0.68301,-0.70711,0.12941,0.48296,-0.86603,0.06699,0.25,-0.96593,0.12941,0.22414,0.96593,0.25,0.43301,0.86603,0.35355,0.61237,0.70711,0.43301,0.75,0.5,0.48296,0.83652,0.25882,0.5,0.86603,0.0,0.48296,0.83652,-0.25882,0.43301,0.75,-0.5,0.35355,0.61237,-0.70711,0.25,0.43301,-0.86603,0.12941,0.22414,-0.96593,0.18301,0.18301,0.96593,0.35355,0.35355,0.86603,0.5,0.5,0.70711,0.61237,0.61237,0.5,0.68301,0.68301,0.25882,0.70711,0.70711,0.0,0.68301,0.68301,-0.25882,0.61237,0.61237,-0.5,0.5,0.5,-0.70711,0.35355,0.35355,-0.86603,0.18301,0.18301,-0.96593,0.22414,0.12941,0.96593,0.43301,0.25,0.86603,0.61237,0.35355,0.70711,0.75,0.43301,0.5,0.83652,0.48296,0.25882,0.86602,0.5,0.0,0.83652,0.48296,-0.25882,0.75,0.43301,-0.5,0.61237,0.35355,-0.70711,0.43301,0.25,-0.86603,0.22414,0.12941,-0.96593,-0.0,0.0,1.0,0.25,0.06699,0.96593,0.48296,0.12941,0.86603,0.68301,0.18301,0.70711,0.83652,0.22414,0.5,0.93301,0.25,0.25882,0.96593,0.25882,0.0,0.93301,0.25,-0.25882,0.83652,0.22414,-0.5,0.68301,0.18301,-0.70711,0.48296,0.12941,-0.86603,0.25,0.06699,-0.96593,0.25882,0.0,0.96593,0.5,0.0,0.86603,0.70711,0.0,0.70711,0.86602,0.0,0.5,0.96593,0.0,0.25882,1.0,0.0,0.0,0.96593,0.0,-0.25882,0.86602,0.0,-0.5,0.70711,0.0,-0.70711,0.5,0.0,-0.86603,0.25882,0.0,-0.96593,0.25,-0.06699,0.96593,0.48296,-0.12941,0.86603,0.68301,-0.18301,0.70711,0.83652,-0.22414,0.5,0.93301,-0.25,0.25882,0.96593,-0.25882,0.0,0.93301,-0.25,-0.25882,0.83652,-0.22414,-0.5,0.68301,-0.18301,-0.70711,0.48296,-0.12941,-0.86603,0.25,-0.06699,-0.96593,0.22414,-0.12941,0.96593,0.43301,-0.25,0.86603,0.61237,-0.35355,0.70711,0.75,-0.43301,0.5,0.83652,-0.48296,0.25882,0.86602,-0.5,0.0,0.83652,-0.48296,-0.25882,0.75,-0.43301,-0.5,0.61237,-0.35355,-0.70711,0.43301,-0.25,-0.86603,0.22414,-0.12941,-0.96593,0.18301,-0.18301,0.96593,0.35355,-0.35355,0.86603,0.5,-0.5,0.70711,0.61237,-0.61237,0.5,0.68301,-0.68301,0.25882,0.70711,-0.70711,0.0,0.68301,-0.68301,-0.25882,0.61237,-0.61237,-0.5,0.5,-0.5,-0.70711,0.35355,-0.35355,-0.86603,0.18301,-0.18301,-0.96593,0.12941,-0.22414,0.96593,0.25,-0.43301,0.86603,0.35355,-0.61237,0.70711,0.43301,-0.75,0.5,0.48296,-0.83652,0.25882,0.5,-0.86602,0.0,0.48296,-0.83652,-0.25882,0.43301,-0.75,-0.5,0.35355,-0.61237,-0.70711,0.25,-0.43301,-0.86603,0.12941,-0.22414,-0.96593,0.06699,-0.25,0.96593,0.12941,-0.48296,0.86603,0.18301,-0.68301,0.70711,0.22414,-0.83652,0.5,0.25,-0.93301,0.25882,0.25882,-0.96592,0.0,0.25,-0.93301,-0.25882,0.22414,-0.83652,-0.5,0.18301,-0.68301,-0.70711,0.12941,-0.48296,-0.86603,0.06699,-0.25,-0.96593,0.0,-0.25882,0.96593,-0.0,-0.5,0.86603,-0.0,-0.70711,0.70711,-0.0,-0.86602,0.5,-0.0,-0.96592,0.25882,-0.0,-1.0,0.0,-0.0,-0.96592,-0.25882,-0.0,-0.86602,-0.5,-0.0,-0.70711,-0.70711,-0.0,-0.5,-0.86603,-0.0,-0.25882,-0.96593,-0.06699,-0.25,0.96593,-0.12941,-0.48296,0.86603,-0.18301,-0.68301,0.70711,-0.22414,-0.83652,0.5,-0.25,-0.93301,0.25882,-0.25882,-0.96592,0.0,-0.25,-0.93301,-0.25882,-0.22414,-0.83652,-0.5,-0.18301,-0.68301,-0.70711,-0.12941,-0.48296,-0.86603,-0.06699,-0.25,-0.96593,-0.12941,-0.22414,0.96593,-0.25,-0.43301,0.86603,-0.35355,-0.61237,0.70711,-0.43301,-0.75,0.5,-0.48296,-0.83652,0.25882,-0.5,-0.86602,0.0,-0.48296,-0.83652,-0.25882,-0.43301,-0.75,-0.5,-0.35355,-0.61237,-0.70711,-0.25,-0.43301,-0.86603,-0.12941,-0.22414,-0.96593,0.0,0.0,-1.0,-0.18301,-0.18301,0.96593,-0.35355,-0.35355,0.86603,-0.5,-0.5,0.70711,-0.61237,-0.61237,0.5,-0.68301,-0.68301,0.25882,-0.70711,-0.70711,0.0,-0.68301,-0.68301,-0.25882,-0.61237,-0.61237,-0.5,-0.5,-0.5,-0.70711,-0.35355,-0.35355,-0.86603,-0.18301,-0.18301,-0.96593,-0.22414,-0.12941,0.96593,-0.43301,-0.25,0.86603,-0.61237,-0.35355,0.70711,-0.75,-0.43301,0.5,-0.83652,-0.48296,0.25882,-0.86602,-0.5,0.0,-0.83652,-0.48296,-0.25882,-0.75,-0.43301,-0.5,-0.61237,-0.35355,-0.70711,-0.43301,-0.25,-0.86603,-0.22414,-0.12941,-0.96593,-0.25,-0.06699,0.96593,-0.48296,-0.12941,0.86603,-0.68301,-0.18301,0.70711,-0.83652,-0.22414,0.5,-0.93301,-0.25,0.25882,-0.96593,-0.25882,0.0,-0.93301,-0.25,-0.25882,-0.83652,-0.22414,-0.5,-0.68301,-0.18301,-0.70711,-0.48296,-0.12941,-0.86603,-0.25,-0.06699,-0.96593,-0.25882,0.0,0.96593,-0.5,0.0,0.86603,-0.70711,0.0,0.70711,-0.86602,0.0,0.5,-0.96593,0.0,0.25882,-1.0,0.0,0.0,-0.96593,0.0,-0.25882,-0.86602,0.0,-0.5,-0.70711,0.0,-0.70711,-0.5,0.0,-0.86603,-0.25882,0.0,-0.96593,-0.25,0.06699,0.96593,-0.48296,0.12941,0.86603,-0.68301,0.18301,0.70711,-0.83652,0.22414,0.5,-0.93301,0.25,0.25882,-0.96593,0.25882,0.0,-0.93301,0.25,-0.25882,-0.83652,0.22414,-0.5,-0.68301,0.18301,-0.70711,-0.48296,0.12941,-0.86603,-0.25,0.06699,-0.96593,-0.22414,0.12941,0.96593,-0.43301,0.25,0.86603,-0.61237,0.35355,0.70711,-0.75,0.43301,0.5,-0.83652,0.48296,0.25882,-0.86602,0.5,0.0,-0.83652,0.48296,-0.25882,-0.75,0.43301,-0.5,-0.61237,0.35355,-0.70711,-0.43301,0.25,-0.86603,-0.22414,0.12941,-0.96593,-0.18301,0.18301,0.96593,-0.35355,0.35355,0.86603,-0.5,0.5,0.70711,-0.61237,0.61237,0.5,-0.68301,0.68301,0.25882,-0.70711,0.70711,0.0,-0.68301,0.68301,-0.25882,-0.61237,0.61237,-0.5,-0.5,0.5,-0.70711,-0.35355,0.35355,-0.86603,-0.18301,0.18301,-0.96593,-0.12941,0.22414,0.96593,-0.25,0.43301,0.86603,-0.35355,0.61237,0.70711,-0.43301,0.75,0.5,-0.48296,0.83652,0.25882,-0.5,0.86603,0.0,-0.48296,0.83652,-0.25882,-0.43301,0.75,-0.5,-0.35355,0.61237,-0.70711,-0.25,0.43301,-0.86603,-0.12941,0.22414,-0.96593,-0.06699,0.25,0.96593,-0.12941,0.48296,0.86603,-0.18301,0.68301,0.70711,-0.22414,0.83652,0.5,-0.25,0.93301,0.25882,-0.25882,0.96593,0.0,-0.25,0.93301,-0.25882,-0.22414,0.83652,-0.5,-0.18301,0.68301,-0.70711,-0.12941,0.48296,-0.86603,-0.06699,0.25,-0.96593,0.0,0.25882,0.96593,0.0,0.70711,0.70711,-0.0,0.96593,0.25882,-0.0,1.0,0.0,0.0,0.70711,-0.70711,-0.0,0.5,-0.86603];
+iron_data_ConstData.skydomeNor = [-0.0,0.50807,0.86132,-0.0,0.86869,0.49536,-0.0,0.96664,-0.25615,-0.0,0.86869,-0.49536,-0.0,0.26891,-0.96317,0.0696,0.25975,0.96317,0.1315,0.49075,0.86132,0.1844,0.68818,0.70172,0.22483,0.83909,0.49536,0.25018,0.9337,0.25615,0.25882,0.96593,0.0,0.25018,0.9337,-0.25615,0.22483,0.83909,-0.49536,0.1844,0.68818,-0.70172,0.1315,0.49075,-0.86132,0.0696,0.25975,-0.96317,0.13445,0.23288,0.96317,0.25403,0.44,0.86132,0.35623,0.61701,0.70172,0.43434,0.75231,0.49536,0.48332,0.83713,0.25615,0.5,0.86603,0.0,0.48332,0.83713,-0.25615,0.43434,0.75231,-0.49536,0.35623,0.61701,-0.70172,0.25403,0.44,-0.86132,0.13445,0.23288,-0.96317,0.19015,0.19015,0.96317,0.35926,0.35926,0.86132,0.50378,0.50378,0.70172,0.61426,0.61426,0.49536,0.68352,0.68352,0.25615,0.70711,0.70711,0.0,0.68352,0.68352,-0.25615,0.61426,0.61426,-0.49536,0.50378,0.50378,-0.70172,0.35926,0.35926,-0.86132,0.19015,0.19015,-0.96317,0.23288,0.13445,0.96317,0.44,0.25403,0.86132,0.61701,0.35623,0.70172,0.75231,0.43434,0.49536,0.83713,0.48332,0.25615,0.86603,0.5,0.0,0.83713,0.48332,-0.25615,0.75231,0.43434,-0.49536,0.61701,0.35623,-0.70172,0.44,0.25403,-0.86132,0.23288,0.13445,-0.96317,-0.0,-0.0,1.0,0.25975,0.0696,0.96317,0.49075,0.1315,0.86132,0.68818,0.1844,0.70172,0.83909,0.22483,0.49536,0.9337,0.25018,0.25615,0.96593,0.25882,0.0,0.9337,0.25018,-0.25615,0.83909,0.22483,-0.49536,0.68818,0.1844,-0.70172,0.49075,0.1315,-0.86132,0.25975,0.0696,-0.96317,0.26891,0.0,0.96317,0.50807,-0.0,0.86132,0.71246,-0.0,0.70172,0.86869,-0.0,0.49536,0.96664,-0.0,0.25615,1.0,-0.0,0.0,0.96664,-0.0,-0.25615,0.86869,-0.0,-0.49536,0.71246,-0.0,-0.70172,0.50807,-0.0,-0.86132,0.26891,-0.0,-0.96317,0.25975,-0.0696,0.96317,0.49075,-0.1315,0.86132,0.68818,-0.1844,0.70172,0.83909,-0.22483,0.49536,0.9337,-0.25018,0.25615,0.96593,-0.25882,0.0,0.9337,-0.25018,-0.25615,0.83909,-0.22483,-0.49536,0.68818,-0.1844,-0.70172,0.49075,-0.1315,-0.86132,0.25975,-0.0696,-0.96317,0.23288,-0.13445,0.96317,0.44,-0.25403,0.86132,0.61701,-0.35623,0.70172,0.75231,-0.43434,0.49536,0.83713,-0.48332,0.25615,0.86603,-0.5,0.0,0.83713,-0.48332,-0.25615,0.75231,-0.43434,-0.49536,0.61701,-0.35623,-0.70172,0.44,-0.25403,-0.86132,0.23288,-0.13445,-0.96317,0.19015,-0.19015,0.96317,0.35926,-0.35926,0.86132,0.50378,-0.50378,0.70172,0.61426,-0.61426,0.49536,0.68352,-0.68352,0.25615,0.70711,-0.70711,0.0,0.68352,-0.68352,-0.25615,0.61426,-0.61426,-0.49536,0.50378,-0.50378,-0.70172,0.35926,-0.35926,-0.86132,0.19015,-0.19015,-0.96317,0.13445,-0.23288,0.96317,0.25403,-0.44,0.86132,0.35623,-0.61701,0.70172,0.43434,-0.75231,0.49536,0.48332,-0.83713,0.25615,0.5,-0.86603,0.0,0.48332,-0.83713,-0.25615,0.43434,-0.75231,-0.49536,0.35623,-0.61701,-0.70172,0.25403,-0.44,-0.86132,0.13445,-0.23288,-0.96317,0.0696,-0.25975,0.96317,0.1315,-0.49075,0.86132,0.1844,-0.68818,0.70172,0.22483,-0.83909,0.49536,0.25018,-0.9337,0.25615,0.25882,-0.96593,0.0,0.25018,-0.9337,-0.25615,0.22483,-0.83909,-0.49536,0.1844,-0.68818,-0.70172,0.1315,-0.49075,-0.86132,0.0696,-0.25975,-0.96317,0.0,-0.26891,0.96317,-0.0,-0.50807,0.86132,-0.0,-0.71246,0.70172,-0.0,-0.86869,0.49536,0.0,-0.96664,0.25615,-0.0,-1.0,0.0,0.0,-0.96664,-0.25615,0.0,-0.86869,-0.49536,0.0,-0.71246,-0.70172,0.0,-0.50807,-0.86132,-0.0,-0.26891,-0.96317,-0.0696,-0.25975,0.96317,-0.1315,-0.49075,0.86132,-0.1844,-0.68818,0.70172,-0.22483,-0.83909,0.49536,-0.25018,-0.9337,0.25615,-0.25882,-0.96593,0.0,-0.25018,-0.9337,-0.25615,-0.22483,-0.83909,-0.49536,-0.1844,-0.68818,-0.70172,-0.1315,-0.49075,-0.86132,-0.0696,-0.25975,-0.96317,-0.13445,-0.23288,0.96317,-0.25403,-0.44,0.86132,-0.35623,-0.61701,0.70172,-0.43434,-0.75231,0.49536,-0.48332,-0.83713,0.25615,-0.5,-0.86603,0.0,-0.48332,-0.83713,-0.25615,-0.43434,-0.75231,-0.49536,-0.35623,-0.61701,-0.70172,-0.25403,-0.44,-0.86132,-0.13445,-0.23288,-0.96317,-0.0,0.0,-1.0,-0.19015,-0.19015,0.96317,-0.35926,-0.35926,0.86132,-0.50378,-0.50378,0.70172,-0.61426,-0.61426,0.49536,-0.68352,-0.68352,0.25615,-0.70711,-0.70711,0.0,-0.68352,-0.68352,-0.25615,-0.61426,-0.61426,-0.49536,-0.50378,-0.50378,-0.70172,-0.35926,-0.35926,-0.86132,-0.19015,-0.19015,-0.96317,-0.23288,-0.13445,0.96317,-0.44,-0.25403,0.86132,-0.61701,-0.35623,0.70172,-0.75231,-0.43434,0.49536,-0.83713,-0.48332,0.25615,-0.86603,-0.5,0.0,-0.83713,-0.48332,-0.25615,-0.75231,-0.43434,-0.49536,-0.61701,-0.35623,-0.70172,-0.44,-0.25403,-0.86132,-0.23288,-0.13445,-0.96317,-0.25975,-0.0696,0.96317,-0.49075,-0.1315,0.86132,-0.68818,-0.1844,0.70172,-0.83909,-0.22483,0.49536,-0.9337,-0.25018,0.25615,-0.96593,-0.25882,0.0,-0.9337,-0.25018,-0.25615,-0.83909,-0.22483,-0.49536,-0.68818,-0.1844,-0.70172,-0.49075,-0.1315,-0.86132,-0.25975,-0.0696,-0.96317,-0.26891,0.0,0.96317,-0.50807,0.0,0.86132,-0.71246,0.0,0.70172,-0.86869,0.0,0.49536,-0.96664,0.0,0.25615,-1.0,0.0,0.0,-0.96664,0.0,-0.25615,-0.86869,0.0,-0.49536,-0.71246,0.0,-0.70172,-0.50807,0.0,-0.86132,-0.26891,0.0,-0.96317,-0.25975,0.0696,0.96317,-0.49075,0.1315,0.86132,-0.68818,0.1844,0.70172,-0.83909,0.22483,0.49536,-0.9337,0.25018,0.25615,-0.96593,0.25882,0.0,-0.9337,0.25018,-0.25615,-0.83909,0.22483,-0.49536,-0.68818,0.1844,-0.70172,-0.49075,0.1315,-0.86132,-0.25975,0.0696,-0.96317,-0.23288,0.13445,0.96317,-0.44,0.25403,0.86132,-0.61701,0.35623,0.70172,-0.75231,0.43434,0.49536,-0.83713,0.48332,0.25615,-0.86603,0.5,0.0,-0.83713,0.48332,-0.25615,-0.75231,0.43434,-0.49536,-0.61701,0.35623,-0.70172,-0.44,0.25403,-0.86132,-0.23288,0.13445,-0.96317,-0.19015,0.19015,0.96317,-0.35926,0.35926,0.86132,-0.50378,0.50378,0.70172,-0.61426,0.61426,0.49536,-0.68352,0.68352,0.25615,-0.70711,0.70711,0.0,-0.68352,0.68352,-0.25615,-0.61426,0.61426,-0.49536,-0.50378,0.50378,-0.70172,-0.35926,0.35926,-0.86132,-0.19015,0.19015,-0.96317,-0.13445,0.23288,0.96317,-0.25403,0.44,0.86132,-0.35623,0.61701,0.70172,-0.43434,0.75231,0.49536,-0.48332,0.83713,0.25615,-0.5,0.86603,0.0,-0.48332,0.83713,-0.25615,-0.43434,0.75231,-0.49536,-0.35623,0.61701,-0.70172,-0.25403,0.44,-0.86132,-0.13445,0.23288,-0.96317,-0.0696,0.25975,0.96317,-0.1315,0.49075,0.86132,-0.1844,0.68818,0.70172,-0.22483,0.83909,0.49536,-0.25018,0.9337,0.25615,-0.25882,0.96593,0.0,-0.25018,0.9337,-0.25615,-0.22483,0.83909,-0.49536,-0.1844,0.68818,-0.70172,-0.1315,0.49075,-0.86132,-0.0696,0.25975,-0.96317,-0.0,0.26891,0.96317,-0.0,0.71246,0.70172,-0.0,0.96664,0.25615,-0.0,1.0,0.0,-0.0,0.71246,-0.70172,-0.0,0.50807,-0.86132];
 iron_data_Data.cachedSceneRaws = new haxe_ds_StringMap();
 iron_data_Data.cachedMeshes = new haxe_ds_StringMap();
 iron_data_Data.cachedLights = new haxe_ds_StringMap();
@@ -27662,7 +27211,7 @@ kha_LoaderImpl.dropFiles = new haxe_ds_StringMap();
 kha_Scheduler.DIF_COUNT = 3;
 kha_Scheduler.maxframetime = 0.5;
 kha_Scheduler.startTime = 0;
-kha_Shaders.World_World_fragData0 = "s1854:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCB2ZWMzIEg7CnVuaWZvcm0gaGlnaHAgdmVjMyBBOwp1bmlmb3JtIGhpZ2hwIHZlYzMgQjsKdW5pZm9ybSBoaWdocCB2ZWMzIEM7CnVuaWZvcm0gaGlnaHAgdmVjMyBEOwp1bmlmb3JtIGhpZ2hwIHZlYzMgRTsKdW5pZm9ybSBoaWdocCB2ZWMzIEY7CnVuaWZvcm0gaGlnaHAgdmVjMyBHOwp1bmlmb3JtIGhpZ2hwIHZlYzMgSTsKdW5pZm9ybSBoaWdocCB2ZWMzIGhvc2VrU3VuRGlyZWN0aW9uOwp1bmlmb3JtIGhpZ2hwIHZlYzMgWjsKdW5pZm9ybSBoaWdocCBmbG9hdCBlbnZtYXBTdHJlbmd0aDsKCmluIGhpZ2hwIHZlYzMgbm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMzIGhvc2VrV2lsa2llKGhpZ2hwIGZsb2F0IGNvc190aGV0YSwgaGlnaHAgZmxvYXQgZ2FtbWEsIGhpZ2hwIGZsb2F0IGNvc19nYW1tYSkKewogICAgaGlnaHAgdmVjMyBjaGkgPSB2ZWMzKDEuMCArIChjb3NfZ2FtbWEgKiBjb3NfZ2FtbWEpKSAvIHBvdygodmVjMygxLjApICsgKEggKiBIKSkgLSAoSCAqICgyLjAgKiBjb3NfZ2FtbWEpKSwgdmVjMygxLjUpKTsKICAgIHJldHVybiAodmVjMygxLjApICsgKEEgKiBleHAoQiAvIHZlYzMoY29zX3RoZXRhICsgMC4wMDk5OTk5OTk3NzY0ODI1ODIwOTIyODUxNTYyNSkpKSkgKiAoKCgoQyArIChEICogZXhwKEUgKiBnYW1tYSkpKSArIChGICogKGNvc19nYW1tYSAqIGNvc19nYW1tYSkpKSArIChHICogY2hpKSkgKyAoSSAqIHNxcnQoY29zX3RoZXRhKSkpOwp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWMzIG4gPSBub3JtYWxpemUobm9ybWFsKTsKICAgIGhpZ2hwIHZlYzMgcG9zID0gLW47CiAgICBoaWdocCBmbG9hdCBjb3NfdGhldGEgPSBjbGFtcChwb3MueiwgMC4wLCAxLjApOwogICAgaGlnaHAgZmxvYXQgY29zX2dhbW1hID0gZG90KHBvcywgaG9zZWtTdW5EaXJlY3Rpb24pOwogICAgaGlnaHAgZmxvYXQgZ2FtbWFfdmFsID0gYWNvcyhjb3NfZ2FtbWEpOwogICAgaGlnaHAgZmxvYXQgcGFyYW0gPSBjb3NfdGhldGE7CiAgICBoaWdocCBmbG9hdCBwYXJhbV8xID0gZ2FtbWFfdmFsOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMiA9IGNvc19nYW1tYTsKICAgIGhpZ2hwIHZlYzMgU2t5VGV4dHVyZV9Db2xvcl9yZXMgPSAoWiAqIGhvc2VrV2lsa2llKHBhcmFtLCBwYXJhbV8xLCBwYXJhbV8yKSkgKiBlbnZtYXBTdHJlbmd0aDsKICAgIGZyYWdDb2xvciA9IHZlYzQoU2t5VGV4dHVyZV9Db2xvcl9yZXMueCwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueSwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueiwgZnJhZ0NvbG9yLncpOwogICAgZnJhZ0NvbG9yLncgPSAwLjA7Cn0KCg";
+kha_Shaders.World_World_fragData0 = "s1815:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCB2ZWMzIEg7CnVuaWZvcm0gaGlnaHAgdmVjMyBBOwp1bmlmb3JtIGhpZ2hwIHZlYzMgQjsKdW5pZm9ybSBoaWdocCB2ZWMzIEM7CnVuaWZvcm0gaGlnaHAgdmVjMyBEOwp1bmlmb3JtIGhpZ2hwIHZlYzMgRTsKdW5pZm9ybSBoaWdocCB2ZWMzIEY7CnVuaWZvcm0gaGlnaHAgdmVjMyBHOwp1bmlmb3JtIGhpZ2hwIHZlYzMgSTsKdW5pZm9ybSBoaWdocCB2ZWMzIGhvc2VrU3VuRGlyZWN0aW9uOwp1bmlmb3JtIGhpZ2hwIHZlYzMgWjsKdW5pZm9ybSBoaWdocCBmbG9hdCBlbnZtYXBTdHJlbmd0aDsKCmluIGhpZ2hwIHZlYzMgbm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMzIGhvc2VrV2lsa2llKGhpZ2hwIGZsb2F0IGNvc190aGV0YSwgaGlnaHAgZmxvYXQgZ2FtbWEsIGhpZ2hwIGZsb2F0IGNvc19nYW1tYSkKewogICAgaGlnaHAgdmVjMyBjaGkgPSB2ZWMzKDEuMCArIChjb3NfZ2FtbWEgKiBjb3NfZ2FtbWEpKSAvIHBvdygodmVjMygxLjApICsgKEggKiBIKSkgLSAoSCAqICgyLjAgKiBjb3NfZ2FtbWEpKSwgdmVjMygxLjUpKTsKICAgIHJldHVybiAodmVjMygxLjApICsgKEEgKiBleHAoQiAvIHZlYzMoY29zX3RoZXRhICsgMC4wMDk5OTk5OTk3NzY0ODI1ODIwOTIyODUxNTYyNSkpKSkgKiAoKCgoQyArIChEICogZXhwKEUgKiBnYW1tYSkpKSArIChGICogKGNvc19nYW1tYSAqIGNvc19nYW1tYSkpKSArIChHICogY2hpKSkgKyAoSSAqIHNxcnQoY29zX3RoZXRhKSkpOwp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWMzIG4gPSBub3JtYWxpemUobm9ybWFsKTsKICAgIGhpZ2hwIGZsb2F0IGNvc190aGV0YSA9IGNsYW1wKG4ueiwgMC4wLCAxLjApOwogICAgaGlnaHAgZmxvYXQgY29zX2dhbW1hID0gZG90KG4sIGhvc2VrU3VuRGlyZWN0aW9uKTsKICAgIGhpZ2hwIGZsb2F0IGdhbW1hX3ZhbCA9IGFjb3MoY29zX2dhbW1hKTsKICAgIGhpZ2hwIGZsb2F0IHBhcmFtID0gY29zX3RoZXRhOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMSA9IGdhbW1hX3ZhbDsKICAgIGhpZ2hwIGZsb2F0IHBhcmFtXzIgPSBjb3NfZ2FtbWE7CiAgICBoaWdocCB2ZWMzIFNreVRleHR1cmVfQ29sb3JfcmVzID0gKFogKiBob3Nla1dpbGtpZShwYXJhbSwgcGFyYW1fMSwgcGFyYW1fMikpICogZW52bWFwU3RyZW5ndGg7CiAgICBmcmFnQ29sb3IgPSB2ZWM0KFNreVRleHR1cmVfQ29sb3JfcmVzLngsIFNreVRleHR1cmVfQ29sb3JfcmVzLnksIFNreVRleHR1cmVfQ29sb3JfcmVzLnosIGZyYWdDb2xvci53KTsKICAgIGZyYWdDb2xvci53ID0gMC4wOwp9Cgo";
 kha_Shaders.World_World_vertData0 = "s258:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgU01WUDsKCm91dCB2ZWMzIG5vcm1hbDsKaW4gdmVjMyBub3I7CmluIHZlYzMgcG9zOwoKdm9pZCBtYWluKCkKewogICAgbm9ybWFsID0gbm9yOwogICAgdmVjNCBwb3NpdGlvbiA9IFNNVlAgKiB2ZWM0KHBvcywgMS4wKTsKICAgIGdsX1Bvc2l0aW9uID0gdmVjNChwb3NpdGlvbik7Cn0KCg";
 kha_Shaders.armdefault_mesh_fragData0 = "s1491:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKaW4gaGlnaHAgdmVjMyB3bm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3JbMl07CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCmhpZ2hwIGZsb2F0IHBhY2tGbG9hdEludDE2KGhpZ2hwIGZsb2F0IGYsIHVpbnQgaSkKewogICAgcmV0dXJuICgwLjA2MjQ4NTY5NDg4NTI1MzkwNjI1ICogZikgKyAoMC4wNjI1MDA5NTM2NzQzMTY0MDYyNSAqIGZsb2F0KGkpKTsKfQoKaGlnaHAgZmxvYXQgcGFja0Zsb2F0MihoaWdocCBmbG9hdCBmMSwgaGlnaHAgZmxvYXQgZjIpCnsKICAgIHJldHVybiBmbG9vcihmMSAqIDI1NS4wKSArIG1pbihmMiwgMC45OTAwMDAwMDk1MzY3NDMxNjQwNjI1KTsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjMyBuID0gbm9ybWFsaXplKHdub3JtYWwpOwogICAgaGlnaHAgdmVjMyBiYXNlY29sID0gdmVjMygwLjgwMDAwMDAxMTkyMDkyODk1NTA3ODEyNSk7CiAgICBoaWdocCBmbG9hdCByb3VnaG5lc3MgPSAwLjI1OwogICAgaGlnaHAgZmxvYXQgbWV0YWxsaWMgPSAwLjA7CiAgICBoaWdocCBmbG9hdCBvY2NsdXNpb24gPSAxLjA7CiAgICBoaWdocCBmbG9hdCBzcGVjdWxhciA9IDAuNTsKICAgIG4gLz0gdmVjMygoYWJzKG4ueCkgKyBhYnMobi55KSkgKyBhYnMobi56KSk7CiAgICBoaWdocCB2ZWMyIF85NTsKICAgIGlmIChuLnogPj0gMC4wKQogICAgewogICAgICAgIF85NSA9IG4ueHk7CiAgICB9CiAgICBlbHNlCiAgICB7CiAgICAgICAgXzk1ID0gb2N0YWhlZHJvbldyYXAobi54eSk7CiAgICB9CiAgICBuID0gdmVjMyhfOTUueCwgXzk1LnksIG4ueik7CiAgICBmcmFnQ29sb3JbMF0gPSB2ZWM0KG4ueHksIHJvdWdobmVzcywgcGFja0Zsb2F0SW50MTYobWV0YWxsaWMsIDB1KSk7CiAgICBmcmFnQ29sb3JbMV0gPSB2ZWM0KGJhc2Vjb2wsIHBhY2tGbG9hdDIob2NjbHVzaW9uLCBzcGVjdWxhcikpOwp9Cgo";
 kha_Shaders.armdefault_mesh_vertData0 = "s303:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDMgTjsKdW5pZm9ybSBtYXQ0IFdWUDsKCmluIHZlYzQgcG9zOwpvdXQgdmVjMyB3bm9ybWFsOwppbiB2ZWMyIG5vcjsKCnZvaWQgbWFpbigpCnsKICAgIHZlYzQgc3BvcyA9IHZlYzQocG9zLnh5eiwgMS4wKTsKICAgIHdub3JtYWwgPSBub3JtYWxpemUoTiAqIHZlYzMobm9yLCBwb3MudykpOwogICAgZ2xfUG9zaXRpb24gPSBXVlAgKiBzcG9zOwp9Cgo";

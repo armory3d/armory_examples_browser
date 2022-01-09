@@ -298,15 +298,24 @@ arm_node_NodeTree.__name__ = true;
 arm_node_NodeTree.__super__ = armory_logicnode_LogicTree;
 arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 	add: function() {
-		var _SetObjectRotation_001 = new armory_logicnode_SetRotationNode(this);
-		_SetObjectRotation_001.property0 = "Euler Angles";
-		_SetObjectRotation_001.inputs.length = 4;
-		_SetObjectRotation_001.outputs.length = 1;
+		var _Print = new armory_logicnode_PrintNode(this);
+		_Print.inputs.length = 2;
+		_Print.outputs.length = 1;
 		var _g = 0;
-		var _g1 = _SetObjectRotation_001.outputs.length;
+		var _g1 = _Print.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_SetObjectRotation_001.outputs[i] = [];
+			_Print.outputs[i] = [];
+		}
+		var _RotateObject = new armory_logicnode_RotateObjectNode(this);
+		_RotateObject.property0 = "Local";
+		_RotateObject.inputs.length = 3;
+		_RotateObject.outputs.length = 1;
+		var _g = 0;
+		var _g1 = _RotateObject.outputs.length;
+		while(_g < _g1) {
+			var i = _g++;
+			_RotateObject.outputs[i] = [];
 		}
 		var _Script = new armory_logicnode_ScriptNode(this);
 		_Script.property0 = "// Haxe script\n// Make sure 'Properties - Armory Project - Hscript' is enabled\nvar v = input[0] + input[1];\ntrace(v);\nreturn Math.sin(v);\n";
@@ -338,19 +347,19 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 			_OnUpdate.outputs[i] = [];
 		}
 		armory_logicnode_LogicNode.addLink(_OnUpdate,_ArraySet,0,0);
-		var _ArrayFloat = new armory_logicnode_ArrayFloatNode(this);
-		_ArrayFloat.inputs.length = 2;
-		_ArrayFloat.outputs.length = 2;
+		var _ArrayFloat_001 = new armory_logicnode_ArrayFloatNode(this);
+		_ArrayFloat_001.inputs.length = 2;
+		_ArrayFloat_001.outputs.length = 2;
 		var _g = 0;
-		var _g1 = _ArrayFloat.outputs.length;
+		var _g1 = _ArrayFloat_001.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_ArrayFloat.outputs[i] = [];
+			_ArrayFloat_001.outputs[i] = [];
 		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_ArrayFloat,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,2.0),_ArrayFloat,0,1);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,new armory_logicnode_IntegerNode(this,0),1,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,_ArraySet,0,1);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_ArrayFloat_001,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,2.0),_ArrayFloat_001,0,1);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_IntegerNode(this,0),1,0);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,_ArraySet,0,1);
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_IntegerNode(this,0),_ArraySet,0,2);
 		var _GetApplicationTime_001 = new armory_logicnode_TimeNode(this);
 		_GetApplicationTime_001.inputs.length = 0;
@@ -364,9 +373,9 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 		armory_logicnode_LogicNode.addLink(_GetApplicationTime_001,new armory_logicnode_FloatNode(this,0.0),1,0);
 		armory_logicnode_LogicNode.addLink(_GetApplicationTime_001,_ArraySet,0,3);
 		armory_logicnode_LogicNode.addLink(_ArraySet,_Script,0,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,_Script,0,1);
-		armory_logicnode_LogicNode.addLink(_Script,_SetObjectRotation_001,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectRotation_001,0,1);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,_Script,0,1);
+		armory_logicnode_LogicNode.addLink(_Script,_RotateObject,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_RotateObject,0,1);
 		var _Vector = new armory_logicnode_VectorNode(this);
 		_Vector.inputs.length = 3;
 		_Vector.outputs.length = 1;
@@ -379,48 +388,10 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,0);
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,1);
 		armory_logicnode_LogicNode.addLink(_Script,_Vector,1,2);
-		armory_logicnode_LogicNode.addLink(_Vector,_SetObjectRotation_001,0,2);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_SetObjectRotation_001,0,3);
-		armory_logicnode_LogicNode.addLink(_SetObjectRotation_001,new armory_logicnode_NullNode(this),0,0);
-		var _ArrayFloat_001 = new armory_logicnode_ArrayFloatNode(this);
-		_ArrayFloat_001.inputs.length = 0;
-		_ArrayFloat_001.outputs.length = 2;
-		var _g = 0;
-		var _g1 = _ArrayFloat_001.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_ArrayFloat_001.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_NullNode(this),0,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_IntegerNode(this,0),1,0);
-		var _RotateObject = new armory_logicnode_RotateObjectNode(this);
-		_RotateObject.property0 = "Local";
-		_RotateObject.inputs.length = 3;
-		_RotateObject.outputs.length = 1;
-		var _g = 0;
-		var _g1 = _RotateObject.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_RotateObject.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_NullNode(this),_RotateObject,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_RotateObject,0,1);
-		var _Rotation = new armory_logicnode_RotationNode(this);
-		_Rotation.property0 = "EulerAngles";
-		_Rotation.property1 = "Rad";
-		_Rotation.property2 = "XYZ";
-		_Rotation.inputs.length = 2;
-		_Rotation.outputs.length = 1;
-		var _g = 0;
-		var _g1 = _Rotation.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_Rotation.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_Rotation,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Rotation,0,1);
-		armory_logicnode_LogicNode.addLink(_Rotation,_RotateObject,0,2);
-		armory_logicnode_LogicNode.addLink(_RotateObject,new armory_logicnode_NullNode(this),0,0);
+		armory_logicnode_LogicNode.addLink(_Vector,_RotateObject,0,2);
+		armory_logicnode_LogicNode.addLink(_RotateObject,_Print,0,0);
+		armory_logicnode_LogicNode.addLink(_Script,_Print,1,1);
+		armory_logicnode_LogicNode.addLink(_Print,new armory_logicnode_NullNode(this),0,0);
 	}
 	,__class__: arm_node_NodeTree
 });
@@ -666,6 +637,21 @@ armory_logicnode_OnUpdateNode.prototype = $extend(armory_logicnode_LogicNode.pro
 	}
 	,__class__: armory_logicnode_OnUpdateNode
 });
+var armory_logicnode_PrintNode = function(tree) {
+	armory_logicnode_LogicNode.call(this,tree);
+};
+$hxClasses["armory.logicnode.PrintNode"] = armory_logicnode_PrintNode;
+armory_logicnode_PrintNode.__name__ = true;
+armory_logicnode_PrintNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_PrintNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+	run: function(from) {
+		var _this = this.inputs[1];
+		var value = _this.fromNode.get(_this.fromIndex);
+		haxe_Log.trace(value,{ fileName : "Sources/armory/logicnode/PrintNode.hx", lineNumber : 15, className : "armory.logicnode.PrintNode", methodName : "run"});
+		this.runOutput(0);
+	}
+	,__class__: armory_logicnode_PrintNode
+});
 var armory_logicnode_RotateObjectNode = function(tree) {
 	this.property0 = "Local";
 	armory_logicnode_LogicNode.call(this,tree);
@@ -733,270 +719,6 @@ armory_logicnode_RotateObjectNode.prototype = $extend(armory_logicnode_LogicNode
 	}
 	,__class__: armory_logicnode_RotateObjectNode
 });
-var armory_logicnode_RotationNode = function(tree,x,y,z,w) {
-	this.input_length = 0;
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = new iron_math_Quat();
-	if(x != null) {
-		var _this = this.value;
-		_this.x = x;
-		_this.y = y;
-		_this.z = z;
-		_this.w = w;
-	}
-	var _g = 0;
-	var _g1 = this.inputs;
-	while(_g < _g1.length) {
-		var input = _g1[_g];
-		++_g;
-		if(input != null) {
-			this.input_length += 1;
-		} else {
-			break;
-		}
-	}
-};
-$hxClasses["armory.logicnode.RotationNode"] = armory_logicnode_RotationNode;
-armory_logicnode_RotationNode.__name__ = true;
-armory_logicnode_RotationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		if(this.inputs.length == 0) {
-			return this.value;
-		}
-		switch(this.property0) {
-		case "AxisAngle":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vec = _this.fromNode.get(_this.fromIndex);
-				var _this = this.inputs[1];
-				var angle = _this.fromNode.get(_this.fromIndex);
-				if(this.property1 == "Deg") {
-					angle *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var s = Math.sin(angle * 0.5);
-				_this.x = vec.x * s;
-				_this.y = vec.y * s;
-				_this.z = vec.z * s;
-				_this.w = Math.cos(angle * 0.5);
-				var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
-				if(l == 0.0) {
-					_this.x = 0;
-					_this.y = 0;
-					_this.z = 0;
-					_this.w = 0;
-				} else {
-					l = 1.0 / l;
-					_this.x *= l;
-					_this.y *= l;
-					_this.z *= l;
-					_this.w *= l;
-				}
-			}
-			break;
-		case "EulerAngles":
-			if(this.inputs[0] != null) {
-				var vec_x = 0.0;
-				var vec_y = 0.0;
-				var vec_z = 0.0;
-				var vec_w = 1.0;
-				var _this = this.inputs[0];
-				var v = _this.fromNode.get(_this.fromIndex);
-				vec_x = v.x;
-				vec_y = v.y;
-				vec_z = v.z;
-				vec_w = v.w;
-				if(this.property1 == "Deg") {
-					vec_x *= 0.017453292519943295;
-					vec_y *= 0.017453292519943295;
-					vec_z *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var order = this.property2;
-				var c1 = Math.cos(vec_x / 2);
-				var c2 = Math.cos(vec_y / 2);
-				var c3 = Math.cos(vec_z / 2);
-				var s1 = Math.sin(vec_x / 2);
-				var s2 = Math.sin(vec_y / 2);
-				var s3 = Math.sin(vec_z / 2);
-				var x = s1;
-				var y = 0;
-				var z = 0;
-				var w = c1;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qx_x = x;
-				var qx_y = y;
-				var qx_z = z;
-				var qx_w = w;
-				var x = 0;
-				var y = s2;
-				var z = 0;
-				var w = c2;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qy_x = x;
-				var qy_y = y;
-				var qy_z = z;
-				var qy_w = w;
-				var x = 0;
-				var y = 0;
-				var z = s3;
-				var w = c3;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qz_x = x;
-				var qz_y = y;
-				var qz_z = z;
-				var qz_w = w;
-				if(order.charAt(2) == "X") {
-					_this.x = qx_x;
-					_this.y = qx_y;
-					_this.z = qx_z;
-					_this.w = qx_w;
-				} else if(order.charAt(2) == "Y") {
-					_this.x = qy_x;
-					_this.y = qy_y;
-					_this.z = qy_z;
-					_this.w = qy_w;
-				} else {
-					_this.x = qz_x;
-					_this.y = qz_y;
-					_this.z = qz_z;
-					_this.w = qz_w;
-				}
-				if(order.charAt(1) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(1) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-				if(order.charAt(0) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(0) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-			}
-			break;
-		case "Quaternion":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vect = _this.fromNode.get(_this.fromIndex);
-				this.value.x = vect.x;
-				this.value.y = vect.y;
-				this.value.z = vect.z;
-				var _this = this.inputs[1];
-				var tmp = _this.fromNode.get(_this.fromIndex);
-				this.value.w = tmp;
-			}
-			break;
-		default:
-			return this.property0;
-		}
-		return this.value;
-	}
-	,__class__: armory_logicnode_RotationNode
-});
 var armory_logicnode_ScriptNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
 };
@@ -1013,43 +735,6 @@ armory_logicnode_ScriptNode.prototype = $extend(armory_logicnode_LogicNode.proto
 		return this.result;
 	}
 	,__class__: armory_logicnode_ScriptNode
-});
-var armory_logicnode_SetRotationNode = function(tree) {
-	armory_logicnode_LogicNode.call(this,tree);
-};
-$hxClasses["armory.logicnode.SetRotationNode"] = armory_logicnode_SetRotationNode;
-armory_logicnode_SetRotationNode.__name__ = true;
-armory_logicnode_SetRotationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_SetRotationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	run: function(from) {
-		var _this = this.inputs[1];
-		var object = _this.fromNode.get(_this.fromIndex);
-		if(object == null) {
-			return;
-		}
-		var _this = this.inputs[2];
-		var q = _this.fromNode.get(_this.fromIndex);
-		if(q == null) {
-			return;
-		}
-		var l = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-		if(l == 0.0) {
-			q.x = 0;
-			q.y = 0;
-			q.z = 0;
-			q.w = 0;
-		} else {
-			l = 1.0 / l;
-			q.x *= l;
-			q.y *= l;
-			q.z *= l;
-			q.w *= l;
-		}
-		object.transform.rot = q;
-		object.transform.buildMatrix();
-		this.runOutput(0);
-	}
-	,__class__: armory_logicnode_SetRotationNode
 });
 var armory_logicnode_TimeNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
@@ -4437,10 +4122,9 @@ iron_Scene.setActive = function(sceneName,done) {
 		return;
 	}
 	iron_Scene.framePassed = false;
-	var removeWorldShader = null;
 	if(iron_Scene.active != null) {
 		if(iron_Scene.active.raw.world_ref != null) {
-			removeWorldShader = "shader_datas/World_" + iron_Scene.active.raw.world_ref + "/World_" + iron_Scene.active.raw.world_ref;
+			iron_RenderPath.active.unloadShader("shader_datas/World_" + iron_Scene.active.raw.world_ref + "/World_" + iron_Scene.active.raw.world_ref);
 		}
 		iron_Scene.active.remove();
 	}
@@ -4448,9 +4132,6 @@ iron_Scene.setActive = function(sceneName,done) {
 		iron_Scene.create(format,function(o) {
 			if(done != null) {
 				done(o);
-			}
-			if(removeWorldShader != null) {
-				iron_RenderPath.active.unloadShader(removeWorldShader);
 			}
 			if(format.world_ref != null) {
 				iron_RenderPath.active.loadShader("shader_datas/World_" + format.world_ref + "/World_" + format.world_ref);
@@ -4624,7 +4305,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 859, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 848, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -5031,14 +4712,12 @@ iron_Scene.prototype = {
 							var group = _g1[_g];
 							++_g;
 							if(group.name == groupRef) {
-								spawnedObject.transform.applyParent();
 								spawnedObject.transform.translate(-group.instance_offset.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),-group.instance_offset.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN),-group.instance_offset.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN));
 								break;
 							}
 						}
 					}
 					if((spawned += 1) == object_refs.length) {
-						groupOwner.transform.reset();
 						done();
 					}
 				});
@@ -10015,15 +9694,6 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 		if(iron_Scene.active != null) {
 			HxOverrides.remove(iron_Scene.active.lights,this);
 		}
-		var rp = iron_RenderPath.active;
-		if(rp.light == this) {
-			rp.light = null;
-		}
-		if(rp.point == this) {
-			rp.point = null;
-		} else if(rp.sun == this) {
-			rp.sun = null;
-		}
 		iron_object_Object.prototype.remove.call(this);
 	}
 	,buildMatrix: function(camera) {
@@ -11707,8 +11377,9 @@ iron_object_Particle.prototype = {
 	__class__: iron_object_Particle
 };
 var iron_object_SpeakerObject = function(data) {
-	this.channels = [];
 	this.paused = false;
+	this.channels = [];
+	this.sound = null;
 	var _gthis = this;
 	iron_object_Object.call(this);
 	this.data = data;
@@ -11828,13 +11499,13 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 		var vz = loc1_z - loc2_z;
 		var d = Math.sqrt(vx * vx + vy * vy + vz * vz);
 		d *= this.data.attenuation;
-		this.volume = (1.0 - Math.min(d / 100,1)) * this.data.volume;
+		var vol = 1.0 - Math.min(d / 100,1);
 		var _g = 0;
 		var _g1 = this.channels;
 		while(_g < _g1.length) {
 			var c = _g1[_g];
 			++_g;
-			c.set_volume(this.volume);
+			c.set_volume(vol * this.data.volume);
 		}
 	}
 	,remove: function() {
@@ -11843,7 +11514,6 @@ iron_object_SpeakerObject.prototype = $extend(iron_object_Object.prototype,{
 			HxOverrides.remove(iron_Scene.active.speakers,this);
 		}
 		iron_object_Object.prototype.remove.call(this);
-		iron_App.removeUpdate($bind(this,this.update));
 	}
 	,__class__: iron_object_SpeakerObject
 });
@@ -12611,62 +12281,6 @@ iron_object_Transform.prototype = {
 		this.decompose();
 		this.buildMatrix();
 	}
-	,applyParent: function() {
-		var pt = this.object.parent.transform;
-		pt.buildMatrix();
-		var _this = this.local;
-		var m = pt.world;
-		var a00 = _this.self._00;
-		var a01 = _this.self._01;
-		var a02 = _this.self._02;
-		var a03 = _this.self._03;
-		var a10 = _this.self._10;
-		var a11 = _this.self._11;
-		var a12 = _this.self._12;
-		var a13 = _this.self._13;
-		var a20 = _this.self._20;
-		var a21 = _this.self._21;
-		var a22 = _this.self._22;
-		var a23 = _this.self._23;
-		var a30 = _this.self._30;
-		var a31 = _this.self._31;
-		var a32 = _this.self._32;
-		var a33 = _this.self._33;
-		var b0 = m.self._00;
-		var b1 = m.self._10;
-		var b2 = m.self._20;
-		var b3 = m.self._30;
-		_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._01;
-		b1 = m.self._11;
-		b2 = m.self._21;
-		b3 = m.self._31;
-		_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._02;
-		b1 = m.self._12;
-		b2 = m.self._22;
-		b3 = m.self._32;
-		_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		b0 = m.self._03;
-		b1 = m.self._13;
-		b2 = m.self._23;
-		b3 = m.self._33;
-		_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-		_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-		_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-		_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-		this.decompose();
-		this.buildMatrix();
-	}
 	,__class__: iron_object_Transform
 };
 var kha_math_FastMatrix3 = function(_00,_10,_20,_01,_11,_21,_02,_12,_22) {
@@ -12942,157 +12556,11 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 	var light = iron_RenderPath.active.light;
 	if(c.type == "mat4") {
 		var m = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_biasLightViewProjectionMatrix":
-				if(light != null) {
-					var _this = iron_object_Uniforms.helpMat;
-					var m1 = light.VP;
-					_this.self._00 = m1.self._00;
-					_this.self._01 = m1.self._01;
-					_this.self._02 = m1.self._02;
-					_this.self._03 = m1.self._03;
-					_this.self._10 = m1.self._10;
-					_this.self._11 = m1.self._11;
-					_this.self._12 = m1.self._12;
-					_this.self._13 = m1.self._13;
-					_this.self._20 = m1.self._20;
-					_this.self._21 = m1.self._21;
-					_this.self._22 = m1.self._22;
-					_this.self._23 = m1.self._23;
-					_this.self._30 = m1.self._30;
-					_this.self._31 = m1.self._31;
-					_this.self._32 = m1.self._32;
-					_this.self._33 = m1.self._33;
-					var _this = iron_object_Uniforms.helpMat;
-					var m1 = iron_object_Uniforms.biasMat;
-					var a00 = _this.self._00;
-					var a01 = _this.self._01;
-					var a02 = _this.self._02;
-					var a03 = _this.self._03;
-					var a10 = _this.self._10;
-					var a11 = _this.self._11;
-					var a12 = _this.self._12;
-					var a13 = _this.self._13;
-					var a20 = _this.self._20;
-					var a21 = _this.self._21;
-					var a22 = _this.self._22;
-					var a23 = _this.self._23;
-					var a30 = _this.self._30;
-					var a31 = _this.self._31;
-					var a32 = _this.self._32;
-					var a33 = _this.self._33;
-					var b0 = m1.self._00;
-					var b1 = m1.self._10;
-					var b2 = m1.self._20;
-					var b3 = m1.self._30;
-					_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._01;
-					b1 = m1.self._11;
-					b2 = m1.self._21;
-					b3 = m1.self._31;
-					_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._02;
-					b1 = m1.self._12;
-					b2 = m1.self._22;
-					b3 = m1.self._32;
-					_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					b0 = m1.self._03;
-					b1 = m1.self._13;
-					b2 = m1.self._23;
-					b3 = m1.self._33;
-					_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-					_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-					_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-					_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-					m = iron_object_Uniforms.helpMat;
-				}
-				break;
-			case "_inverseProjectionMatrix":
+		switch(c.link) {
+		case "_biasLightViewProjectionMatrix":
+			if(light != null) {
 				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = m1.self._00;
-				var a01 = m1.self._01;
-				var a02 = m1.self._02;
-				var a03 = m1.self._03;
-				var a10 = m1.self._10;
-				var a11 = m1.self._11;
-				var a12 = m1.self._12;
-				var a13 = m1.self._13;
-				var a20 = m1.self._20;
-				var a21 = m1.self._21;
-				var a22 = m1.self._22;
-				var a23 = m1.self._23;
-				var a30 = m1.self._30;
-				var a31 = m1.self._31;
-				var a32 = m1.self._32;
-				var a33 = m1.self._33;
-				var b00 = a00 * a11 - a01 * a10;
-				var b01 = a00 * a12 - a02 * a10;
-				var b02 = a00 * a13 - a03 * a10;
-				var b03 = a01 * a12 - a02 * a11;
-				var b04 = a01 * a13 - a03 * a11;
-				var b05 = a02 * a13 - a03 * a12;
-				var b06 = a20 * a31 - a21 * a30;
-				var b07 = a20 * a32 - a22 * a30;
-				var b08 = a20 * a33 - a23 * a30;
-				var b09 = a21 * a32 - a22 * a31;
-				var b10 = a21 * a33 - a23 * a31;
-				var b11 = a22 * a33 - a23 * a32;
-				var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-				if(det == 0.0) {
-					_this.self._00 = 1.0;
-					_this.self._01 = 0.0;
-					_this.self._02 = 0.0;
-					_this.self._03 = 0.0;
-					_this.self._10 = 0.0;
-					_this.self._11 = 1.0;
-					_this.self._12 = 0.0;
-					_this.self._13 = 0.0;
-					_this.self._20 = 0.0;
-					_this.self._21 = 0.0;
-					_this.self._22 = 1.0;
-					_this.self._23 = 0.0;
-					_this.self._30 = 0.0;
-					_this.self._31 = 0.0;
-					_this.self._32 = 0.0;
-					_this.self._33 = 1.0;
-				} else {
-					det = 1.0 / det;
-					_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
-					_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
-					_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
-					_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
-					_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
-					_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
-					_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
-					_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
-					_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
-					_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
-					_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
-					_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
-					_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
-					_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
-					_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
-					_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
-				}
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_inverseViewProjectionMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
+				var m1 = light.VP;
 				_this.self._00 = m1.self._00;
 				_this.self._01 = m1.self._01;
 				_this.self._02 = m1.self._02;
@@ -13110,150 +12578,7 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				_this.self._32 = m1.self._32;
 				_this.self._33 = m1.self._33;
 				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = iron_object_Uniforms.helpMat;
-				var a00 = m1.self._00;
-				var a01 = m1.self._01;
-				var a02 = m1.self._02;
-				var a03 = m1.self._03;
-				var a10 = m1.self._10;
-				var a11 = m1.self._11;
-				var a12 = m1.self._12;
-				var a13 = m1.self._13;
-				var a20 = m1.self._20;
-				var a21 = m1.self._21;
-				var a22 = m1.self._22;
-				var a23 = m1.self._23;
-				var a30 = m1.self._30;
-				var a31 = m1.self._31;
-				var a32 = m1.self._32;
-				var a33 = m1.self._33;
-				var b00 = a00 * a11 - a01 * a10;
-				var b01 = a00 * a12 - a02 * a10;
-				var b02 = a00 * a13 - a03 * a10;
-				var b03 = a01 * a12 - a02 * a11;
-				var b04 = a01 * a13 - a03 * a11;
-				var b05 = a02 * a13 - a03 * a12;
-				var b06 = a20 * a31 - a21 * a30;
-				var b07 = a20 * a32 - a22 * a30;
-				var b08 = a20 * a33 - a23 * a30;
-				var b09 = a21 * a32 - a22 * a31;
-				var b10 = a21 * a33 - a23 * a31;
-				var b11 = a22 * a33 - a23 * a32;
-				var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
-				if(det == 0.0) {
-					_this.self._00 = 1.0;
-					_this.self._01 = 0.0;
-					_this.self._02 = 0.0;
-					_this.self._03 = 0.0;
-					_this.self._10 = 0.0;
-					_this.self._11 = 1.0;
-					_this.self._12 = 0.0;
-					_this.self._13 = 0.0;
-					_this.self._20 = 0.0;
-					_this.self._21 = 0.0;
-					_this.self._22 = 1.0;
-					_this.self._23 = 0.0;
-					_this.self._30 = 0.0;
-					_this.self._31 = 0.0;
-					_this.self._32 = 0.0;
-					_this.self._33 = 1.0;
-				} else {
-					det = 1.0 / det;
-					_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
-					_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
-					_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
-					_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
-					_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
-					_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
-					_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
-					_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
-					_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
-					_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
-					_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
-					_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
-					_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
-					_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
-					_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
-					_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
-				}
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_lightViewProjectionMatrix":
-				if(light != null) {
-					m = light.VP;
-				}
-				break;
-			case "_prevViewProjectionMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.prevV;
-				_this.self._00 = m1.self._00;
-				_this.self._01 = m1.self._01;
-				_this.self._02 = m1.self._02;
-				_this.self._03 = m1.self._03;
-				_this.self._10 = m1.self._10;
-				_this.self._11 = m1.self._11;
-				_this.self._12 = m1.self._12;
-				_this.self._13 = m1.self._13;
-				_this.self._20 = m1.self._20;
-				_this.self._21 = m1.self._21;
-				_this.self._22 = m1.self._22;
-				_this.self._23 = m1.self._23;
-				_this.self._30 = m1.self._30;
-				_this.self._31 = m1.self._31;
-				_this.self._32 = m1.self._32;
-				_this.self._33 = m1.self._33;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
+				var m1 = iron_object_Uniforms.biasMat;
 				var a00 = _this.self._00;
 				var a01 = _this.self._01;
 				var a02 = _this.self._02;
@@ -13303,235 +12628,517 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
 				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_projectionMatrix":
-				m = camera.P;
-				break;
-			case "_skydomeMatrix":
-				var tr = camera.transform;
-				var _this = iron_object_Uniforms.helpVec;
-				_this.x = tr.world.self._30;
-				_this.y = tr.world.self._31;
-				_this.z = tr.world.self._32 - 3.5;
-				_this.w = 1.0;
-				var bounds = camera.data.raw.far_plane * 0.95;
-				var _this = iron_object_Uniforms.helpVec2;
-				_this.x = bounds;
-				_this.y = bounds;
-				_this.z = bounds;
-				_this.w = 1.0;
-				var _this = iron_object_Uniforms.helpMat;
-				var loc = iron_object_Uniforms.helpVec;
-				var quat = iron_object_Uniforms.helpQuat;
-				var sc = iron_object_Uniforms.helpVec2;
-				var x = quat.x;
-				var y = quat.y;
-				var z = quat.z;
-				var w = quat.w;
-				var x2 = x + x;
-				var y2 = y + y;
-				var z2 = z + z;
-				var xx = x * x2;
-				var xy = x * y2;
-				var xz = x * z2;
-				var yy = y * y2;
-				var yz = y * z2;
-				var zz = z * z2;
-				var wx = w * x2;
-				var wy = w * y2;
-				var wz = w * z2;
-				_this.self._00 = 1.0 - (yy + zz);
-				_this.self._10 = xy - wz;
-				_this.self._20 = xz + wy;
-				_this.self._01 = xy + wz;
-				_this.self._11 = 1.0 - (xx + zz);
-				_this.self._21 = yz - wx;
-				_this.self._02 = xz - wy;
-				_this.self._12 = yz + wx;
-				_this.self._22 = 1.0 - (xx + yy);
+			}
+			break;
+		case "_inverseProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = m1.self._00;
+			var a01 = m1.self._01;
+			var a02 = m1.self._02;
+			var a03 = m1.self._03;
+			var a10 = m1.self._10;
+			var a11 = m1.self._11;
+			var a12 = m1.self._12;
+			var a13 = m1.self._13;
+			var a20 = m1.self._20;
+			var a21 = m1.self._21;
+			var a22 = m1.self._22;
+			var a23 = m1.self._23;
+			var a30 = m1.self._30;
+			var a31 = m1.self._31;
+			var a32 = m1.self._32;
+			var a33 = m1.self._33;
+			var b00 = a00 * a11 - a01 * a10;
+			var b01 = a00 * a12 - a02 * a10;
+			var b02 = a00 * a13 - a03 * a10;
+			var b03 = a01 * a12 - a02 * a11;
+			var b04 = a01 * a13 - a03 * a11;
+			var b05 = a02 * a13 - a03 * a12;
+			var b06 = a20 * a31 - a21 * a30;
+			var b07 = a20 * a32 - a22 * a30;
+			var b08 = a20 * a33 - a23 * a30;
+			var b09 = a21 * a32 - a22 * a31;
+			var b10 = a21 * a33 - a23 * a31;
+			var b11 = a22 * a33 - a23 * a32;
+			var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+			if(det == 0.0) {
+				_this.self._00 = 1.0;
+				_this.self._01 = 0.0;
+				_this.self._02 = 0.0;
 				_this.self._03 = 0.0;
+				_this.self._10 = 0.0;
+				_this.self._11 = 1.0;
+				_this.self._12 = 0.0;
 				_this.self._13 = 0.0;
+				_this.self._20 = 0.0;
+				_this.self._21 = 0.0;
+				_this.self._22 = 1.0;
 				_this.self._23 = 0.0;
 				_this.self._30 = 0.0;
 				_this.self._31 = 0.0;
 				_this.self._32 = 0.0;
 				_this.self._33 = 1.0;
-				var x = sc.x;
-				var y = sc.y;
-				var z = sc.z;
-				_this.self._00 *= x;
-				_this.self._01 *= x;
-				_this.self._02 *= x;
-				_this.self._03 *= x;
-				_this.self._10 *= y;
-				_this.self._11 *= y;
-				_this.self._12 *= y;
-				_this.self._13 *= y;
-				_this.self._20 *= z;
-				_this.self._21 *= z;
-				_this.self._22 *= z;
-				_this.self._23 *= z;
-				_this.self._30 = loc.x;
-				_this.self._31 = loc.y;
-				_this.self._32 = loc.z;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.P;
-				var a00 = _this.self._00;
-				var a01 = _this.self._01;
-				var a02 = _this.self._02;
-				var a03 = _this.self._03;
-				var a10 = _this.self._10;
-				var a11 = _this.self._11;
-				var a12 = _this.self._12;
-				var a13 = _this.self._13;
-				var a20 = _this.self._20;
-				var a21 = _this.self._21;
-				var a22 = _this.self._22;
-				var a23 = _this.self._23;
-				var a30 = _this.self._30;
-				var a31 = _this.self._31;
-				var a32 = _this.self._32;
-				var a33 = _this.self._33;
-				var b0 = m1.self._00;
-				var b1 = m1.self._10;
-				var b2 = m1.self._20;
-				var b3 = m1.self._30;
-				_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._01;
-				b1 = m1.self._11;
-				b2 = m1.self._21;
-				b3 = m1.self._31;
-				_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._02;
-				b1 = m1.self._12;
-				b2 = m1.self._22;
-				b3 = m1.self._32;
-				_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				b0 = m1.self._03;
-				b1 = m1.self._13;
-				b2 = m1.self._23;
-				b3 = m1.self._33;
-				_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
-				_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
-				_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
-				_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_transposeViewMatrix":
-				var _this = iron_object_Uniforms.helpMat;
-				var m1 = camera.V;
-				_this.self._00 = m1.self._00;
-				_this.self._01 = m1.self._01;
-				_this.self._02 = m1.self._02;
-				_this.self._03 = m1.self._03;
-				_this.self._10 = m1.self._10;
-				_this.self._11 = m1.self._11;
-				_this.self._12 = m1.self._12;
-				_this.self._13 = m1.self._13;
-				_this.self._20 = m1.self._20;
-				_this.self._21 = m1.self._21;
-				_this.self._22 = m1.self._22;
-				_this.self._23 = m1.self._23;
-				_this.self._30 = m1.self._30;
-				_this.self._31 = m1.self._31;
-				_this.self._32 = m1.self._32;
-				_this.self._33 = m1.self._33;
-				var _this = iron_object_Uniforms.helpMat;
-				var f = _this.self._01;
-				_this.self._01 = _this.self._10;
-				_this.self._10 = f;
-				f = _this.self._02;
-				_this.self._02 = _this.self._20;
-				_this.self._20 = f;
-				f = _this.self._12;
-				_this.self._12 = _this.self._21;
-				_this.self._21 = f;
-				m = iron_object_Uniforms.helpMat;
-				break;
-			case "_viewMatrix":
-				m = camera.V;
-				break;
-			case "_viewProjectionMatrix":
-				m = camera.VP;
-				break;
-			default:
-				return false;
+			} else {
+				det = 1.0 / det;
+				_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+				_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+				_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+				_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+				_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+				_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+				_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+				_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+				_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+				_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+				_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+				_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+				_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+				_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+				_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+				_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
 			}
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_inverseViewProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = iron_object_Uniforms.helpMat;
+			var a00 = m1.self._00;
+			var a01 = m1.self._01;
+			var a02 = m1.self._02;
+			var a03 = m1.self._03;
+			var a10 = m1.self._10;
+			var a11 = m1.self._11;
+			var a12 = m1.self._12;
+			var a13 = m1.self._13;
+			var a20 = m1.self._20;
+			var a21 = m1.self._21;
+			var a22 = m1.self._22;
+			var a23 = m1.self._23;
+			var a30 = m1.self._30;
+			var a31 = m1.self._31;
+			var a32 = m1.self._32;
+			var a33 = m1.self._33;
+			var b00 = a00 * a11 - a01 * a10;
+			var b01 = a00 * a12 - a02 * a10;
+			var b02 = a00 * a13 - a03 * a10;
+			var b03 = a01 * a12 - a02 * a11;
+			var b04 = a01 * a13 - a03 * a11;
+			var b05 = a02 * a13 - a03 * a12;
+			var b06 = a20 * a31 - a21 * a30;
+			var b07 = a20 * a32 - a22 * a30;
+			var b08 = a20 * a33 - a23 * a30;
+			var b09 = a21 * a32 - a22 * a31;
+			var b10 = a21 * a33 - a23 * a31;
+			var b11 = a22 * a33 - a23 * a32;
+			var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+			if(det == 0.0) {
+				_this.self._00 = 1.0;
+				_this.self._01 = 0.0;
+				_this.self._02 = 0.0;
+				_this.self._03 = 0.0;
+				_this.self._10 = 0.0;
+				_this.self._11 = 1.0;
+				_this.self._12 = 0.0;
+				_this.self._13 = 0.0;
+				_this.self._20 = 0.0;
+				_this.self._21 = 0.0;
+				_this.self._22 = 1.0;
+				_this.self._23 = 0.0;
+				_this.self._30 = 0.0;
+				_this.self._31 = 0.0;
+				_this.self._32 = 0.0;
+				_this.self._33 = 1.0;
+			} else {
+				det = 1.0 / det;
+				_this.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+				_this.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+				_this.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+				_this.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+				_this.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+				_this.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+				_this.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+				_this.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+				_this.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+				_this.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+				_this.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+				_this.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+				_this.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+				_this.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+				_this.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+				_this.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+			}
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_lightViewProjectionMatrix":
+			if(light != null) {
+				m = light.VP;
+			}
+			break;
+		case "_prevViewProjectionMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.prevV;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_projectionMatrix":
+			m = camera.P;
+			break;
+		case "_skydomeMatrix":
+			var tr = camera.transform;
+			var _this = iron_object_Uniforms.helpVec;
+			_this.x = tr.world.self._30;
+			_this.y = tr.world.self._31;
+			_this.z = tr.world.self._32 - 3.5;
+			_this.w = 1.0;
+			var bounds = camera.data.raw.far_plane * 0.95;
+			var _this = iron_object_Uniforms.helpVec2;
+			_this.x = bounds;
+			_this.y = bounds;
+			_this.z = bounds;
+			_this.w = 1.0;
+			var _this = iron_object_Uniforms.helpMat;
+			var loc = iron_object_Uniforms.helpVec;
+			var quat = iron_object_Uniforms.helpQuat;
+			var sc = iron_object_Uniforms.helpVec2;
+			var x = quat.x;
+			var y = quat.y;
+			var z = quat.z;
+			var w = quat.w;
+			var x2 = x + x;
+			var y2 = y + y;
+			var z2 = z + z;
+			var xx = x * x2;
+			var xy = x * y2;
+			var xz = x * z2;
+			var yy = y * y2;
+			var yz = y * z2;
+			var zz = z * z2;
+			var wx = w * x2;
+			var wy = w * y2;
+			var wz = w * z2;
+			_this.self._00 = 1.0 - (yy + zz);
+			_this.self._10 = xy - wz;
+			_this.self._20 = xz + wy;
+			_this.self._01 = xy + wz;
+			_this.self._11 = 1.0 - (xx + zz);
+			_this.self._21 = yz - wx;
+			_this.self._02 = xz - wy;
+			_this.self._12 = yz + wx;
+			_this.self._22 = 1.0 - (xx + yy);
+			_this.self._03 = 0.0;
+			_this.self._13 = 0.0;
+			_this.self._23 = 0.0;
+			_this.self._30 = 0.0;
+			_this.self._31 = 0.0;
+			_this.self._32 = 0.0;
+			_this.self._33 = 1.0;
+			var x = sc.x;
+			var y = sc.y;
+			var z = sc.z;
+			_this.self._00 *= x;
+			_this.self._01 *= x;
+			_this.self._02 *= x;
+			_this.self._03 *= x;
+			_this.self._10 *= y;
+			_this.self._11 *= y;
+			_this.self._12 *= y;
+			_this.self._13 *= y;
+			_this.self._20 *= z;
+			_this.self._21 *= z;
+			_this.self._22 *= z;
+			_this.self._23 *= z;
+			_this.self._30 = loc.x;
+			_this.self._31 = loc.y;
+			_this.self._32 = loc.z;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.P;
+			var a00 = _this.self._00;
+			var a01 = _this.self._01;
+			var a02 = _this.self._02;
+			var a03 = _this.self._03;
+			var a10 = _this.self._10;
+			var a11 = _this.self._11;
+			var a12 = _this.self._12;
+			var a13 = _this.self._13;
+			var a20 = _this.self._20;
+			var a21 = _this.self._21;
+			var a22 = _this.self._22;
+			var a23 = _this.self._23;
+			var a30 = _this.self._30;
+			var a31 = _this.self._31;
+			var a32 = _this.self._32;
+			var a33 = _this.self._33;
+			var b0 = m1.self._00;
+			var b1 = m1.self._10;
+			var b2 = m1.self._20;
+			var b3 = m1.self._30;
+			_this.self._00 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._10 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._20 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._30 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._01;
+			b1 = m1.self._11;
+			b2 = m1.self._21;
+			b3 = m1.self._31;
+			_this.self._01 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._11 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._21 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._31 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._02;
+			b1 = m1.self._12;
+			b2 = m1.self._22;
+			b3 = m1.self._32;
+			_this.self._02 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._12 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._22 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._32 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			b0 = m1.self._03;
+			b1 = m1.self._13;
+			b2 = m1.self._23;
+			b3 = m1.self._33;
+			_this.self._03 = a00 * b0 + a01 * b1 + a02 * b2 + a03 * b3;
+			_this.self._13 = a10 * b0 + a11 * b1 + a12 * b2 + a13 * b3;
+			_this.self._23 = a20 * b0 + a21 * b1 + a22 * b2 + a23 * b3;
+			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_transposeViewMatrix":
+			var _this = iron_object_Uniforms.helpMat;
+			var m1 = camera.V;
+			_this.self._00 = m1.self._00;
+			_this.self._01 = m1.self._01;
+			_this.self._02 = m1.self._02;
+			_this.self._03 = m1.self._03;
+			_this.self._10 = m1.self._10;
+			_this.self._11 = m1.self._11;
+			_this.self._12 = m1.self._12;
+			_this.self._13 = m1.self._13;
+			_this.self._20 = m1.self._20;
+			_this.self._21 = m1.self._21;
+			_this.self._22 = m1.self._22;
+			_this.self._23 = m1.self._23;
+			_this.self._30 = m1.self._30;
+			_this.self._31 = m1.self._31;
+			_this.self._32 = m1.self._32;
+			_this.self._33 = m1.self._33;
+			var _this = iron_object_Uniforms.helpMat;
+			var f = _this.self._01;
+			_this.self._01 = _this.self._10;
+			_this.self._10 = f;
+			f = _this.self._02;
+			_this.self._02 = _this.self._20;
+			_this.self._20 = f;
+			f = _this.self._12;
+			_this.self._12 = _this.self._21;
+			_this.self._21 = f;
+			m = iron_object_Uniforms.helpMat;
+			break;
+		case "_viewMatrix":
+			m = camera.V;
+			break;
+		case "_viewProjectionMatrix":
+			m = camera.VP;
+			break;
 		}
-		g.setMatrix(location,m != null ? m.self : new kha_math_FastMatrix4(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1));
-		return true;
+		if(m != null) {
+			g.setMatrix(location,m.self);
+			return true;
+		}
 	} else if(c.type == "vec4") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
-		var w = 0;
-		if(w == null) {
-			w = 1.0;
-		}
 		_this.x = 0;
 		_this.y = 0;
 		_this.z = 0;
-		_this.w = w;
-		var _g = c.link;
-		return false;
+		_this.w = 1.0;
+		if(v != null) {
+			g.setFloat4(location,v.x,v.y,v.z,v.w);
+			return true;
+		}
 	} else if(c.type == "vec3") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
@@ -13539,183 +13146,174 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		_this.y = 0;
 		_this.z = 0;
 		_this.w = 1.0;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_backgroundCol":
-				if(camera.data.raw.clear_color != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					var y = camera.data.raw.clear_color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					var z = camera.data.raw.clear_color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.x = camera.data.raw.clear_color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-				}
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraLook":
-				var _this = new iron_math_Vec4(-camera.transform.world.self._20,-camera.transform.world.self._21,-camera.transform.world.self._22);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraPosition":
+		switch(c.link) {
+		case "_backgroundCol":
+			if(camera.data.raw.clear_color != null) {
 				var _this = iron_object_Uniforms.helpVec;
-				_this.x = camera.transform.world.self._30;
-				_this.y = camera.transform.world.self._31;
-				_this.z = camera.transform.world.self._32;
+				var y = camera.data.raw.clear_color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				var z = camera.data.raw.clear_color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.x = camera.data.raw.clear_color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+			}
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraLook":
+			var _this = new iron_math_Vec4(-camera.transform.world.self._20,-camera.transform.world.self._21,-camera.transform.world.self._22);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraPosition":
+			var _this = iron_object_Uniforms.helpVec;
+			_this.x = camera.transform.world.self._30;
+			_this.y = camera.transform.world.self._31;
+			_this.z = camera.transform.world.self._32;
+			_this.w = 1.0;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraRight":
+			var _this = new iron_math_Vec4(camera.transform.world.self._00,camera.transform.world.self._01,camera.transform.world.self._02);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_cameraUp":
+			var _this = new iron_math_Vec4(camera.transform.world.self._10,camera.transform.world.self._11,camera.transform.world.self._12);
+			var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+			if(n > 0.0) {
+				var invN = 1.0 / n;
+				_this.x *= invN;
+				_this.y *= invN;
+				_this.z *= invN;
+			}
+			iron_object_Uniforms.helpVec = _this;
+			v = iron_object_Uniforms.helpVec;
+			break;
+		case "_hosekSunDirection":
+			var w = iron_Scene.active.world;
+			if(w != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				var y = w.raw.sun_direction.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				var z = w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) > 0 ? w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) : 0;
+				_this.x = w.raw.sun_direction.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
+				_this.y = y;
+				_this.z = z;
 				_this.w = 1.0;
 				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraRight":
-				var _this = new iron_math_Vec4(camera.transform.world.self._00,camera.transform.world.self._01,camera.transform.world.self._02);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_cameraUp":
-				var _this = new iron_math_Vec4(camera.transform.world.self._10,camera.transform.world.self._11,camera.transform.world.self._12);
-				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-				if(n > 0.0) {
-					var invN = 1.0 / n;
-					_this.x *= invN;
-					_this.y *= invN;
-					_this.z *= invN;
-				}
-				iron_object_Uniforms.helpVec = _this;
-				v = iron_object_Uniforms.helpVec;
-				break;
-			case "_hosekSunDirection":
-				var w = iron_Scene.active.world;
-				if(w != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					var y = w.raw.sun_direction.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					var z = w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) > 0 ? w.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) : 0;
-					_this.x = w.raw.sun_direction.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN);
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_lightDirection":
-				if(light != null) {
-					var _this = new iron_math_Vec4(light.V.self._02,light.V.self._12,light.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_lightPosition":
-				if(light != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					_this.x = light.transform.world.self._30;
-					_this.y = light.transform.world.self._31;
-					_this.z = light.transform.world.self._32;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_pointColor":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var str = point.visible ? point.data.raw.strength : 0.0;
-					var _this = iron_object_Uniforms.helpVec;
-					var y = point.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					var z = point.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.x = point.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_pointPosition":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var _this = iron_object_Uniforms.helpVec;
-					_this.x = point.transform.world.self._30;
-					_this.y = point.transform.world.self._31;
-					_this.z = point.transform.world.self._32;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_spotDirection":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					var _this = new iron_math_Vec4(point.V.self._02,point.V.self._12,point.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_sunColor":
-				var sun = iron_RenderPath.active.sun;
-				if(sun != null) {
-					var str = sun.visible ? sun.data.raw.strength : 0.0;
-					var _this = iron_object_Uniforms.helpVec;
-					var y = sun.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					var z = sun.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.x = sun.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
-					_this.y = y;
-					_this.z = z;
-					_this.w = 1.0;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			case "_sunDirection":
-				var sun = iron_RenderPath.active.sun;
-				if(sun != null) {
-					var _this = new iron_math_Vec4(sun.V.self._02,sun.V.self._12,sun.V.self._22);
-					var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
-					if(n > 0.0) {
-						var invN = 1.0 / n;
-						_this.x *= invN;
-						_this.y *= invN;
-						_this.z *= invN;
-					}
-					iron_object_Uniforms.helpVec = _this;
-					v = iron_object_Uniforms.helpVec;
-				}
-				break;
-			default:
-				return false;
 			}
+			break;
+		case "_lightDirection":
+			if(light != null) {
+				var _this = new iron_math_Vec4(light.V.self._02,light.V.self._12,light.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_lightPosition":
+			if(light != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				_this.x = light.transform.world.self._30;
+				_this.y = light.transform.world.self._31;
+				_this.z = light.transform.world.self._32;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_pointColor":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var str = point.visible ? point.data.raw.strength : 0.0;
+				var _this = iron_object_Uniforms.helpVec;
+				var y = point.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				var z = point.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.x = point.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_pointPosition":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var _this = iron_object_Uniforms.helpVec;
+				_this.x = point.transform.world.self._30;
+				_this.y = point.transform.world.self._31;
+				_this.z = point.transform.world.self._32;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_spotDirection":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				var _this = new iron_math_Vec4(point.V.self._02,point.V.self._12,point.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_sunColor":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var str = sun.visible ? sun.data.raw.strength : 0.0;
+				var _this = iron_object_Uniforms.helpVec;
+				var y = sun.data.raw.color.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				var z = sun.data.raw.color.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.x = sun.data.raw.color.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN) * str;
+				_this.y = y;
+				_this.z = z;
+				_this.w = 1.0;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
+		case "_sunDirection":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var _this = new iron_math_Vec4(sun.V.self._02,sun.V.self._12,sun.V.self._22);
+				var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
+				if(n > 0.0) {
+					var invN = 1.0 / n;
+					_this.x *= invN;
+					_this.y *= invN;
+					_this.z *= invN;
+				}
+				iron_object_Uniforms.helpVec = _this;
+				v = iron_object_Uniforms.helpVec;
+			}
+			break;
 		}
 		if(v != null) {
 			g.setFloat3(location,v.x,v.y,v.z);
-		} else {
-			g.setFloat3(location,0.0,0.0,0.0);
+			return true;
 		}
-		return true;
 	} else if(c.type == "vec2") {
 		var v = null;
 		var _this = iron_object_Uniforms.helpVec;
@@ -13723,178 +13321,164 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		_this.y = 0;
 		_this.z = 0;
 		_this.w = 1.0;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_aspectRatio":
+		switch(c.link) {
+		case "_aspectRatio":
+			v = iron_object_Uniforms.helpVec;
+			v.x = iron_RenderPath.active.currentH / iron_RenderPath.active.currentW;
+			v.y = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
+			v.x = v.x > 1.0 ? 1.0 : v.x;
+			v.y = v.y > 1.0 ? 1.0 : v.y;
+			break;
+		case "_cameraPlane":
+			v = iron_object_Uniforms.helpVec;
+			v.x = camera.data.raw.near_plane;
+			v.y = camera.data.raw.far_plane;
+			break;
+		case "_cameraPlaneProj":
+			var near = camera.data.raw.near_plane;
+			var far = camera.data.raw.far_plane;
+			v = iron_object_Uniforms.helpVec;
+			v.x = far / (far - near);
+			v.y = -far * near / (far - near);
+			break;
+		case "_lightPlane":
+			if(light != null) {
 				v = iron_object_Uniforms.helpVec;
-				v.x = iron_RenderPath.active.currentH / iron_RenderPath.active.currentW;
-				v.y = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
-				v.x = v.x > 1.0 ? 1.0 : v.x;
-				v.y = v.y > 1.0 ? 1.0 : v.y;
-				break;
-			case "_cameraPlane":
-				v = iron_object_Uniforms.helpVec;
-				v.x = camera.data.raw.near_plane;
-				v.y = camera.data.raw.far_plane;
-				break;
-			case "_cameraPlaneProj":
-				var near = camera.data.raw.near_plane;
-				var far = camera.data.raw.far_plane;
-				v = iron_object_Uniforms.helpVec;
-				v.x = far / (far - near);
-				v.y = -far * near / (far - near);
-				break;
-			case "_lightPlane":
-				if(light != null) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = light.data.raw.near_plane;
-					v.y = light.data.raw.far_plane;
-				}
-				break;
-			case "_lightPlaneProj":
-				if(light != null) {
-					var near = light.data.raw.near_plane;
-					var far = light.data.raw.far_plane;
-					var a = far + near;
-					var b = far - near;
-					var f2 = 2.0;
-					var c1 = f2 * far * near;
-					v = iron_object_Uniforms.helpVec;
-					v.x = a / b;
-					v.y = c1 / b;
-				}
-				break;
-			case "_screenSize":
-				v = iron_object_Uniforms.helpVec;
-				v.x = iron_RenderPath.active.currentW;
-				v.y = iron_RenderPath.active.currentH;
-				break;
-			case "_screenSizeInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0 / iron_RenderPath.active.currentW;
-				v.y = 1.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_shadowMapSize":
-				if(light != null && light.data.raw.cast_shadow) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = v.y = light.data.raw.shadowmap_size;
-				}
-				break;
-			case "_spotData":
-				var point = iron_RenderPath.active.point;
-				if(point != null) {
-					v = iron_object_Uniforms.helpVec;
-					v.x = point.data.raw.spot_size;
-					v.y = v.x - point.data.raw.spot_blend;
-				}
-				break;
-			case "_vec2x":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0;
-				v.y = 0.0;
-				break;
-			case "_vec2x2":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 2.0;
-				v.y = 0.0;
-				break;
-			case "_vec2x2Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 2.0 / iron_RenderPath.active.currentW;
-				v.y = 0.0;
-				break;
-			case "_vec2xInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 1.0 / iron_RenderPath.active.currentW;
-				v.y = 0.0;
-				break;
-			case "_vec2y":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 1.0;
-				break;
-			case "_vec2y2":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 2.0;
-				break;
-			case "_vec2y2Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 2.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_vec2y3":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 3.0;
-				break;
-			case "_vec2y3Inv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 3.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_vec2yInv":
-				v = iron_object_Uniforms.helpVec;
-				v.x = 0.0;
-				v.y = 1.0 / iron_RenderPath.active.currentH;
-				break;
-			case "_windowSize":
-				v = iron_object_Uniforms.helpVec;
-				v.x = kha_System.windowWidth();
-				v.y = kha_System.windowHeight();
-				break;
-			default:
-				return false;
+				v.x = light.data.raw.near_plane;
+				v.y = light.data.raw.far_plane;
 			}
+			break;
+		case "_lightPlaneProj":
+			if(light != null) {
+				var near = light.data.raw.near_plane;
+				var far = light.data.raw.far_plane;
+				var a = far + near;
+				var b = far - near;
+				var f2 = 2.0;
+				var c1 = f2 * far * near;
+				v = iron_object_Uniforms.helpVec;
+				v.x = a / b;
+				v.y = c1 / b;
+			}
+			break;
+		case "_screenSize":
+			v = iron_object_Uniforms.helpVec;
+			v.x = iron_RenderPath.active.currentW;
+			v.y = iron_RenderPath.active.currentH;
+			break;
+		case "_screenSizeInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0 / iron_RenderPath.active.currentW;
+			v.y = 1.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_shadowMapSize":
+			if(light != null && light.data.raw.cast_shadow) {
+				v = iron_object_Uniforms.helpVec;
+				v.x = v.y = light.data.raw.shadowmap_size;
+			}
+			break;
+		case "_spotData":
+			var point = iron_RenderPath.active.point;
+			if(point != null) {
+				v = iron_object_Uniforms.helpVec;
+				v.x = point.data.raw.spot_size;
+				v.y = v.x - point.data.raw.spot_blend;
+			}
+			break;
+		case "_vec2x":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0;
+			v.y = 0.0;
+			break;
+		case "_vec2x2":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 2.0;
+			v.y = 0.0;
+			break;
+		case "_vec2x2Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 2.0 / iron_RenderPath.active.currentW;
+			v.y = 0.0;
+			break;
+		case "_vec2xInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 1.0 / iron_RenderPath.active.currentW;
+			v.y = 0.0;
+			break;
+		case "_vec2y":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 1.0;
+			break;
+		case "_vec2y2":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 2.0;
+			break;
+		case "_vec2y2Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 2.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_vec2y3":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 3.0;
+			break;
+		case "_vec2y3Inv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 3.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_vec2yInv":
+			v = iron_object_Uniforms.helpVec;
+			v.x = 0.0;
+			v.y = 1.0 / iron_RenderPath.active.currentH;
+			break;
+		case "_windowSize":
+			v = iron_object_Uniforms.helpVec;
+			v.x = kha_System.windowWidth();
+			v.y = kha_System.windowHeight();
+			break;
 		}
 		if(v != null) {
 			g.setFloat2(location,v.x,v.y);
-		} else {
-			g.setFloat2(location,0.0,0.0);
+			return true;
 		}
-		return true;
 	} else if(c.type == "float") {
 		var f = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else {
-			switch(_g) {
-			case "_aspectRatioF":
-				f = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
-				break;
-			case "_aspectRatioWindowF":
-				f = kha_System.windowWidth() / kha_System.windowHeight();
-				break;
-			case "_envmapStrength":
-				f = iron_Scene.active.world == null ? 0.0 : iron_Scene.active.world.probe.raw.strength;
-				break;
-			case "_fieldOfView":
-				f = camera.data.raw.fov;
-				break;
-			case "_frameScale":
-				f = iron_RenderPath.active.frameTime / iron_system_Time.get_delta();
-				break;
-			case "_pointShadowsBias":
-				var point = iron_RenderPath.active.point;
-				f = point == null ? 0.0 : point.data.raw.shadows_bias;
-				break;
-			case "_sunShadowsBias":
-				var sun = iron_RenderPath.active.sun;
-				f = sun == null ? 0.0 : sun.data.raw.shadows_bias;
-				break;
-			case "_time":
-				f = kha_Scheduler.time();
-				break;
-			default:
-				return false;
-			}
+		switch(c.link) {
+		case "_aspectRatioF":
+			f = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
+			break;
+		case "_aspectRatioWindowF":
+			f = kha_System.windowWidth() / kha_System.windowHeight();
+			break;
+		case "_envmapStrength":
+			f = iron_Scene.active.world == null ? 0.0 : iron_Scene.active.world.probe.raw.strength;
+			break;
+		case "_fieldOfView":
+			f = camera.data.raw.fov;
+			break;
+		case "_frameScale":
+			f = iron_RenderPath.active.frameTime / iron_system_Time.get_delta();
+			break;
+		case "_pointShadowsBias":
+			var point = iron_RenderPath.active.point;
+			f = point == null ? 0.0 : point.data.raw.shadows_bias;
+			break;
+		case "_sunShadowsBias":
+			var sun = iron_RenderPath.active.sun;
+			f = sun == null ? 0.0 : sun.data.raw.shadows_bias;
+			break;
+		case "_time":
+			f = kha_Scheduler.time();
+			break;
 		}
-		g.setFloat(location,f != null ? f : 0);
-		return true;
+		if(f != null) {
+			g.setFloat(location,f);
+			return true;
+		}
 	} else if(c.type == "floats") {
 		var fa = null;
 		switch(c.link) {
@@ -13920,17 +13504,14 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 		}
 	} else if(c.type == "int") {
 		var i = null;
-		var _g = c.link;
-		if(_g == null) {
-			return false;
-		} else if(_g == "_envmapNumMipmaps") {
+		if(c.link == "_envmapNumMipmaps") {
 			var w = iron_Scene.active.world;
 			i = w != null ? w.probe.raw.radiance_mipmaps + 1 - 2 : 1;
-		} else {
-			return false;
 		}
-		g.setInt(location,i != null ? i : 0);
-		return true;
+		if(i != null) {
+			g.setInt(location,i);
+			return true;
+		}
 	}
 	return false;
 };
@@ -27633,9 +27214,9 @@ iron_App.lastw = -1;
 iron_App.lasth = -1;
 iron_Scene.uidCounter = 0;
 iron_Scene.framePassed = true;
-iron_data_ConstData.skydomeIndices = [261,8,7,258,5,4,265,12,11,257,2,156,262,9,8,259,6,5,179,12,265,0,3,2,263,10,9,260,7,6,1,4,3,264,11,10,6,17,16,179,23,12,3,14,13,10,21,20,7,18,17,4,15,14,11,22,21,8,19,18,5,16,15,12,23,22,2,13,156,9,20,19,16,27,26,23,34,33,13,24,156,20,31,30,17,28,27,179,34,23,14,25,24,21,32,31,18,29,28,15,26,25,22,33,32,19,30,29,29,40,39,26,37,36,33,44,43,30,41,40,27,38,37,34,45,44,24,35,156,31,42,41,28,39,38,179,45,34,25,36,35,32,43,42,39,50,49,179,56,45,36,47,46,43,54,53,40,51,50,37,48,47,44,55,54,41,52,51,38,49,48,45,56,55,35,46,156,42,53,52,52,63,62,49,60,59,56,67,66,46,57,156,53,64,63,50,61,60,179,67,56,47,58,57,54,65,64,51,62,61,48,59,58,55,66,65,62,73,72,59,70,69,66,77,76,63,74,73,60,71,70,67,78,77,57,68,156,64,75,74,61,72,71,179,78,67,58,69,68,65,76,75,75,86,85,72,83,82,179,89,78,69,80,79,76,87,86,73,84,83,70,81,80,77,88,87,74,85,84,71,82,81,78,89,88,68,79,156,85,96,95,82,93,92,89,100,99,79,90,156,86,97,96,83,94,93,179,100,89,80,91,90,87,98,97,84,95,94,81,92,91,88,99,98,98,109,108,95,106,105,92,103,102,99,110,109,96,107,106,93,104,103,100,111,110,90,101,156,97,108,107,94,105,104,179,111,100,91,102,101,101,112,156,108,119,118,105,116,115,179,122,111,102,113,112,109,120,119,106,117,116,103,114,113,110,121,120,107,118,117,104,115,114,111,122,121,121,132,131,118,129,128,115,126,125,122,133,132,112,123,156,119,130,129,116,127,126,179,133,122,113,124,123,120,131,130,117,128,127,114,125,124,124,135,134,131,142,141,128,139,138,125,136,135,132,143,142,129,140,139,126,137,136,133,144,143,123,134,156,130,141,140,127,138,137,179,144,133,144,155,154,134,145,156,141,152,151,138,149,148,179,155,144,135,146,145,142,153,152,139,150,149,136,147,146,143,154,153,140,151,150,137,148,147,147,159,158,154,166,165,151,163,162,148,160,159,155,167,166,145,157,156,152,164,163,149,161,160,179,167,155,146,158,157,153,165,164,150,162,161,179,178,167,158,169,168,165,176,175,162,173,172,159,170,169,166,177,176,163,174,173,160,171,170,167,178,177,157,168,156,164,175,174,161,172,171,171,183,182,178,190,189,168,180,156,175,187,186,172,184,183,179,190,178,169,181,180,176,188,187,173,185,184,170,182,181,177,189,188,174,186,185,182,193,192,189,200,199,186,197,196,183,194,193,190,201,200,180,191,156,187,198,197,184,195,194,179,201,190,181,192,191,188,199,198,185,196,195,195,206,205,179,212,201,192,203,202,199,210,209,196,207,206,193,204,203,200,211,210,197,208,207,194,205,204,201,212,211,191,202,156,198,209,208,205,216,215,212,223,222,202,213,156,209,220,219,206,217,216,179,223,212,203,214,213,210,221,220,207,218,217,204,215,214,211,222,221,208,219,218,218,229,228,215,226,225,222,233,232,219,230,229,216,227,226,223,234,233,213,224,156,220,231,230,217,228,227,179,234,223,214,225,224,221,232,231,228,239,238,179,245,234,225,236,235,232,243,242,229,240,239,226,237,236,233,244,243,230,241,240,227,238,237,234,245,244,224,235,156,231,242,241,241,252,251,238,249,248,245,256,255,235,246,156,242,253,252,239,250,249,179,256,245,236,247,246,243,254,253,240,251,250,237,248,247,244,255,254,251,260,259,248,1,0,255,264,263,252,261,260,249,258,1,256,265,264,246,257,156,253,262,261,250,259,258,179,265,256,247,0,257,254,263,262,261,7,260,258,4,1,265,11,264,262,8,261,259,5,258,0,2,257,263,9,262,260,6,259,1,3,0,264,10,263,6,16,5,3,13,2,10,20,9,7,17,6,4,14,3,11,21,10,8,18,7,5,15,4,12,22,11,9,19,8,16,26,15,23,33,22,20,30,19,17,27,16,14,24,13,21,31,20,18,28,17,15,25,14,22,32,21,19,29,18,29,39,28,26,36,25,33,43,32,30,40,29,27,37,26,34,44,33,31,41,30,28,38,27,25,35,24,32,42,31,39,49,38,36,46,35,43,53,42,40,50,39,37,47,36,44,54,43,41,51,40,38,48,37,45,55,44,42,52,41,52,62,51,49,59,48,56,66,55,53,63,52,50,60,49,47,57,46,54,64,53,51,61,50,48,58,47,55,65,54,62,72,61,59,69,58,66,76,65,63,73,62,60,70,59,67,77,66,64,74,63,61,71,60,58,68,57,65,75,64,75,85,74,72,82,71,69,79,68,76,86,75,73,83,72,70,80,69,77,87,76,74,84,73,71,81,70,78,88,77,85,95,84,82,92,81,89,99,88,86,96,85,83,93,82,80,90,79,87,97,86,84,94,83,81,91,80,88,98,87,98,108,97,95,105,94,92,102,91,99,109,98,96,106,95,93,103,92,100,110,99,97,107,96,94,104,93,91,101,90,108,118,107,105,115,104,102,112,101,109,119,108,106,116,105,103,113,102,110,120,109,107,117,106,104,114,103,111,121,110,121,131,120,118,128,117,115,125,114,122,132,121,119,129,118,116,126,115,113,123,112,120,130,119,117,127,116,114,124,113,124,134,123,131,141,130,128,138,127,125,135,124,132,142,131,129,139,128,126,136,125,133,143,132,130,140,129,127,137,126,144,154,143,141,151,140,138,148,137,135,145,134,142,152,141,139,149,138,136,146,135,143,153,142,140,150,139,137,147,136,147,158,146,154,165,153,151,162,150,148,159,147,155,166,154,152,163,151,149,160,148,146,157,145,153,164,152,150,161,149,158,168,157,165,175,164,162,172,161,159,169,158,166,176,165,163,173,162,160,170,159,167,177,166,164,174,163,161,171,160,171,182,170,178,189,177,175,186,174,172,183,171,169,180,168,176,187,175,173,184,172,170,181,169,177,188,176,174,185,173,182,192,181,189,199,188,186,196,185,183,193,182,190,200,189,187,197,186,184,194,183,181,191,180,188,198,187,185,195,184,195,205,194,192,202,191,199,209,198,196,206,195,193,203,192,200,210,199,197,207,196,194,204,193,201,211,200,198,208,197,205,215,204,212,222,211,209,219,208,206,216,205,203,213,202,210,220,209,207,217,206,204,214,203,211,221,210,208,218,207,218,228,217,215,225,214,222,232,221,219,229,218,216,226,215,223,233,222,220,230,219,217,227,216,214,224,213,221,231,220,228,238,227,225,235,224,232,242,231,229,239,228,226,236,225,233,243,232,230,240,229,227,237,226,234,244,233,231,241,230,241,251,240,238,248,237,245,255,244,242,252,241,239,249,238,236,246,235,243,253,242,240,250,239,237,247,236,244,254,243,251,259,250,248,0,247,255,263,254,252,260,251,249,1,248,256,264,255,253,261,252,250,258,249,247,257,246,254,262,253];
-iron_data_ConstData.skydomePos = [0.0,0.5,0.86603,0.0,0.70711,0.70711,0.06699,0.25,0.96593,0.12941,0.48296,0.86603,0.18301,0.68301,0.70711,0.22414,0.83652,0.5,0.25,0.93301,0.25882,0.25882,0.96593,-0.0,0.25,0.93301,-0.25882,0.22414,0.83652,-0.5,0.18301,0.68301,-0.70711,0.12941,0.48296,-0.86603,0.06699,0.25,-0.96593,0.12941,0.22414,0.96593,0.25,0.43301,0.86603,0.35355,0.61237,0.70711,0.43301,0.75,0.5,0.48296,0.83652,0.25882,0.5,0.86603,-0.0,0.48296,0.83652,-0.25882,0.43301,0.75,-0.5,0.35355,0.61237,-0.70711,0.25,0.43301,-0.86603,0.12941,0.22414,-0.96593,0.18301,0.18301,0.96593,0.35355,0.35355,0.86603,0.5,0.5,0.70711,0.61237,0.61237,0.5,0.68301,0.68301,0.25882,0.70711,0.70711,-0.0,0.68301,0.68301,-0.25882,0.61237,0.61237,-0.5,0.5,0.5,-0.70711,0.35355,0.35355,-0.86603,0.18301,0.18301,-0.96593,0.22414,0.12941,0.96593,0.43301,0.25,0.86603,0.61237,0.35355,0.70711,0.75,0.43301,0.5,0.83652,0.48296,0.25882,0.86603,0.5,-0.0,0.83652,0.48296,-0.25882,0.75,0.43301,-0.5,0.61237,0.35355,-0.70711,0.43301,0.25,-0.86603,0.22414,0.12941,-0.96593,0.25,0.06699,0.96593,0.48296,0.12941,0.86603,0.68301,0.18301,0.70711,0.83652,0.22414,0.5,0.93301,0.25,0.25882,0.96593,0.25882,-0.0,0.93301,0.25,-0.25882,0.83652,0.22414,-0.5,0.68301,0.18301,-0.70711,0.48296,0.12941,-0.86603,0.25,0.06699,-0.96593,0.25882,-0.0,0.96593,0.5,-0.0,0.86603,0.70711,-0.0,0.70711,0.86603,0.0,0.5,0.96593,-0.0,0.25882,1.0,-0.0,-0.0,0.96593,-0.0,-0.25882,0.86603,-0.0,-0.5,0.70711,-0.0,-0.70711,0.5,-0.0,-0.86603,0.25882,-0.0,-0.96593,0.25,-0.06699,0.96593,0.48296,-0.12941,0.86603,0.68301,-0.18301,0.70711,0.83652,-0.22414,0.5,0.93301,-0.25,0.25882,0.96593,-0.25882,-0.0,0.93301,-0.25,-0.25882,0.83652,-0.22414,-0.5,0.68301,-0.18301,-0.70711,0.48296,-0.12941,-0.86603,0.25,-0.06699,-0.96593,0.22414,-0.12941,0.96593,0.43301,-0.25,0.86603,0.61237,-0.35355,0.70711,0.75,-0.43301,0.5,0.83652,-0.48296,0.25882,0.86603,-0.5,-0.0,0.83652,-0.48296,-0.25882,0.75,-0.43301,-0.5,0.61237,-0.35355,-0.70711,0.43301,-0.25,-0.86603,0.22414,-0.12941,-0.96593,0.18301,-0.18301,0.96593,0.35355,-0.35355,0.86603,0.5,-0.5,0.70711,0.61237,-0.61237,0.5,0.68301,-0.68301,0.25882,0.70711,-0.70711,-0.0,0.68301,-0.68301,-0.25882,0.61237,-0.61237,-0.5,0.5,-0.5,-0.70711,0.35355,-0.35355,-0.86603,0.18301,-0.18301,-0.96593,0.12941,-0.22414,0.96593,0.25,-0.43301,0.86603,0.35355,-0.61237,0.70711,0.43301,-0.75,0.5,0.48296,-0.83652,0.25882,0.5,-0.86603,-0.0,0.48296,-0.83652,-0.25882,0.43301,-0.75,-0.5,0.35355,-0.61237,-0.70711,0.25,-0.43301,-0.86603,0.12941,-0.22414,-0.96593,0.06699,-0.25,0.96593,0.12941,-0.48296,0.86603,0.18301,-0.68301,0.70711,0.22414,-0.83652,0.5,0.25,-0.93301,0.25882,0.25882,-0.96593,-0.0,0.25,-0.93301,-0.25882,0.22414,-0.83652,-0.5,0.18301,-0.68301,-0.70711,0.12941,-0.48296,-0.86603,0.06699,-0.25,-0.96593,0.0,-0.25882,0.96593,-0.0,-0.5,0.86603,0.0,-0.70711,0.70711,0.0,-0.86603,0.5,0.0,-0.96593,0.25882,-0.0,-1.0,-0.0,0.0,-0.96593,-0.25882,0.0,-0.86603,-0.5,0.0,-0.70711,-0.70711,0.0,-0.5,-0.86603,0.0,-0.25882,-0.96593,-0.06699,-0.25,0.96593,-0.12941,-0.48296,0.86603,-0.18301,-0.68301,0.70711,-0.22414,-0.83652,0.5,-0.25,-0.93301,0.25882,-0.25882,-0.96593,-0.0,-0.25,-0.93301,-0.25882,-0.22414,-0.83652,-0.5,-0.18301,-0.68301,-0.70711,-0.12941,-0.48296,-0.86603,-0.06699,-0.25,-0.96593,-0.12941,-0.22414,0.96593,-0.25,-0.43301,0.86603,-0.35355,-0.61237,0.70711,-0.43301,-0.75,0.5,-0.48296,-0.83652,0.25882,-0.5,-0.86603,-0.0,-0.48296,-0.83652,-0.25882,-0.43301,-0.75,-0.5,-0.35355,-0.61237,-0.70711,-0.25,-0.43301,-0.86603,-0.12941,-0.22414,-0.96593,-0.0,-0.0,1.0,-0.18301,-0.18301,0.96593,-0.35355,-0.35355,0.86603,-0.5,-0.5,0.70711,-0.61237,-0.61237,0.5,-0.68301,-0.68301,0.25882,-0.70711,-0.70711,-0.0,-0.68301,-0.68301,-0.25882,-0.61237,-0.61237,-0.5,-0.5,-0.5,-0.70711,-0.35355,-0.35355,-0.86603,-0.18301,-0.18301,-0.96593,-0.22414,-0.12941,0.96593,-0.43301,-0.25,0.86603,-0.61237,-0.35355,0.70711,-0.75,-0.43301,0.5,-0.83652,-0.48296,0.25882,-0.86602,-0.5,-0.0,-0.83652,-0.48296,-0.25882,-0.75,-0.43301,-0.5,-0.61237,-0.35355,-0.70711,-0.43301,-0.25,-0.86603,-0.22414,-0.12941,-0.96593,0.0,-0.0,-1.0,-0.25,-0.06699,0.96593,-0.48296,-0.12941,0.86603,-0.68301,-0.18301,0.70711,-0.83652,-0.22414,0.5,-0.93301,-0.25,0.25882,-0.96593,-0.25882,-0.0,-0.93301,-0.25,-0.25882,-0.83652,-0.22414,-0.5,-0.68301,-0.18301,-0.70711,-0.48296,-0.12941,-0.86603,-0.25,-0.06699,-0.96593,-0.25882,-0.0,0.96593,-0.5,-0.0,0.86603,-0.70711,-0.0,0.70711,-0.86603,-0.0,0.5,-0.96593,-0.0,0.25882,-1.0,-0.0,-0.0,-0.96593,-0.0,-0.25882,-0.86603,-0.0,-0.5,-0.70711,-0.0,-0.70711,-0.5,-0.0,-0.86603,-0.25882,-0.0,-0.96593,-0.25,0.06699,0.96593,-0.48296,0.12941,0.86603,-0.68301,0.18301,0.70711,-0.83652,0.22414,0.5,-0.93301,0.25,0.25882,-0.96593,0.25882,-0.0,-0.93301,0.25,-0.25882,-0.83652,0.22414,-0.5,-0.68301,0.18301,-0.70711,-0.48296,0.12941,-0.86603,-0.25,0.06699,-0.96593,-0.22414,0.12941,0.96593,-0.43301,0.25,0.86603,-0.61237,0.35355,0.70711,-0.75,0.43301,0.5,-0.83652,0.48296,0.25882,-0.86602,0.5,-0.0,-0.83652,0.48296,-0.25882,-0.75,0.43301,-0.5,-0.61237,0.35355,-0.70711,-0.43301,0.25,-0.86603,-0.22414,0.12941,-0.96593,-0.18301,0.18301,0.96593,-0.35355,0.35355,0.86603,-0.5,0.5,0.70711,-0.61237,0.61237,0.5,-0.68301,0.68301,0.25882,-0.70711,0.70711,-0.0,-0.68301,0.68301,-0.25882,-0.61237,0.61237,-0.5,-0.5,0.5,-0.70711,-0.35355,0.35355,-0.86603,-0.18301,0.18301,-0.96593,-0.12941,0.22414,0.96593,-0.25,0.43301,0.86603,-0.35355,0.61237,0.70711,-0.43301,0.75,0.5,-0.48296,0.83652,0.25882,-0.5,0.86602,-0.0,-0.48296,0.83652,-0.25882,-0.43301,0.75,-0.5,-0.35355,0.61237,-0.70711,-0.25,0.43301,-0.86603,-0.12941,0.22414,-0.96593,-0.06699,0.25,0.96593,-0.12941,0.48296,0.86603,-0.18301,0.68301,0.70711,-0.22414,0.83652,0.5,-0.25,0.93301,0.25882,-0.25882,0.96593,-0.0,-0.25,0.93301,-0.25882,-0.22414,0.83652,-0.5,-0.18301,0.68301,-0.70711,-0.12941,0.48296,-0.86603,-0.06699,0.25,-0.96593,-0.0,0.25882,0.96593,-0.0,0.86603,0.5,-0.0,0.96593,0.25882,0.0,1.0,-0.0,-0.0,0.96593,-0.25882,-0.0,0.86603,-0.5,0.0,0.70711,-0.70711,0.0,0.5,-0.86603,-0.0,0.25882,-0.96593];
-iron_data_ConstData.skydomeNor = [0.0,-0.50807,-0.86132,0.0,-0.71246,-0.70172,-0.0696,-0.25975,-0.96317,-0.1315,-0.49075,-0.86132,-0.1844,-0.68818,-0.70172,-0.22483,-0.83909,-0.49536,-0.25018,-0.9337,-0.25615,-0.25882,-0.96593,-0.0,-0.25018,-0.9337,0.25615,-0.22483,-0.83909,0.49536,-0.1844,-0.68818,0.70172,-0.1315,-0.49075,0.86132,-0.0696,-0.25975,0.96317,-0.13445,-0.23288,-0.96317,-0.25403,-0.44,-0.86132,-0.35623,-0.61701,-0.70172,-0.43434,-0.75231,-0.49536,-0.48332,-0.83713,-0.25615,-0.5,-0.86603,0.0,-0.48332,-0.83713,0.25615,-0.43434,-0.75231,0.49536,-0.35623,-0.61701,0.70172,-0.25403,-0.44,0.86132,-0.13445,-0.23288,0.96317,-0.19015,-0.19015,-0.96317,-0.35926,-0.35926,-0.86132,-0.50378,-0.50378,-0.70172,-0.61426,-0.61426,-0.49536,-0.68352,-0.68352,-0.25615,-0.70711,-0.70711,0.0,-0.68352,-0.68352,0.25615,-0.61426,-0.61426,0.49536,-0.50378,-0.50378,0.70172,-0.35926,-0.35926,0.86132,-0.19015,-0.19015,0.96317,-0.23288,-0.13445,-0.96317,-0.44,-0.25403,-0.86132,-0.61701,-0.35623,-0.70172,-0.75231,-0.43434,-0.49536,-0.83713,-0.48332,-0.25615,-0.86603,-0.5,0.0,-0.83713,-0.48332,0.25615,-0.75231,-0.43434,0.49536,-0.61701,-0.35623,0.70172,-0.44,-0.25403,0.86132,-0.23288,-0.13445,0.96317,-0.25975,-0.0696,-0.96317,-0.49075,-0.1315,-0.86132,-0.68818,-0.1844,-0.70172,-0.83909,-0.22483,-0.49536,-0.9337,-0.25018,-0.25615,-0.96593,-0.25882,0.0,-0.9337,-0.25018,0.25615,-0.83909,-0.22483,0.49536,-0.68818,-0.1844,0.70172,-0.49075,-0.1315,0.86132,-0.25975,-0.0696,0.96317,-0.26891,-0.0,-0.96317,-0.50807,0.0,-0.86132,-0.71246,0.0,-0.70172,-0.86869,-0.0,-0.49536,-0.96664,0.0,-0.25615,-1.0,0.0,0.0,-0.96664,0.0,0.25615,-0.86869,0.0,0.49536,-0.71246,0.0,0.70172,-0.50807,0.0,0.86132,-0.26891,-0.0,0.96317,-0.25975,0.0696,-0.96317,-0.49075,0.1315,-0.86132,-0.68818,0.1844,-0.70172,-0.83909,0.22483,-0.49536,-0.9337,0.25018,-0.25615,-0.96593,0.25882,0.0,-0.9337,0.25018,0.25615,-0.83909,0.22483,0.49536,-0.68818,0.1844,0.70172,-0.49075,0.1315,0.86132,-0.25975,0.0696,0.96317,-0.23288,0.13445,-0.96317,-0.44,0.25403,-0.86132,-0.61701,0.35623,-0.70172,-0.75231,0.43434,-0.49536,-0.83713,0.48332,-0.25615,-0.86603,0.5,0.0,-0.83713,0.48332,0.25615,-0.75231,0.43434,0.49536,-0.61701,0.35623,0.70172,-0.44,0.25403,0.86132,-0.23288,0.13445,0.96317,-0.19015,0.19015,-0.96317,-0.35926,0.35926,-0.86132,-0.50378,0.50378,-0.70172,-0.61426,0.61426,-0.49536,-0.68352,0.68352,-0.25615,-0.70711,0.70711,0.0,-0.68352,0.68352,0.25615,-0.61426,0.61426,0.49536,-0.50378,0.50378,0.70172,-0.35926,0.35926,0.86132,-0.19015,0.19015,0.96317,-0.13445,0.23288,-0.96317,-0.25403,0.44,-0.86132,-0.35623,0.61701,-0.70172,-0.43434,0.75231,-0.49536,-0.48332,0.83713,-0.25615,-0.5,0.86603,0.0,-0.48332,0.83713,0.25615,-0.43434,0.75231,0.49536,-0.35623,0.61701,0.70172,-0.25403,0.44,0.86132,-0.13445,0.23288,0.96317,-0.0696,0.25975,-0.96317,-0.1315,0.49075,-0.86132,-0.1844,0.68818,-0.70172,-0.22483,0.83909,-0.49536,-0.25018,0.9337,-0.25615,-0.25882,0.96593,0.0,-0.25018,0.9337,0.25615,-0.22483,0.83909,0.49536,-0.1844,0.68818,0.70172,-0.1315,0.49075,0.86132,-0.0696,0.25975,0.96317,-0.0,0.26891,-0.96317,0.0,0.50807,-0.86132,0.0,0.71246,-0.70172,-0.0,0.86869,-0.49536,0.0,0.96664,-0.25615,0.0,1.0,0.0,-0.0,0.96664,0.25615,0.0,0.86869,0.49536,0.0,0.71246,0.70172,0.0,0.50807,0.86132,0.0,0.26891,0.96317,0.0696,0.25975,-0.96317,0.1315,0.49075,-0.86132,0.1844,0.68818,-0.70172,0.22483,0.83909,-0.49536,0.25018,0.9337,-0.25615,0.25882,0.96593,0.0,0.25018,0.9337,0.25615,0.22483,0.83909,0.49536,0.1844,0.68818,0.70172,0.1315,0.49075,0.86132,0.0696,0.25975,0.96317,0.13445,0.23288,-0.96317,0.25403,0.44,-0.86132,0.35623,0.61701,-0.70172,0.43434,0.75231,-0.49536,0.48332,0.83713,-0.25615,0.5,0.86603,0.0,0.48332,0.83713,0.25615,0.43434,0.75231,0.49536,0.35623,0.61701,0.70172,0.25403,0.44,0.86132,0.13445,0.23288,0.96317,0.0,0.0,-1.0,0.19015,0.19015,-0.96317,0.35926,0.35926,-0.86132,0.50378,0.50378,-0.70172,0.61426,0.61426,-0.49536,0.68352,0.68352,-0.25615,0.70711,0.70711,0.0,0.68352,0.68352,0.25615,0.61426,0.61426,0.49536,0.50378,0.50378,0.70172,0.35926,0.35926,0.86132,0.19015,0.19015,0.96317,0.23288,0.13445,-0.96317,0.44,0.25403,-0.86132,0.61701,0.35623,-0.70172,0.75231,0.43434,-0.49536,0.83713,0.48332,-0.25615,0.86603,0.5,0.0,0.83713,0.48332,0.25615,0.75231,0.43434,0.49536,0.61701,0.35623,0.70172,0.44,0.25403,0.86132,0.23288,0.13445,0.96317,0.0,-0.0,1.0,0.25975,0.0696,-0.96317,0.49075,0.1315,-0.86132,0.68818,0.1844,-0.70172,0.83909,0.22483,-0.49536,0.9337,0.25018,-0.25615,0.96593,0.25882,0.0,0.9337,0.25018,0.25615,0.83909,0.22483,0.49536,0.68818,0.1844,0.70172,0.49075,0.1315,0.86132,0.25975,0.0696,0.96317,0.26891,-0.0,-0.96317,0.50807,-0.0,-0.86132,0.71246,0.0,-0.70172,0.86869,0.0,-0.49536,0.96664,-0.0,-0.25615,1.0,-0.0,0.0,0.96664,0.0,0.25615,0.86869,0.0,0.49536,0.71246,-0.0,0.70172,0.50807,0.0,0.86132,0.26891,-0.0,0.96317,0.25975,-0.0696,-0.96317,0.49075,-0.1315,-0.86132,0.68818,-0.1844,-0.70172,0.83909,-0.22483,-0.49536,0.9337,-0.25018,-0.25615,0.96593,-0.25882,0.0,0.9337,-0.25018,0.25615,0.83909,-0.22483,0.49536,0.68818,-0.1844,0.70172,0.49075,-0.1315,0.86132,0.25975,-0.0696,0.96317,0.23288,-0.13445,-0.96317,0.44,-0.25403,-0.86132,0.61701,-0.35623,-0.70172,0.75231,-0.43434,-0.49536,0.83713,-0.48332,-0.25615,0.86603,-0.5,0.0,0.83713,-0.48332,0.25615,0.75231,-0.43434,0.49536,0.617,-0.35623,0.70172,0.44,-0.25403,0.86132,0.23288,-0.13445,0.96317,0.19015,-0.19015,-0.96317,0.35926,-0.35926,-0.86132,0.50378,-0.50378,-0.70172,0.61426,-0.61426,-0.49536,0.68352,-0.68352,-0.25615,0.70711,-0.70711,-0.0,0.68352,-0.68352,0.25615,0.61426,-0.61426,0.49536,0.50378,-0.50378,0.70172,0.35926,-0.35926,0.86132,0.19015,-0.19015,0.96317,0.13445,-0.23288,-0.96317,0.25403,-0.44,-0.86132,0.35623,-0.61701,-0.70172,0.43434,-0.75231,-0.49536,0.48332,-0.83713,-0.25615,0.5,-0.86603,0.0,0.48332,-0.83713,0.25615,0.43434,-0.75231,0.49536,0.35623,-0.617,0.70172,0.25403,-0.44,0.86132,0.13445,-0.23288,0.96317,0.0696,-0.25975,-0.96317,0.1315,-0.49075,-0.86132,0.1844,-0.68818,-0.70172,0.22483,-0.83909,-0.49536,0.25018,-0.9337,-0.25615,0.25882,-0.96593,0.0,0.25018,-0.9337,0.25615,0.22483,-0.83909,0.49536,0.1844,-0.68818,0.70172,0.1315,-0.49075,0.86132,0.0696,-0.25975,0.96317,0.0,-0.26891,-0.96317,0.0,-0.86869,-0.49536,0.0,-0.96664,-0.25615,0.0,-1.0,-0.0,0.0,-0.96664,0.25615,0.0,-0.86869,0.49536,0.0,-0.71246,0.70172,0.0,-0.50807,0.86132,0.0,-0.26891,0.96317];
+iron_data_ConstData.skydomeIndices = [263,10,9,261,7,6,265,14,13,2,11,10,1,8,7,4,15,14,260,5,49,3,12,11,262,9,8,160,15,4,0,6,5,264,13,12,8,19,18,15,26,25,5,16,49,12,23,22,9,20,19,160,26,15,6,17,16,13,24,23,10,21,20,7,18,17,14,25,24,11,22,21,18,29,28,25,36,35,22,33,32,19,30,29,26,37,36,16,27,49,23,34,33,20,31,30,160,37,26,17,28,27,24,35,34,21,32,31,31,42,41,160,48,37,28,39,38,35,46,45,32,43,42,29,40,39,36,47,46,33,44,43,30,41,40,37,48,47,27,38,49,34,45,44,41,53,52,48,60,59,38,50,49,45,57,56,42,54,53,160,60,48,39,51,50,46,58,57,43,55,54,40,52,51,47,59,58,44,56,55,55,66,65,52,63,62,59,70,69,56,67,66,53,64,63,60,71,70,50,61,49,57,68,67,54,65,64,160,71,60,51,62,61,58,69,68,65,76,75,160,82,71,62,73,72,69,80,79,66,77,76,63,74,73,70,81,80,67,78,77,64,75,74,71,82,81,61,72,49,68,79,78,78,89,88,75,86,85,82,93,92,72,83,49,79,90,89,76,87,86,160,93,82,73,84,83,80,91,90,77,88,87,74,85,84,81,92,91,88,99,98,85,96,95,92,103,102,89,100,99,86,97,96,93,104,103,83,94,49,90,101,100,87,98,97,160,104,93,84,95,94,91,102,101,101,112,111,98,109,108,160,115,104,95,106,105,102,113,112,99,110,109,96,107,106,103,114,113,100,111,110,97,108,107,104,115,114,94,105,49,111,122,121,108,119,118,115,126,125,105,116,49,112,123,122,109,120,119,160,126,115,106,117,116,113,124,123,110,121,120,107,118,117,114,125,124,124,135,134,121,132,131,118,129,128,125,136,135,122,133,132,119,130,129,126,137,136,116,127,49,123,134,133,120,131,130,160,137,126,117,128,127,127,138,49,134,145,144,131,142,141,160,148,137,128,139,138,135,146,145,132,143,142,129,140,139,136,147,146,133,144,143,130,141,140,137,148,147,147,158,157,144,155,154,141,152,151,148,159,158,138,149,49,145,156,155,142,153,152,160,159,148,139,150,149,146,157,156,143,154,153,140,151,150,150,162,161,157,169,168,154,166,165,151,163,162,158,170,169,155,167,166,152,164,163,159,171,170,149,161,49,156,168,167,153,165,164,160,171,159,171,182,181,161,172,49,168,179,178,165,176,175,160,182,171,162,173,172,169,180,179,166,177,176,163,174,173,170,181,180,167,178,177,164,175,174,174,185,184,181,192,191,178,189,188,175,186,185,182,193,192,172,183,49,179,190,189,176,187,186,160,193,182,173,184,183,180,191,190,177,188,187,160,204,193,184,195,194,191,202,201,188,199,198,185,196,195,192,203,202,189,200,199,186,197,196,193,204,203,183,194,49,190,201,200,187,198,197,197,208,207,204,215,214,194,205,49,201,212,211,198,209,208,160,215,204,195,206,205,202,213,212,199,210,209,196,207,206,203,214,213,200,211,210,207,218,217,214,225,224,211,222,221,208,219,218,215,226,225,205,216,49,212,223,222,209,220,219,160,226,215,206,217,216,213,224,223,210,221,220,220,231,230,160,237,226,217,228,227,224,235,234,221,232,231,218,229,228,225,236,235,222,233,232,219,230,229,226,237,236,216,227,49,223,234,233,230,241,240,237,248,247,227,238,49,234,245,244,231,242,241,160,248,237,228,239,238,235,246,245,232,243,242,229,240,239,236,247,246,233,244,243,243,254,253,240,251,250,247,258,257,244,255,254,241,252,251,248,259,258,238,249,49,245,256,255,242,253,252,160,259,248,239,250,249,246,257,256,253,262,1,160,4,259,250,0,260,257,264,3,254,263,262,251,261,0,258,265,264,255,2,263,252,1,261,259,4,265,249,260,49,256,3,2,263,9,262,261,6,0,265,13,264,2,10,263,1,7,261,4,14,265,3,11,2,262,8,1,0,5,260,264,12,3,8,18,7,15,25,14,12,22,11,9,19,8,6,16,5,13,23,12,10,20,9,7,17,6,14,24,13,11,21,10,18,28,17,25,35,24,22,32,21,19,29,18,26,36,25,23,33,22,20,30,19,17,27,16,24,34,23,21,31,20,31,41,30,28,38,27,35,45,34,32,42,31,29,39,28,36,46,35,33,43,32,30,40,29,37,47,36,34,44,33,41,52,40,48,59,47,45,56,44,42,53,41,39,50,38,46,57,45,43,54,42,40,51,39,47,58,46,44,55,43,55,65,54,52,62,51,59,69,58,56,66,55,53,63,52,60,70,59,57,67,56,54,64,53,51,61,50,58,68,57,65,75,64,62,72,61,69,79,68,66,76,65,63,73,62,70,80,69,67,77,66,64,74,63,71,81,70,68,78,67,78,88,77,75,85,74,82,92,81,79,89,78,76,86,75,73,83,72,80,90,79,77,87,76,74,84,73,81,91,80,88,98,87,85,95,84,92,102,91,89,99,88,86,96,85,93,103,92,90,100,89,87,97,86,84,94,83,91,101,90,101,111,100,98,108,97,95,105,94,102,112,101,99,109,98,96,106,95,103,113,102,100,110,99,97,107,96,104,114,103,111,121,110,108,118,107,115,125,114,112,122,111,109,119,108,106,116,105,113,123,112,110,120,109,107,117,106,114,124,113,124,134,123,121,131,120,118,128,117,125,135,124,122,132,121,119,129,118,126,136,125,123,133,122,120,130,119,117,127,116,134,144,133,131,141,130,128,138,127,135,145,134,132,142,131,129,139,128,136,146,135,133,143,132,130,140,129,137,147,136,147,157,146,144,154,143,141,151,140,148,158,147,145,155,144,142,152,141,139,149,138,146,156,145,143,153,142,140,150,139,150,161,149,157,168,156,154,165,153,151,162,150,158,169,157,155,166,154,152,163,151,159,170,158,156,167,155,153,164,152,171,181,170,168,178,167,165,175,164,162,172,161,169,179,168,166,176,165,163,173,162,170,180,169,167,177,166,164,174,163,174,184,173,181,191,180,178,188,177,175,185,174,182,192,181,179,189,178,176,186,175,173,183,172,180,190,179,177,187,176,184,194,183,191,201,190,188,198,187,185,195,184,192,202,191,189,199,188,186,196,185,193,203,192,190,200,189,187,197,186,197,207,196,204,214,203,201,211,200,198,208,197,195,205,194,202,212,201,199,209,198,196,206,195,203,213,202,200,210,199,207,217,206,214,224,213,211,221,210,208,218,207,215,225,214,212,222,211,209,219,208,206,216,205,213,223,212,210,220,209,220,230,219,217,227,216,224,234,223,221,231,220,218,228,217,225,235,224,222,232,221,219,229,218,226,236,225,223,233,222,230,240,229,237,247,236,234,244,233,231,241,230,228,238,227,235,245,234,232,242,231,229,239,228,236,246,235,233,243,232,243,253,242,240,250,239,247,257,246,244,254,243,241,251,240,248,258,247,245,255,244,242,252,241,239,249,238,246,256,245,253,1,252,250,260,249,257,3,256,254,262,253,251,0,250,258,264,257,255,263,254,252,261,251,259,265,258,256,2,255];
+iron_data_ConstData.skydomePos = [0.0,0.5,0.86603,0.0,0.86603,0.5,0.0,0.96593,-0.25882,0.0,0.86603,-0.5,0.0,0.25882,-0.96593,0.06699,0.25,0.96593,0.12941,0.48296,0.86603,0.18301,0.68301,0.70711,0.22414,0.83652,0.5,0.25,0.93301,0.25882,0.25882,0.96593,0.0,0.25,0.93301,-0.25882,0.22414,0.83652,-0.5,0.18301,0.68301,-0.70711,0.12941,0.48296,-0.86603,0.06699,0.25,-0.96593,0.12941,0.22414,0.96593,0.25,0.43301,0.86603,0.35355,0.61237,0.70711,0.43301,0.75,0.5,0.48296,0.83652,0.25882,0.5,0.86603,0.0,0.48296,0.83652,-0.25882,0.43301,0.75,-0.5,0.35355,0.61237,-0.70711,0.25,0.43301,-0.86603,0.12941,0.22414,-0.96593,0.18301,0.18301,0.96593,0.35355,0.35355,0.86603,0.5,0.5,0.70711,0.61237,0.61237,0.5,0.68301,0.68301,0.25882,0.70711,0.70711,0.0,0.68301,0.68301,-0.25882,0.61237,0.61237,-0.5,0.5,0.5,-0.70711,0.35355,0.35355,-0.86603,0.18301,0.18301,-0.96593,0.22414,0.12941,0.96593,0.43301,0.25,0.86603,0.61237,0.35355,0.70711,0.75,0.43301,0.5,0.83652,0.48296,0.25882,0.86602,0.5,0.0,0.83652,0.48296,-0.25882,0.75,0.43301,-0.5,0.61237,0.35355,-0.70711,0.43301,0.25,-0.86603,0.22414,0.12941,-0.96593,-0.0,0.0,1.0,0.25,0.06699,0.96593,0.48296,0.12941,0.86603,0.68301,0.18301,0.70711,0.83652,0.22414,0.5,0.93301,0.25,0.25882,0.96593,0.25882,0.0,0.93301,0.25,-0.25882,0.83652,0.22414,-0.5,0.68301,0.18301,-0.70711,0.48296,0.12941,-0.86603,0.25,0.06699,-0.96593,0.25882,0.0,0.96593,0.5,0.0,0.86603,0.70711,0.0,0.70711,0.86602,0.0,0.5,0.96593,0.0,0.25882,1.0,0.0,0.0,0.96593,0.0,-0.25882,0.86602,0.0,-0.5,0.70711,0.0,-0.70711,0.5,0.0,-0.86603,0.25882,0.0,-0.96593,0.25,-0.06699,0.96593,0.48296,-0.12941,0.86603,0.68301,-0.18301,0.70711,0.83652,-0.22414,0.5,0.93301,-0.25,0.25882,0.96593,-0.25882,0.0,0.93301,-0.25,-0.25882,0.83652,-0.22414,-0.5,0.68301,-0.18301,-0.70711,0.48296,-0.12941,-0.86603,0.25,-0.06699,-0.96593,0.22414,-0.12941,0.96593,0.43301,-0.25,0.86603,0.61237,-0.35355,0.70711,0.75,-0.43301,0.5,0.83652,-0.48296,0.25882,0.86602,-0.5,0.0,0.83652,-0.48296,-0.25882,0.75,-0.43301,-0.5,0.61237,-0.35355,-0.70711,0.43301,-0.25,-0.86603,0.22414,-0.12941,-0.96593,0.18301,-0.18301,0.96593,0.35355,-0.35355,0.86603,0.5,-0.5,0.70711,0.61237,-0.61237,0.5,0.68301,-0.68301,0.25882,0.70711,-0.70711,0.0,0.68301,-0.68301,-0.25882,0.61237,-0.61237,-0.5,0.5,-0.5,-0.70711,0.35355,-0.35355,-0.86603,0.18301,-0.18301,-0.96593,0.12941,-0.22414,0.96593,0.25,-0.43301,0.86603,0.35355,-0.61237,0.70711,0.43301,-0.75,0.5,0.48296,-0.83652,0.25882,0.5,-0.86602,0.0,0.48296,-0.83652,-0.25882,0.43301,-0.75,-0.5,0.35355,-0.61237,-0.70711,0.25,-0.43301,-0.86603,0.12941,-0.22414,-0.96593,0.06699,-0.25,0.96593,0.12941,-0.48296,0.86603,0.18301,-0.68301,0.70711,0.22414,-0.83652,0.5,0.25,-0.93301,0.25882,0.25882,-0.96592,0.0,0.25,-0.93301,-0.25882,0.22414,-0.83652,-0.5,0.18301,-0.68301,-0.70711,0.12941,-0.48296,-0.86603,0.06699,-0.25,-0.96593,0.0,-0.25882,0.96593,-0.0,-0.5,0.86603,-0.0,-0.70711,0.70711,-0.0,-0.86602,0.5,-0.0,-0.96592,0.25882,-0.0,-1.0,0.0,-0.0,-0.96592,-0.25882,-0.0,-0.86602,-0.5,-0.0,-0.70711,-0.70711,-0.0,-0.5,-0.86603,-0.0,-0.25882,-0.96593,-0.06699,-0.25,0.96593,-0.12941,-0.48296,0.86603,-0.18301,-0.68301,0.70711,-0.22414,-0.83652,0.5,-0.25,-0.93301,0.25882,-0.25882,-0.96592,0.0,-0.25,-0.93301,-0.25882,-0.22414,-0.83652,-0.5,-0.18301,-0.68301,-0.70711,-0.12941,-0.48296,-0.86603,-0.06699,-0.25,-0.96593,-0.12941,-0.22414,0.96593,-0.25,-0.43301,0.86603,-0.35355,-0.61237,0.70711,-0.43301,-0.75,0.5,-0.48296,-0.83652,0.25882,-0.5,-0.86602,0.0,-0.48296,-0.83652,-0.25882,-0.43301,-0.75,-0.5,-0.35355,-0.61237,-0.70711,-0.25,-0.43301,-0.86603,-0.12941,-0.22414,-0.96593,0.0,0.0,-1.0,-0.18301,-0.18301,0.96593,-0.35355,-0.35355,0.86603,-0.5,-0.5,0.70711,-0.61237,-0.61237,0.5,-0.68301,-0.68301,0.25882,-0.70711,-0.70711,0.0,-0.68301,-0.68301,-0.25882,-0.61237,-0.61237,-0.5,-0.5,-0.5,-0.70711,-0.35355,-0.35355,-0.86603,-0.18301,-0.18301,-0.96593,-0.22414,-0.12941,0.96593,-0.43301,-0.25,0.86603,-0.61237,-0.35355,0.70711,-0.75,-0.43301,0.5,-0.83652,-0.48296,0.25882,-0.86602,-0.5,0.0,-0.83652,-0.48296,-0.25882,-0.75,-0.43301,-0.5,-0.61237,-0.35355,-0.70711,-0.43301,-0.25,-0.86603,-0.22414,-0.12941,-0.96593,-0.25,-0.06699,0.96593,-0.48296,-0.12941,0.86603,-0.68301,-0.18301,0.70711,-0.83652,-0.22414,0.5,-0.93301,-0.25,0.25882,-0.96593,-0.25882,0.0,-0.93301,-0.25,-0.25882,-0.83652,-0.22414,-0.5,-0.68301,-0.18301,-0.70711,-0.48296,-0.12941,-0.86603,-0.25,-0.06699,-0.96593,-0.25882,0.0,0.96593,-0.5,0.0,0.86603,-0.70711,0.0,0.70711,-0.86602,0.0,0.5,-0.96593,0.0,0.25882,-1.0,0.0,0.0,-0.96593,0.0,-0.25882,-0.86602,0.0,-0.5,-0.70711,0.0,-0.70711,-0.5,0.0,-0.86603,-0.25882,0.0,-0.96593,-0.25,0.06699,0.96593,-0.48296,0.12941,0.86603,-0.68301,0.18301,0.70711,-0.83652,0.22414,0.5,-0.93301,0.25,0.25882,-0.96593,0.25882,0.0,-0.93301,0.25,-0.25882,-0.83652,0.22414,-0.5,-0.68301,0.18301,-0.70711,-0.48296,0.12941,-0.86603,-0.25,0.06699,-0.96593,-0.22414,0.12941,0.96593,-0.43301,0.25,0.86603,-0.61237,0.35355,0.70711,-0.75,0.43301,0.5,-0.83652,0.48296,0.25882,-0.86602,0.5,0.0,-0.83652,0.48296,-0.25882,-0.75,0.43301,-0.5,-0.61237,0.35355,-0.70711,-0.43301,0.25,-0.86603,-0.22414,0.12941,-0.96593,-0.18301,0.18301,0.96593,-0.35355,0.35355,0.86603,-0.5,0.5,0.70711,-0.61237,0.61237,0.5,-0.68301,0.68301,0.25882,-0.70711,0.70711,0.0,-0.68301,0.68301,-0.25882,-0.61237,0.61237,-0.5,-0.5,0.5,-0.70711,-0.35355,0.35355,-0.86603,-0.18301,0.18301,-0.96593,-0.12941,0.22414,0.96593,-0.25,0.43301,0.86603,-0.35355,0.61237,0.70711,-0.43301,0.75,0.5,-0.48296,0.83652,0.25882,-0.5,0.86603,0.0,-0.48296,0.83652,-0.25882,-0.43301,0.75,-0.5,-0.35355,0.61237,-0.70711,-0.25,0.43301,-0.86603,-0.12941,0.22414,-0.96593,-0.06699,0.25,0.96593,-0.12941,0.48296,0.86603,-0.18301,0.68301,0.70711,-0.22414,0.83652,0.5,-0.25,0.93301,0.25882,-0.25882,0.96593,0.0,-0.25,0.93301,-0.25882,-0.22414,0.83652,-0.5,-0.18301,0.68301,-0.70711,-0.12941,0.48296,-0.86603,-0.06699,0.25,-0.96593,0.0,0.25882,0.96593,0.0,0.70711,0.70711,-0.0,0.96593,0.25882,-0.0,1.0,0.0,0.0,0.70711,-0.70711,-0.0,0.5,-0.86603];
+iron_data_ConstData.skydomeNor = [-0.0,0.50807,0.86132,-0.0,0.86869,0.49536,-0.0,0.96664,-0.25615,-0.0,0.86869,-0.49536,-0.0,0.26891,-0.96317,0.0696,0.25975,0.96317,0.1315,0.49075,0.86132,0.1844,0.68818,0.70172,0.22483,0.83909,0.49536,0.25018,0.9337,0.25615,0.25882,0.96593,0.0,0.25018,0.9337,-0.25615,0.22483,0.83909,-0.49536,0.1844,0.68818,-0.70172,0.1315,0.49075,-0.86132,0.0696,0.25975,-0.96317,0.13445,0.23288,0.96317,0.25403,0.44,0.86132,0.35623,0.61701,0.70172,0.43434,0.75231,0.49536,0.48332,0.83713,0.25615,0.5,0.86603,0.0,0.48332,0.83713,-0.25615,0.43434,0.75231,-0.49536,0.35623,0.61701,-0.70172,0.25403,0.44,-0.86132,0.13445,0.23288,-0.96317,0.19015,0.19015,0.96317,0.35926,0.35926,0.86132,0.50378,0.50378,0.70172,0.61426,0.61426,0.49536,0.68352,0.68352,0.25615,0.70711,0.70711,0.0,0.68352,0.68352,-0.25615,0.61426,0.61426,-0.49536,0.50378,0.50378,-0.70172,0.35926,0.35926,-0.86132,0.19015,0.19015,-0.96317,0.23288,0.13445,0.96317,0.44,0.25403,0.86132,0.61701,0.35623,0.70172,0.75231,0.43434,0.49536,0.83713,0.48332,0.25615,0.86603,0.5,0.0,0.83713,0.48332,-0.25615,0.75231,0.43434,-0.49536,0.61701,0.35623,-0.70172,0.44,0.25403,-0.86132,0.23288,0.13445,-0.96317,-0.0,-0.0,1.0,0.25975,0.0696,0.96317,0.49075,0.1315,0.86132,0.68818,0.1844,0.70172,0.83909,0.22483,0.49536,0.9337,0.25018,0.25615,0.96593,0.25882,0.0,0.9337,0.25018,-0.25615,0.83909,0.22483,-0.49536,0.68818,0.1844,-0.70172,0.49075,0.1315,-0.86132,0.25975,0.0696,-0.96317,0.26891,0.0,0.96317,0.50807,-0.0,0.86132,0.71246,-0.0,0.70172,0.86869,-0.0,0.49536,0.96664,-0.0,0.25615,1.0,-0.0,0.0,0.96664,-0.0,-0.25615,0.86869,-0.0,-0.49536,0.71246,-0.0,-0.70172,0.50807,-0.0,-0.86132,0.26891,-0.0,-0.96317,0.25975,-0.0696,0.96317,0.49075,-0.1315,0.86132,0.68818,-0.1844,0.70172,0.83909,-0.22483,0.49536,0.9337,-0.25018,0.25615,0.96593,-0.25882,0.0,0.9337,-0.25018,-0.25615,0.83909,-0.22483,-0.49536,0.68818,-0.1844,-0.70172,0.49075,-0.1315,-0.86132,0.25975,-0.0696,-0.96317,0.23288,-0.13445,0.96317,0.44,-0.25403,0.86132,0.61701,-0.35623,0.70172,0.75231,-0.43434,0.49536,0.83713,-0.48332,0.25615,0.86603,-0.5,0.0,0.83713,-0.48332,-0.25615,0.75231,-0.43434,-0.49536,0.61701,-0.35623,-0.70172,0.44,-0.25403,-0.86132,0.23288,-0.13445,-0.96317,0.19015,-0.19015,0.96317,0.35926,-0.35926,0.86132,0.50378,-0.50378,0.70172,0.61426,-0.61426,0.49536,0.68352,-0.68352,0.25615,0.70711,-0.70711,0.0,0.68352,-0.68352,-0.25615,0.61426,-0.61426,-0.49536,0.50378,-0.50378,-0.70172,0.35926,-0.35926,-0.86132,0.19015,-0.19015,-0.96317,0.13445,-0.23288,0.96317,0.25403,-0.44,0.86132,0.35623,-0.61701,0.70172,0.43434,-0.75231,0.49536,0.48332,-0.83713,0.25615,0.5,-0.86603,0.0,0.48332,-0.83713,-0.25615,0.43434,-0.75231,-0.49536,0.35623,-0.61701,-0.70172,0.25403,-0.44,-0.86132,0.13445,-0.23288,-0.96317,0.0696,-0.25975,0.96317,0.1315,-0.49075,0.86132,0.1844,-0.68818,0.70172,0.22483,-0.83909,0.49536,0.25018,-0.9337,0.25615,0.25882,-0.96593,0.0,0.25018,-0.9337,-0.25615,0.22483,-0.83909,-0.49536,0.1844,-0.68818,-0.70172,0.1315,-0.49075,-0.86132,0.0696,-0.25975,-0.96317,0.0,-0.26891,0.96317,-0.0,-0.50807,0.86132,-0.0,-0.71246,0.70172,-0.0,-0.86869,0.49536,0.0,-0.96664,0.25615,-0.0,-1.0,0.0,0.0,-0.96664,-0.25615,0.0,-0.86869,-0.49536,0.0,-0.71246,-0.70172,0.0,-0.50807,-0.86132,-0.0,-0.26891,-0.96317,-0.0696,-0.25975,0.96317,-0.1315,-0.49075,0.86132,-0.1844,-0.68818,0.70172,-0.22483,-0.83909,0.49536,-0.25018,-0.9337,0.25615,-0.25882,-0.96593,0.0,-0.25018,-0.9337,-0.25615,-0.22483,-0.83909,-0.49536,-0.1844,-0.68818,-0.70172,-0.1315,-0.49075,-0.86132,-0.0696,-0.25975,-0.96317,-0.13445,-0.23288,0.96317,-0.25403,-0.44,0.86132,-0.35623,-0.61701,0.70172,-0.43434,-0.75231,0.49536,-0.48332,-0.83713,0.25615,-0.5,-0.86603,0.0,-0.48332,-0.83713,-0.25615,-0.43434,-0.75231,-0.49536,-0.35623,-0.61701,-0.70172,-0.25403,-0.44,-0.86132,-0.13445,-0.23288,-0.96317,-0.0,0.0,-1.0,-0.19015,-0.19015,0.96317,-0.35926,-0.35926,0.86132,-0.50378,-0.50378,0.70172,-0.61426,-0.61426,0.49536,-0.68352,-0.68352,0.25615,-0.70711,-0.70711,0.0,-0.68352,-0.68352,-0.25615,-0.61426,-0.61426,-0.49536,-0.50378,-0.50378,-0.70172,-0.35926,-0.35926,-0.86132,-0.19015,-0.19015,-0.96317,-0.23288,-0.13445,0.96317,-0.44,-0.25403,0.86132,-0.61701,-0.35623,0.70172,-0.75231,-0.43434,0.49536,-0.83713,-0.48332,0.25615,-0.86603,-0.5,0.0,-0.83713,-0.48332,-0.25615,-0.75231,-0.43434,-0.49536,-0.61701,-0.35623,-0.70172,-0.44,-0.25403,-0.86132,-0.23288,-0.13445,-0.96317,-0.25975,-0.0696,0.96317,-0.49075,-0.1315,0.86132,-0.68818,-0.1844,0.70172,-0.83909,-0.22483,0.49536,-0.9337,-0.25018,0.25615,-0.96593,-0.25882,0.0,-0.9337,-0.25018,-0.25615,-0.83909,-0.22483,-0.49536,-0.68818,-0.1844,-0.70172,-0.49075,-0.1315,-0.86132,-0.25975,-0.0696,-0.96317,-0.26891,0.0,0.96317,-0.50807,0.0,0.86132,-0.71246,0.0,0.70172,-0.86869,0.0,0.49536,-0.96664,0.0,0.25615,-1.0,0.0,0.0,-0.96664,0.0,-0.25615,-0.86869,0.0,-0.49536,-0.71246,0.0,-0.70172,-0.50807,0.0,-0.86132,-0.26891,0.0,-0.96317,-0.25975,0.0696,0.96317,-0.49075,0.1315,0.86132,-0.68818,0.1844,0.70172,-0.83909,0.22483,0.49536,-0.9337,0.25018,0.25615,-0.96593,0.25882,0.0,-0.9337,0.25018,-0.25615,-0.83909,0.22483,-0.49536,-0.68818,0.1844,-0.70172,-0.49075,0.1315,-0.86132,-0.25975,0.0696,-0.96317,-0.23288,0.13445,0.96317,-0.44,0.25403,0.86132,-0.61701,0.35623,0.70172,-0.75231,0.43434,0.49536,-0.83713,0.48332,0.25615,-0.86603,0.5,0.0,-0.83713,0.48332,-0.25615,-0.75231,0.43434,-0.49536,-0.61701,0.35623,-0.70172,-0.44,0.25403,-0.86132,-0.23288,0.13445,-0.96317,-0.19015,0.19015,0.96317,-0.35926,0.35926,0.86132,-0.50378,0.50378,0.70172,-0.61426,0.61426,0.49536,-0.68352,0.68352,0.25615,-0.70711,0.70711,0.0,-0.68352,0.68352,-0.25615,-0.61426,0.61426,-0.49536,-0.50378,0.50378,-0.70172,-0.35926,0.35926,-0.86132,-0.19015,0.19015,-0.96317,-0.13445,0.23288,0.96317,-0.25403,0.44,0.86132,-0.35623,0.61701,0.70172,-0.43434,0.75231,0.49536,-0.48332,0.83713,0.25615,-0.5,0.86603,0.0,-0.48332,0.83713,-0.25615,-0.43434,0.75231,-0.49536,-0.35623,0.61701,-0.70172,-0.25403,0.44,-0.86132,-0.13445,0.23288,-0.96317,-0.0696,0.25975,0.96317,-0.1315,0.49075,0.86132,-0.1844,0.68818,0.70172,-0.22483,0.83909,0.49536,-0.25018,0.9337,0.25615,-0.25882,0.96593,0.0,-0.25018,0.9337,-0.25615,-0.22483,0.83909,-0.49536,-0.1844,0.68818,-0.70172,-0.1315,0.49075,-0.86132,-0.0696,0.25975,-0.96317,-0.0,0.26891,0.96317,-0.0,0.71246,0.70172,-0.0,0.96664,0.25615,-0.0,1.0,0.0,-0.0,0.71246,-0.70172,-0.0,0.50807,-0.86132];
 iron_data_Data.cachedSceneRaws = new haxe_ds_StringMap();
 iron_data_Data.cachedMeshes = new haxe_ds_StringMap();
 iron_data_Data.cachedLights = new haxe_ds_StringMap();
