@@ -63,7 +63,9 @@ class ArmoryExamplesBrowser {
             
             var build = getBuildInfo();
             console.debug(build);
-            readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>/<a href="$GITHUB/armsdk/commit/${build.commit}">'+${build.commit.substr(0,7)}+'</a> '+build.time;
+            readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>';
+            if( build.commit != null ) readme.innerHTML += '/<a href="$GITHUB/armsdk/commit/${build.commit}">'+${build.commit.substr(0,7)}+'</a>';
+            readme.innerHTML += ' '+build.time;
             
             iframe.src = "start.html";
 
@@ -350,8 +352,10 @@ class ArmoryExamplesBrowser {
     #end
 
     macro public static function makeProjectsList( path : String ) : ExprOf<Array<String>> {
-        if( !exists( path ) )
-            Context.fatalError( 'Projects directory [$path] not found', Context.currentPos() );
+        if( !exists( path ) ) {
+            Context.warning( 'Projects directory [$path] not found', Context.currentPos() );
+            return macro [];
+        }
         var projects : Array<String> = readDirectory( path ).filter( dir->{
             var p = '$path/$dir';
             return isDirectory( p ) && exists('$p/index.html') && exists('$p/kha.js');
