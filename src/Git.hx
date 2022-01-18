@@ -5,12 +5,12 @@ using StringTools;
 class Git {
 
     public static function getCommit(?path : String) : String {
-        var args = 'log --format=%H -n 1'.split(' ');
-        if(path == null)
-            return exe(args).trim();
+        if(path == null) path = Sys.getCwd();
+        if( !sys.FileSystem.exists('$path/.git') )
+            return null;
         var cwd = Sys.getCwd();
         Sys.setCwd( path );
-        var commit = exe(args).trim();
+        var commit = exe('log --format=%H -n 1'.split(' ')).trim();
         Sys.setCwd(cwd);
         return commit;
     } 
