@@ -66,12 +66,16 @@ class Project {
         var dstdir = '$dst/$name';
         if( exists( dstdir ) )
             forceRebuild ? rmdir(dstdir) : return 0;
-        var blend = '$srcdir/$name.blend';
         var args = [];
+        var blend = '$name.blend';
         if( backgroundMode ) args.push('-b');
-        args = args.concat( [blend,'--python',buildScript] );
+        final buildScriptAbs = absolutePath(buildScript);
+        args = args.concat( [blend,'--python',buildScriptAbs] );
         Sys.println( 'blender '+args.join(' ') );
+        final mainDir = Sys.getCwd();
+        Sys.setCwd(srcdir);
         final code = Sys.command('blender', args);
+        Sys.setCwd(mainDir);
         if( code == 0 ) {
             var builddir = '$srcdir/build_$name/html5';
             if( !exists( builddir ) ) {
