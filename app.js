@@ -13,16 +13,20 @@ class ArmoryExamplesBrowser {
 			ArmoryExamplesBrowser.controls = window.document.getElementById("project-controls");
 			ArmoryExamplesBrowser.iframe = mainElement.querySelector("iframe");
 			ArmoryExamplesBrowser.readme = mainElement.querySelector(".readme");
-			let build = { os : "Linux", commit : "342728ff381aec5966a84668179ed84262187d8f", time : "2022-01-09"};
+			let build = { os : "Linux", commit : null, time : "2022-03-16"};
 			$global.console.debug(build);
-			ArmoryExamplesBrowser.readme.innerHTML = "<span>Build:</span> <a href=\"" + ArmoryExamplesBrowser.GITHUB + "/armsdk\">ARMSDK</a>/<a href=\"" + ArmoryExamplesBrowser.GITHUB + "/armsdk/commit/" + build.commit + "\">" + HxOverrides.substr(build.commit,0,7) + "</a> " + build.time;
+			ArmoryExamplesBrowser.readme.innerHTML = "<span>Build:</span> <a href=\"" + ArmoryExamplesBrowser.GITHUB + "/armsdk\">ARMSDK</a>";
+			if(build.commit != null) {
+				ArmoryExamplesBrowser.readme.innerHTML += "/<a href=\"" + ArmoryExamplesBrowser.GITHUB + "/armsdk/commit/" + build.commit + "\">" + HxOverrides.substr(build.commit,0,7) + "</a>";
+			}
+			ArmoryExamplesBrowser.readme.innerHTML += " " + build.time;
 			ArmoryExamplesBrowser.iframe.src = "start.html";
 			let _g = new haxe_ds_StringMap();
 			let value = ArmoryExamplesBrowser.addProjectGroup("tutorials",["playground","tanks_nodes","tanks_script"]);
 			_g.h["tutorials"] = value;
 			let value1 = ArmoryExamplesBrowser.addProjectGroup("templates",["archery","first_person","platformer","race_track","third_person","third_person_terrain","top_down","twin_stick"]);
 			_g.h["templates"] = value1;
-			let value2 = ArmoryExamplesBrowser.addProjectGroup("examples",["animation_actions","animation_blend","animation_bonechild","animation_instanced","animation_movebone","animation_timeline","animation_uv","call_hx","call_js","debug_draw","default_cube","ease","file_read","file_storage","file_write","game_bowling","graphics_settings","input_mouselock","input_multitouch","input_sensor","instancing","light_area","light_ies","light_probes","light_probes_cubemap","light_probes_plane","light_volumetric","linked_proxy","load_screen","lod","logic_break","logic_callgroup","logic_camera_pan","logic_camera_zoom","logic_canvas","logic_event_fromhaxe","logic_event_global","logic_event_object","logic_gamepad","logic_gate","logic_get_contacts","logic_keyboard","logic_linked_variable","logic_loadurl","logic_object_rotate","logic_object_scale","logic_object_translate","logic_pause_trait","logic_scenes","logic_scenetree","logic_script","logic_set_property","logic_toy_car","logic_transform","logic_watch_variable","material_alpha","material_bake","material_billboard","material_bump","material_decal","material_decal_colors","material_displace","material_normalmap","material_params","material_shadeless","material_shaders","material_sss","material_translucent","material_video","mesh_generate","mesh_import","mesh_terrain","navmesh","navmesh_follow","particle_bunny","particle_hair","particle_info","particle_mesh","particle_smoke","physics_break","physics_collision_groups","physics_drag","physics_ragdoll","physics_raycast","render_bloom","render_colorgrading","render_splitscreen","render_to_texture","render_voxelao_teapots","scene_stream","screentex","script_linkedgroup","script_properties","script_properties_global","script_rigidbody_trigger","script_spawnobject","script_transform","server_stream","spawn_from_scene","tilesheet","tilesheet_2d","tilesheet_walkcycle","tween","ui_canvas","ui_events","ui_script2d","ui_script3d","wasm_call","wasm_trait_c","wasm_trait_rust","world_sun_direction"]);
+			let value2 = ArmoryExamplesBrowser.addProjectGroup("examples",["animation_actions","animation_blend","animation_bonechild","animation_instanced","animation_movebone","animation_timeline","animation_uv","call_hx","call_js","debug_draw","ease","file_read","file_storage","file_write","game_bowling","graphics_settings","input_mouselock","input_multitouch","input_sensor","instancing","light_area","light_ies","light_probes_cubemap","light_probes_plane","light_volumetric","linked_proxy","load_screen","lod","logic_break","logic_callgroup","logic_camera_pan","logic_camera_zoom","logic_canvas","logic_event_fromhaxe","logic_event_global","logic_event_object","logic_gamepad","logic_gate","logic_get_contacts","logic_keyboard","logic_linked_variable","logic_loadurl","logic_object_rotate","logic_object_scale","logic_object_translate","logic_pause_trait","logic_scenes","logic_scenetree","logic_script","logic_set_property","logic_toy_car","logic_transform","macro_armpack","material_alpha","material_bake","material_batch","material_billboard","material_bump","material_decal","material_decal_colors","material_displace","material_normalmap","material_params","material_shadeless","material_shaders","material_sss","material_translucent","mesh_generate","mesh_import","mesh_terrain","navmesh","navmesh_follow","particle_bunny","particle_hair","particle_info","particle_mesh","particle_smoke","physics_break","physics_collision_groups","physics_constraints","physics_drag","physics_ragdoll","physics_raycast","physics_softbody","render_bloom","render_colorgrading","render_splitscreen","render_to_texture","render_voxelao_teapots","scene_stream","screentex","script_camera_lerp","script_linkedgroup","script_properties","script_properties_global","script_rigidbody_trigger","script_spawnobject","script_transform","server_stream","spawn_from_scene","tilesheet","tilesheet_2d","tilesheet_walkcycle","tween","ui_canvas","ui_events","ui_script2d","ui_script3d","wasm_call","wasm_trait_c","wasm_trait_rust","world_sun_direction"]);
 			_g.h["examples"] = value2;
 			ArmoryExamplesBrowser.projects = _g;
 			let searchInput = ArmoryExamplesBrowser.sidebar.querySelector("input[type=\"search\"]");
@@ -106,7 +110,7 @@ class ArmoryExamplesBrowser {
 					haxe_Timer.delay($bind(searchInput,searchInput.focus),0);
 					break;
 				case "o":
-					console.log("src/ArmoryExamplesBrowser.hx:145:","OPEN PROJECT");
+					console.log("src/ArmoryExamplesBrowser.hx:147:","OPEN PROJECT");
 					break;
 				case "r":
 					ArmoryExamplesBrowser.reloadProject();
