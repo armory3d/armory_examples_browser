@@ -1,3 +1,2 @@
 -cp src
---macro Project.buildGroup("../armory_templates","web/templates",false,true,false,[])
-# --macro Project.buildAll("armory_templates","first_person","web/templates",true,true)
+--macro Project.buildGroup("armory_templates","web/templates",false,true,false,[])

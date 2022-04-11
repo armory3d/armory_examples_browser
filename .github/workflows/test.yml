@@ -13,7 +13,7 @@ jobs:
           submodules: true
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.3
+          haxe-version: 4.2.5
       - name: Install blender
         run: sudo snap install blender --channel=2.93lts/stable --classic
       - name: Install armsdk
@@ -21,11 +21,17 @@ jobs:
           git clone --recurse-submodules https://github.com/armory3d/armsdk.git
           blender -noaudio -b -P blender/enable_addon.py
       - name: Build examples
-        run: haxe build-examples.hxml 
+        run: |
+          git clone https://github.com/armory3d/armory_examples.git
+          haxe build-examples.hxml 
       - name: Build templates
-        run: haxe build-templates.hxml 
+        run: |
+          git clone https://github.com/armory3d/armory_templates.git
+          haxe build-templates.hxml 
       - name: Build tutorials
-        run: haxe build-tutorials.hxml 
+        run: |
+          git clone https://github.com/armory3d/armory_tutorials.git
+          haxe build-tutorials.hxml 
       - name: Build application
         run: |
           export ARMSDK="$(pwd)/armsdk"
