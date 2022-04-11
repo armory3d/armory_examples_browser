@@ -1,9 +1,0 @@
-[submodule "armory_examples"]
-	path = armory_examples
-	url = https://github.com/armory3d/armory_examples.git
-[submodule "armory_templates"]
-	path = armory_templates
-	url = https://github.com/armory3d/armory_templates.git
-[submodule "armory_tutorials"]
-	path = armory_tutorials
-	url = https://github.com/armory3d/armory_tutorials.git
