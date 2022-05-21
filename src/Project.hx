@@ -34,7 +34,7 @@ class Project {
             final code = Project.build( src, project, dst, forceRebuild, backgroundMode );
             final time = Std.int((Sys.time() - timeStart) * 1000);
             final result = { project: project, group: group, src: srcAbs, code: code, time: time, background: backgroundMode };
-            results.push( result );
+            results.push( { project: project, code: code, time: time } );
             Sys.println('Time: '+time+'ms');
             if( code != 0 ) {
                 Sys.println( 'ERROR: $code' );
