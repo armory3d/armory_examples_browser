@@ -23,7 +23,7 @@ class Project {
             return !~/^_|\..+$/.match(dir) && isDirectory('$src/$dir') && exists( blend );
         });
         projects.sort( (a,b) -> return (a>b) ? 1 : (a<b) ? -1 : 0 );
-        final results = new Array<{project:String,code:Int,time:Int}>();
+		final results = new Array<{project:String,group:String,src:String,code:Int,time:Int,background:Bool}>();
         for( i in 0...projects.length ) {
             final project = projects[i];
             if( ignoreProject != null && ignoreProject.indexOf( project ) != -1 ) continue;
