@@ -3252,6 +3252,7 @@ var iron_Scene = function() {
 	this.speakers = [];
 	this.empties = [];
 	this.animations = [];
+	this.tilesheets = [];
 	this.armatures = [];
 	this.embedded = new haxe_ds_StringMap();
 	this.root = new iron_object_Object();
@@ -3280,7 +3281,7 @@ iron_Scene.create = function(format,done) {
 				iron_Scene.createTraits(object.raw.traits,object);
 			}
 			if(iron_Scene.active.cameras.length == 0) {
-				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 135, className : "iron.Scene", methodName : "create"});
+				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 138, className : "iron.Scene", methodName : "create"});
 			}
 			iron_Scene.active.camera = iron_Scene.active.getCamera(format.camera_ref);
 			iron_Scene.active.sceneParent = sceneObject;
@@ -3490,7 +3491,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 863, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 870, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -3657,6 +3658,13 @@ iron_Scene.prototype = {
 			return;
 		}
 		iron_Scene.framePassed = true;
+		var _g = 0;
+		var _g1 = this.tilesheets;
+		while(_g < _g1.length) {
+			var tilesheet = _g1[_g];
+			++_g;
+			tilesheet.update();
+		}
 		if(this.camera != null) {
 			this.camera.renderFrame(g);
 		} else {
@@ -4803,7 +4811,7 @@ iron_data_Data.getImage = function(file,done,readable,format) {
 			delete(_this.h[file]);
 		}
 		iron_data_Data.assetsLoaded++;
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 471, className : "iron.data.Data", methodName : "getImage"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 473, className : "iron.data.Data", methodName : "getImage"});
 };
 iron_data_Data.getSound = function(file,done) {
 	if(StringTools.endsWith(file,".wav")) {
@@ -4843,7 +4851,7 @@ iron_data_Data.getSound = function(file,done) {
 			}
 			iron_data_Data.assetsLoaded++;
 		});
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 511, className : "iron.data.Data", methodName : "getSound"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 513, className : "iron.data.Data", methodName : "getSound"});
 };
 iron_data_Data.isAbsolute = function(file) {
 	if(!(file.charAt(0) == "/" || file.charAt(1) == ":")) {
@@ -10313,9 +10321,6 @@ iron_object_MeshObject.prototype = $extend(iron_object_Object.prototype,{
 		if(this.particleSystems != null && this.particleSystems.length > 0 && !this.raw.render_emitter) {
 			return;
 		}
-		if(this.tilesheet != null) {
-			this.tilesheet.update();
-		}
 		if(this.cullMaterial(context)) {
 			return;
 		}
@@ -10889,30 +10894,45 @@ iron_object_ParticleSystem.prototype = {
 	,setupGeomGpu: function(object,owner) {
 		var instancedData = kha_arrays_Float32Array._new(this.particles.length * 3);
 		var i = 0;
-		var scaleFactorVol = owner.data.scalePos / this.r.particle_size;
-		var scaleFactorVertFace = 3.05185094759971923e-05 * scaleFactorVol;
+		var x = object.transform.dim.x / 2.0 / this.r.particle_size;
+		var y = object.transform.dim.y / 2.0 / this.r.particle_size;
+		var z = object.transform.dim.z / 2.0 / this.r.particle_size;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var scaleFactor_x = x;
+		var scaleFactor_y = y;
+		var scaleFactor_z = z;
 		switch(this.r.emit_from) {
 		case 0:
 			var pa = owner.data.geom.positions;
+			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
 				var p = _g1[_g];
 				++_g;
 				var j = this.fhash(i) * ((pa.values.byteLength >> 1) / pa.size) | 0;
-				var v = pa.values.getInt16(j * pa.size * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v = pa.values.getInt16(j * pa.size * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = pa.values.getInt16((j * pa.size + 1) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v1 = pa.values.getInt16((j * pa.size + 1) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = pa.values.getInt16((j * pa.size + 2) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v2 = pa.values.getInt16((j * pa.size + 2) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
 			break;
 		case 1:
 			var positions = owner.data.geom.positions.values;
+			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
@@ -10992,13 +11012,13 @@ iron_object_ParticleSystem.prototype = {
 				pos_x += v_x;
 				pos_y += v_y;
 				pos_z += v_z;
-				var v = pos_x * scaleFactorVertFace;
+				var v = pos_x * normFactor * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = pos_y * scaleFactorVertFace;
+				var v1 = pos_y * normFactor * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = pos_z * scaleFactorVertFace;
+				var v2 = pos_z * normFactor * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
@@ -11009,13 +11029,13 @@ iron_object_ParticleSystem.prototype = {
 			while(_g < _g1.length) {
 				var p = _g1[_g];
 				++_g;
-				var v = (Math.random() * 2.0 - 1.0) * (object.transform.dim.x / 2.0) * scaleFactorVol;
+				var v = (Math.random() * 2.0 - 1.0) * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = (Math.random() * 2.0 - 1.0) * (object.transform.dim.y / 2.0) * scaleFactorVol;
+				var v1 = (Math.random() * 2.0 - 1.0) * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = (Math.random() * 2.0 - 1.0) * (object.transform.dim.z / 2.0) * scaleFactorVol;
+				var v2 = (Math.random() * 2.0 - 1.0) * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
@@ -11209,6 +11229,7 @@ var iron_object_Tilesheet = function(sceneName,tilesheet_ref,tilesheet_action_re
 			++_g;
 			if(ts.name == tilesheet_ref) {
 				_gthis.raw = ts;
+				iron_Scene.active.tilesheets.push(_gthis);
 				_gthis.play(tilesheet_action_ref);
 				_gthis.ready = true;
 				break;
@@ -11235,19 +11256,25 @@ iron_object_Tilesheet.prototype = {
 		this.paused = false;
 	}
 	,remove: function() {
+		HxOverrides.remove(iron_Scene.active.tilesheets,this);
 	}
 	,update: function() {
 		if(!this.ready || this.paused || this.action.start >= this.action.end) {
 			return;
 		}
-		this.time += iron_system_Time.get_delta();
-		if(this.time >= 1 / this.raw.framerate) {
-			this.setFrame(this.frame + 1);
+		this.time += iron_system_Time.realDelta;
+		var frameTime = 1 / this.raw.framerate;
+		var framesToAdvance = 0;
+		while(this.time >= frameTime) {
+			this.time -= frameTime;
+			++framesToAdvance;
+		}
+		if(framesToAdvance != 0) {
+			this.setFrame(this.frame + framesToAdvance);
 		}
 	}
 	,setFrame: function(f) {
 		this.frame = f;
-		this.time = 0;
 		var tx = this.frame % this.raw.tilesx;
 		var ty = this.frame / this.raw.tilesx | 0;
 		this.tileX = tx * (1 / this.raw.tilesx);
@@ -14147,6 +14174,30 @@ iron_object_Uniforms.setObjectConstant = function(g,object,location,c) {
 			var mo = js_Boot.__cast(object , iron_object_MeshObject);
 			if(mo.particleOwner != null && mo.particleOwner.particleSystems != null) {
 				m = mo.particleOwner.particleSystems[mo.particleIndex].getData();
+			}
+			break;
+		case "_sunWorldMatrix":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var _this = iron_object_Uniforms.helpMat;
+				var m1 = sun.transform.worldUnpack;
+				_this.self._00 = m1.self._00;
+				_this.self._01 = m1.self._01;
+				_this.self._02 = m1.self._02;
+				_this.self._03 = m1.self._03;
+				_this.self._10 = m1.self._10;
+				_this.self._11 = m1.self._11;
+				_this.self._12 = m1.self._12;
+				_this.self._13 = m1.self._13;
+				_this.self._20 = m1.self._20;
+				_this.self._21 = m1.self._21;
+				_this.self._22 = m1.self._22;
+				_this.self._23 = m1.self._23;
+				_this.self._30 = m1.self._30;
+				_this.self._31 = m1.self._31;
+				_this.self._32 = m1.self._32;
+				_this.self._33 = m1.self._33;
+				m = iron_object_Uniforms.helpMat;
 			}
 			break;
 		case "_worldMatrix":

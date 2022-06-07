@@ -6742,6 +6742,7 @@ var iron_Scene = function() {
 	this.speakers = [];
 	this.empties = [];
 	this.animations = [];
+	this.tilesheets = [];
 	this.embedded = new haxe_ds_StringMap();
 	this.root = new iron_object_Object();
 	this.root.name = "Root";
@@ -6769,7 +6770,7 @@ iron_Scene.create = function(format,done) {
 				iron_Scene.createTraits(object.raw.traits,object);
 			}
 			if(iron_Scene.active.cameras.length == 0) {
-				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 135, className : "iron.Scene", methodName : "create"});
+				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 138, className : "iron.Scene", methodName : "create"});
 			}
 			iron_Scene.active.camera = iron_Scene.active.getCamera(format.camera_ref);
 			iron_Scene.active.sceneParent = sceneObject;
@@ -6970,7 +6971,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 863, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 870, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -7134,6 +7135,13 @@ iron_Scene.prototype = {
 			return;
 		}
 		iron_Scene.framePassed = true;
+		var _g = 0;
+		var _g1 = this.tilesheets;
+		while(_g < _g1.length) {
+			var tilesheet = _g1[_g];
+			++_g;
+			tilesheet.update();
+		}
 		if(this.camera != null) {
 			this.camera.renderFrame(g);
 		} else {
@@ -8043,7 +8051,7 @@ iron_data_Data.getImage = function(file,done,readable,format) {
 			delete(_this.h[file]);
 		}
 		iron_data_Data.assetsLoaded++;
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 471, className : "iron.data.Data", methodName : "getImage"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 473, className : "iron.data.Data", methodName : "getImage"});
 };
 iron_data_Data.getSound = function(file,done) {
 	if(StringTools.endsWith(file,".wav")) {
@@ -8083,7 +8091,7 @@ iron_data_Data.getSound = function(file,done) {
 			}
 			iron_data_Data.assetsLoaded++;
 		});
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 511, className : "iron.data.Data", methodName : "getSound"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 513, className : "iron.data.Data", methodName : "getSound"});
 };
 iron_data_Data.getFont = function(file,done) {
 	var cached = iron_data_Data.cachedFonts.h[file];
@@ -8118,7 +8126,7 @@ iron_data_Data.getFont = function(file,done) {
 			delete(_this.h[file]);
 		}
 		iron_data_Data.assetsLoaded++;
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 583, className : "iron.data.Data", methodName : "getFont"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 585, className : "iron.data.Data", methodName : "getFont"});
 };
 iron_data_Data.isAbsolute = function(file) {
 	if(!(file.charAt(0) == "/" || file.charAt(1) == ":")) {
@@ -11092,9 +11100,6 @@ iron_object_MeshObject.prototype = $extend(iron_object_Object.prototype,{
 			return;
 		}
 		var meshContext = this.raw != null && context == "mesh";
-		if(this.tilesheet != null) {
-			this.tilesheet.update();
-		}
 		if(this.cullMaterial(context)) {
 			return;
 		}
@@ -11633,6 +11638,7 @@ var iron_object_Tilesheet = function(sceneName,tilesheet_ref,tilesheet_action_re
 			++_g;
 			if(ts.name == tilesheet_ref) {
 				_gthis.raw = ts;
+				iron_Scene.active.tilesheets.push(_gthis);
 				_gthis.play(tilesheet_action_ref);
 				_gthis.ready = true;
 				break;
@@ -11659,19 +11665,25 @@ iron_object_Tilesheet.prototype = {
 		this.paused = false;
 	}
 	,remove: function() {
+		HxOverrides.remove(iron_Scene.active.tilesheets,this);
 	}
 	,update: function() {
 		if(!this.ready || this.paused || this.action.start >= this.action.end) {
 			return;
 		}
-		this.time += iron_system_Time.get_delta();
-		if(this.time >= 1 / this.raw.framerate) {
-			this.setFrame(this.frame + 1);
+		this.time += iron_system_Time.realDelta;
+		var frameTime = 1 / this.raw.framerate;
+		var framesToAdvance = 0;
+		while(this.time >= frameTime) {
+			this.time -= frameTime;
+			++framesToAdvance;
+		}
+		if(framesToAdvance != 0) {
+			this.setFrame(this.frame + framesToAdvance);
 		}
 	}
 	,setFrame: function(f) {
 		this.frame = f;
-		this.time = 0;
 		var tx = this.frame % this.raw.tilesx;
 		var ty = this.frame / this.raw.tilesx | 0;
 		this.tileX = tx * (1 / this.raw.tilesx);
@@ -14714,6 +14726,30 @@ iron_object_Uniforms.setObjectConstant = function(g,object,location,c) {
 			_this.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 			m = iron_object_Uniforms.helpMat;
 			break;
+		case "_sunWorldMatrix":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var _this = iron_object_Uniforms.helpMat;
+				var m1 = sun.transform.worldUnpack;
+				_this.self._00 = m1.self._00;
+				_this.self._01 = m1.self._01;
+				_this.self._02 = m1.self._02;
+				_this.self._03 = m1.self._03;
+				_this.self._10 = m1.self._10;
+				_this.self._11 = m1.self._11;
+				_this.self._12 = m1.self._12;
+				_this.self._13 = m1.self._13;
+				_this.self._20 = m1.self._20;
+				_this.self._21 = m1.self._21;
+				_this.self._22 = m1.self._22;
+				_this.self._23 = m1.self._23;
+				_this.self._30 = m1.self._30;
+				_this.self._31 = m1.self._31;
+				_this.self._32 = m1.self._32;
+				_this.self._33 = m1.self._33;
+				m = iron_object_Uniforms.helpMat;
+			}
+			break;
 		case "_worldMatrix":
 			m = object.transform.worldUnpack;
 			break;
@@ -16609,7 +16645,7 @@ js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl = function(begin,end) {
 	return resultArray.buffer;
 };
 var kha__$Assets_FontList = function() {
-	this.font_defaultDescription = { name : "font_default", file_sizes : [22544], files : ["font_default.ttf"], type : "font"};
+	this.font_defaultDescription = { name : "font_default", file_sizes : [918020], files : ["font_default.ttf"], type : "font"};
 	this.font_default = null;
 };
 $hxClasses["kha._Assets.FontList"] = kha__$Assets_FontList;
@@ -36773,8 +36809,10 @@ var zui_Zui = function(ops) {
 	this.tooltipImgMaxWidth = null;
 	this.tooltipImg = null;
 	this.tooltipText = "";
+	this.comboInitialValue = 0;
 	this.comboToSubmit = 0;
 	this.submitComboHandle = null;
+	this.comboSearchBar = false;
 	this.comboSelectedWindow = null;
 	this.comboSelectedHandle = null;
 	this.tabPressedHandle = null;
@@ -37342,13 +37380,16 @@ zui_Zui.prototype = {
 		}
 	}
 	,submitTextEdit: function() {
+		this.submitTextHandle.changed = this.submitTextHandle.text != this.textToSubmit;
 		this.submitTextHandle.text = this.textToSubmit;
-		this.submitTextHandle.changed = this.changed = true;
 		this.submitTextHandle = null;
 		this.textToSubmit = "";
 		this.textSelected = "";
 	}
-	,updateTextEdit: function(align,editable) {
+	,updateTextEdit: function(align,editable,liveUpdate) {
+		if(liveUpdate == null) {
+			liveUpdate = false;
+		}
 		if(editable == null) {
 			editable = true;
 		}
@@ -37462,8 +37503,15 @@ zui_Zui.prototype = {
 			this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,this.ops.scaleFactor,cursorHeight);
 		}
 		this.textSelected = text;
+		if(liveUpdate && this.textSelectedHandle != null) {
+			this.textSelectedHandle.changed = this.textSelectedHandle.text != this.textSelected;
+			this.textSelectedHandle.text = this.textSelected;
+		}
 	}
-	,textInput: function(handle,label,align,editable) {
+	,textInput: function(handle,label,align,editable,liveUpdate) {
+		if(liveUpdate == null) {
+			liveUpdate = false;
+		}
 		if(editable == null) {
 			editable = true;
 		}
@@ -37507,16 +37555,15 @@ zui_Zui.prototype = {
 			this.setCursorToInput(align);
 		}
 		var startEdit = released || this.tabPressed;
+		handle.changed = false;
 		if(this.textSelectedHandle != handle && startEdit) {
 			this.startTextEdit(handle,align);
 		}
 		if(this.textSelectedHandle == handle) {
-			this.updateTextEdit(align,editable);
+			this.updateTextEdit(align,editable,liveUpdate);
 		}
 		if(this.submitTextHandle == handle) {
 			this.submitTextEdit();
-		} else {
-			handle.changed = false;
 		}
 		if(label != "") {
 			this.g.set_color(this.t.LABEL_COL);
@@ -37625,7 +37672,10 @@ zui_Zui.prototype = {
 		this.endElement();
 		return handle.selected;
 	}
-	,combo: function(handle,texts,label,showLabel,align) {
+	,combo: function(handle,texts,label,showLabel,align,searchBar) {
+		if(searchBar == null) {
+			searchBar = true;
+		}
 		if(align == null) {
 			align = 0;
 		}
@@ -37650,6 +37700,7 @@ zui_Zui.prototype = {
 				this.comboSelectedX = this._x + this._windowX | 0;
 				this.comboSelectedY = this._y + this._windowY + this.t.ELEMENT_H * this.ops.scaleFactor | 0;
 				this.comboSelectedW = this._w | 0;
+				this.comboSearchBar = searchBar;
 				var _g = 0;
 				while(_g < texts.length) {
 					var t = texts[_g];
@@ -37666,9 +37717,14 @@ zui_Zui.prototype = {
 					this.comboSelectedW += this.t.TEXT_OFFSET * this.ops.scaleFactor | 0;
 				}
 				this.comboToSubmit = handle.position;
+				this.comboInitialValue = handle.position;
 			}
 		}
-		if(handle == this.submitComboHandle) {
+		if(handle == this.comboSelectedHandle && (this.isEscapeDown || this.inputReleasedR)) {
+			handle.position = this.comboInitialValue;
+			handle.changed = this.changed = true;
+			this.submitComboHandle = null;
+		} else if(handle == this.submitComboHandle) {
 			handle.position = this.comboToSubmit;
 			this.submitComboHandle = null;
 			handle.changed = this.changed = true;
@@ -37908,7 +37964,7 @@ zui_Zui.prototype = {
 		var _g = this.g;
 		this.globalG.set_color(this.t.SEPARATOR_COL);
 		this.globalG.begin(false);
-		var comboH = (this.comboSelectedTexts.length + (this.comboSelectedLabel != "" ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
+		var comboH = (this.comboSelectedTexts.length + (this.comboSelectedLabel != "" ? 1 : 0) + (this.comboSearchBar ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) - this.windowBorderTop;
 		var distBottom = kha_System.windowHeight() - this.windowBorderBottom - (this.comboSelectedY + comboH);
 		var unrollUp = distBottom < 0 && distBottom < distTop;
@@ -37919,10 +37975,26 @@ zui_Zui.prototype = {
 			var wheelUp = unrollUp && this.inputWheelDelta > 0 || !unrollUp && this.inputWheelDelta < 0;
 			var wheelDown = unrollUp && this.inputWheelDelta < 0 || !unrollUp && this.inputWheelDelta > 0;
 			if((arrowUp || wheelUp) && this.comboToSubmit > 0) {
-				this.comboToSubmit--;
+				var step = 1;
+				if(this.comboSearchBar && this.textSelected.length > 0) {
+					var search = this.textSelected.toLowerCase();
+					while(this.comboSelectedTexts[this.comboToSubmit - step].toLowerCase().indexOf(search) < 0 && this.comboToSubmit - step > 0) ++step;
+					if(this.comboSelectedTexts[this.comboToSubmit - step].toLowerCase().indexOf(search) < 0) {
+						step = 0;
+					}
+				}
+				this.comboToSubmit -= step;
 				this.submitComboHandle = this.comboSelectedHandle;
 			} else if((arrowDown || wheelDown) && this.comboToSubmit < this.comboSelectedTexts.length - 1) {
-				this.comboToSubmit++;
+				var step = 1;
+				if(this.comboSearchBar && this.textSelected.length > 0) {
+					var search = this.textSelected.toLowerCase();
+					while(this.comboSelectedTexts[this.comboToSubmit + step].toLowerCase().indexOf(search) < 0 && this.comboToSubmit + step < this.comboSelectedTexts.length - 1) ++step;
+					if(this.comboSelectedTexts[this.comboToSubmit + step].toLowerCase().indexOf(search) < 0) {
+						step = 0;
+					}
+				}
+				this.comboToSubmit += step;
 				this.submitComboHandle = this.comboSelectedHandle;
 			}
 			if(this.comboSelectedWindow != null) {
@@ -37934,10 +38006,35 @@ zui_Zui.prototype = {
 		var _ELEMENT_OFFSET = this.t.ELEMENT_OFFSET;
 		this.t.ELEMENT_OFFSET = 0;
 		var unrollRight = this._x + this.comboSelectedW * 2 < kha_System.windowWidth() - this.windowBorderRight ? 1 : -1;
+		var resetPosition = false;
+		var search = "";
+		if(this.comboSearchBar) {
+			if(unrollUp) {
+				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
+			}
+			var comboSearchHandle = zui_Handle.global.nest(0,null);
+			if(zui_Zui.comboFirst) {
+				comboSearchHandle.text = "";
+			}
+			this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
+			search = this.textInput(comboSearchHandle,"",0,true,true).toLowerCase();
+			if(zui_Zui.comboFirst) {
+				this.startTextEdit(comboSearchHandle);
+			}
+			resetPosition = comboSearchHandle.changed;
+		}
 		var _g1 = 0;
 		var _g2 = this.comboSelectedTexts.length;
 		while(_g1 < _g2) {
 			var i = _g1++;
+			if(search.length > 0 && this.comboSelectedTexts[i].toLowerCase().indexOf(search) < 0) {
+				continue;
+			}
+			if(resetPosition) {
+				this.comboToSubmit = this.comboSelectedHandle.position = i;
+				this.submitComboHandle = this.comboSelectedHandle;
+				resetPosition = false;
+			}
 			if(unrollUp) {
 				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
 			}
@@ -37973,7 +38070,7 @@ zui_Zui.prototype = {
 				this.drawString(this.g,this.comboSelectedLabel,null,0,2);
 			}
 		}
-		if((this.inputReleased || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
+		if((this.inputReleased || this.inputReleasedR || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
 			this.comboSelectedHandle = null;
 			zui_Zui.comboFirst = true;
 		} else {
@@ -38472,6 +38569,7 @@ armory_trait_physics_bullet_RigidBody.CF_CHARACTER_OBJECT = 16;
 armory_trait_physics_bullet_RigidBody.convexHullCache = new haxe_ds_ObjectMap();
 armory_trait_physics_bullet_RigidBody.triangleMeshCache = new haxe_ds_ObjectMap();
 armory_trait_physics_bullet_RigidBody.usersCache = new haxe_ds_ObjectMap();
+zui_Handle.global = new zui_Handle();
 armory_ui_Canvas.assetMap = new haxe_ds_IntMap();
 armory_ui_Canvas.themes = [];
 armory_ui_Canvas.events = [];

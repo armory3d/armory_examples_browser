@@ -2329,7 +2329,7 @@ iron_data_Data.getImage = function(file,done,readable,format) {
 			delete(_this.h[file]);
 		}
 		iron_data_Data.assetsLoaded++;
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 471, className : "iron.data.Data", methodName : "getImage"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 473, className : "iron.data.Data", methodName : "getImage"});
 };
 iron_data_Data.getSound = function(file,done) {
 	if(StringTools.endsWith(file,".wav")) {
@@ -2369,7 +2369,7 @@ iron_data_Data.getSound = function(file,done) {
 			}
 			iron_data_Data.assetsLoaded++;
 		});
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 511, className : "iron.data.Data", methodName : "getSound"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 513, className : "iron.data.Data", methodName : "getSound"});
 };
 iron_data_Data.getFont = function(file,done) {
 	var cached = iron_data_Data.cachedFonts.h[file];
@@ -2404,7 +2404,7 @@ iron_data_Data.getFont = function(file,done) {
 			delete(_this.h[file]);
 		}
 		iron_data_Data.assetsLoaded++;
-	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 583, className : "iron.data.Data", methodName : "getFont"});
+	},null,{ fileName : "Sources/iron/data/Data.hx", lineNumber : 585, className : "iron.data.Data", methodName : "getFont"});
 };
 iron_data_Data.isAbsolute = function(file) {
 	if(!(file.charAt(0) == "/" || file.charAt(1) == ":")) {
@@ -2821,6 +2821,7 @@ var iron_Scene = function() {
 	this.speakers = [];
 	this.empties = [];
 	this.animations = [];
+	this.tilesheets = [];
 	this.armatures = [];
 	this.embedded = new haxe_ds_StringMap();
 	this.root = new iron_object_Object();
@@ -2849,7 +2850,7 @@ iron_Scene.create = function(format,done) {
 				iron_Scene.createTraits(object.raw.traits,object);
 			}
 			if(iron_Scene.active.cameras.length == 0) {
-				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 135, className : "iron.Scene", methodName : "create"});
+				haxe_Log.trace("No camera found for scene \"" + format.name + "\"",{ fileName : "Sources/iron/Scene.hx", lineNumber : 138, className : "iron.Scene", methodName : "create"});
 			}
 			iron_Scene.active.camera = iron_Scene.active.getCamera(format.camera_ref);
 			iron_Scene.active.sceneParent = sceneObject;
@@ -3059,7 +3060,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 863, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 870, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -3223,6 +3224,13 @@ iron_Scene.prototype = {
 			return;
 		}
 		iron_Scene.framePassed = true;
+		var _g = 0;
+		var _g1 = this.tilesheets;
+		while(_g < _g1.length) {
+			var tilesheet = _g1[_g];
+			++_g;
+			tilesheet.update();
+		}
 		if(this.camera != null) {
 			this.camera.renderFrame(g);
 		} else {
@@ -3944,8 +3952,8 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(!armory_trait_internal_DebugConsole.visible) {
 			return;
 		}
-		var hwin = zui_Handle.global.nest(0,null);
-		var htab = zui_Handle.global.nest(1,{ position : 0});
+		var hwin = zui_Handle.global.nest(1,null);
+		var htab = zui_Handle.global.nest(2,{ position : 0});
 		var ww = 280 * this.scaleFactor * armory_trait_internal_DebugConsole.getScale() | 0;
 		var wx = kha_System.windowWidth() - ww;
 		var wy = 0;
@@ -3969,7 +3977,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 		if(armory_trait_internal_DebugConsole.ui.window(hwin,wx,wy,ww,wh,true)) {
 			var tmp = armory_trait_internal_DebugConsole.ui.tab(htab,"");
 			if(armory_trait_internal_DebugConsole.ui.tab(htab,"Scene")) {
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(2,{ selected : true}),"Outliner")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(3,{ selected : true}),"Outliner")) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					var lineCounter = 0;
 					var drawList = null;
@@ -4032,20 +4040,20 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					while(_g < _g1.length) {
 						var c = _g1[_g];
 						++_g;
-						drawList(zui_Handle.global.nest(3,null),c);
+						drawList(zui_Handle.global.nest(4,null),c);
 					}
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
 				if(this.selectedObject == null) {
 					this.selectedType = "";
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(4,{ selected : true}),"Properties " + this.selectedType)) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(5,{ selected : true}),"Properties " + this.selectedType)) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					if(this.selectedObject != null) {
 						if(((this.selectedObject) instanceof iron_object_CameraObject)) {
 							armory_trait_internal_DebugConsole.ui.row([0.5,0.5]);
 						}
-						var h = zui_Handle.global.nest(5,null);
+						var h = zui_Handle.global.nest(6,null);
 						h.selected = this.selectedObject.visible;
 						this.selectedObject.visible = armory_trait_internal_DebugConsole.ui.check(h,"Visible");
 						if(((this.selectedObject) instanceof iron_object_CameraObject)) {
@@ -4108,31 +4116,31 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.row4);
 						armory_trait_internal_DebugConsole.ui.text("World Loc");
 						armory_trait_internal_DebugConsole.ui.enabled = false;
-						h = zui_Handle.global.nest(6,null);
+						h = zui_Handle.global.nest(7,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_x) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"X"));
-						h = zui_Handle.global.nest(7,null);
+						h = zui_Handle.global.nest(8,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_y) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Y"));
-						h = zui_Handle.global.nest(8,null);
+						h = zui_Handle.global.nest(9,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(worldPos_z) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Z"));
 						armory_trait_internal_DebugConsole.ui.enabled = true;
 						armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.row4);
 						armory_trait_internal_DebugConsole.ui.text("Local Loc");
-						h = zui_Handle.global.nest(9,null);
+						h = zui_Handle.global.nest(10,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.x) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"X"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							localPos.x = f;
 						}
-						h = zui_Handle.global.nest(10,null);
+						h = zui_Handle.global.nest(11,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.y) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Y"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							localPos.y = f;
 						}
-						h = zui_Handle.global.nest(11,null);
+						h = zui_Handle.global.nest(12,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(localPos.z) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Z"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
@@ -4140,7 +4148,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.row4);
 						armory_trait_internal_DebugConsole.ui.text("Rotation");
-						h = zui_Handle.global.nest(12,null);
+						h = zui_Handle.global.nest(13,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_x) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"X"));
 						var changed = false;
@@ -4148,14 +4156,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							changed = true;
 							rot_x = f;
 						}
-						h = zui_Handle.global.nest(13,null);
+						h = zui_Handle.global.nest(14,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_y) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Y"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							changed = true;
 							rot_y = f;
 						}
-						h = zui_Handle.global.nest(14,null);
+						h = zui_Handle.global.nest(15,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(rot_z) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Z"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
@@ -4184,19 +4192,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.row4);
 						armory_trait_internal_DebugConsole.ui.text("Scale");
-						h = zui_Handle.global.nest(15,null);
+						h = zui_Handle.global.nest(16,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.x) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"X"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							scale.x = f;
 						}
-						h = zui_Handle.global.nest(16,null);
+						h = zui_Handle.global.nest(17,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.y) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Y"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							scale.y = f;
 						}
-						h = zui_Handle.global.nest(17,null);
+						h = zui_Handle.global.nest(18,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(scale.z) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Z"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
@@ -4204,19 +4212,19 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						}
 						armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.row4);
 						armory_trait_internal_DebugConsole.ui.text("Dimensions");
-						h = zui_Handle.global.nest(18,null);
+						h = zui_Handle.global.nest(19,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.x) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"X"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							dim.x = f;
 						}
-						h = zui_Handle.global.nest(19,null);
+						h = zui_Handle.global.nest(20,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.y) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Y"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
 							dim.y = f;
 						}
-						h = zui_Handle.global.nest(20,null);
+						h = zui_Handle.global.nest(21,null);
 						h.text = armory_trait_internal_DebugConsole.roundfp(dim.z) + "";
 						f = parseFloat(armory_trait_internal_DebugConsole.ui.textInput(h,"Z"));
 						if(armory_trait_internal_DebugConsole.ui.changed) {
@@ -4248,7 +4256,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 							if(iron_Scene.active.world != null) {
 								var p = iron_Scene.active.world.probe;
 								var tmp = armory_trait_internal_DebugConsole.ui;
-								var tmp1 = zui_Handle.global.nest(21,{ value : p.raw.strength});
+								var tmp1 = zui_Handle.global.nest(22,{ value : p.raw.strength});
 								p.raw.strength = tmp.slider(tmp1,"Env Strength",0.0,5.0,true);
 							} else {
 								armory_trait_internal_DebugConsole.ui.text("This scene has no world data to edit.");
@@ -4256,14 +4264,14 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 						} else if(((this.selectedObject) instanceof iron_object_LightObject)) {
 							this.selectedType = "(Light)";
 							var light = js_Boot.__cast(this.selectedObject , iron_object_LightObject);
-							var lightHandle = zui_Handle.global.nest(22,null);
+							var lightHandle = zui_Handle.global.nest(23,null);
 							lightHandle.value = light.data.raw.strength / 10;
 							var tmp = armory_trait_internal_DebugConsole.ui.slider(lightHandle,"Strength",0.0,5.0,true);
 							light.data.raw.strength = tmp * 10;
 						} else if(((this.selectedObject) instanceof iron_object_CameraObject)) {
 							this.selectedType = "(Camera)";
 							var cam = js_Boot.__cast(this.selectedObject , iron_object_CameraObject);
-							var fovHandle = zui_Handle.global.nest(23,null);
+							var fovHandle = zui_Handle.global.nest(24,null);
 							fovHandle.value = (cam.data.raw.fov * 100 | 0) / 100;
 							cam.data.raw.fov = armory_trait_internal_DebugConsole.ui.slider(fovHandle,"Field of View",0.3,2.0,true);
 							if(armory_trait_internal_DebugConsole.ui.changed) {
@@ -4279,7 +4287,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			var avg = Math.round(this.frameTimeAvg * 10000) / 10;
 			var fpsAvg = avg > 0 ? Math.round(1000 / avg) : 0;
 			if(armory_trait_internal_DebugConsole.ui.tab(htab,"" + avg + " ms")) {
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(24,{ selected : true}),"Performance")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(25,{ selected : true}),"Performance")) {
 					if(this.graph != null) {
 						armory_trait_internal_DebugConsole.ui.image(this.graph);
 					}
@@ -4301,7 +4309,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					armory_trait_internal_DebugConsole.ui.text(Math.round(this.physTimeAvg * 10000) / 10 + " ms",2);
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(25,{ selected : false}),"Draw")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(26,{ selected : false}),"Draw")) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					armory_trait_internal_DebugConsole.ui.row(armory_trait_internal_DebugConsole.lrow);
 					var numMeshes = iron_Scene.active.meshes.length;
@@ -4321,7 +4329,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					armory_trait_internal_DebugConsole.ui.text(iron_RenderPath.culled + " / " + numMeshes * 2,2);
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(26,{ selected : false}),"Render Targets")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(27,{ selected : false}),"Render Targets")) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					armory_trait_internal_DebugConsole.ui.imageInvertY = true;
 					var h = iron_RenderPath.active.renderTargets.h;
@@ -4339,7 +4347,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					armory_trait_internal_DebugConsole.ui.imageInvertY = false;
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(27,{ selected : false}),"Cached Materials")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(28,{ selected : false}),"Cached Materials")) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					var h = iron_data_Data.cachedMaterials.h;
 					var c_h = h;
@@ -4352,7 +4360,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(28,{ selected : false}),"Cached Shaders")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(29,{ selected : false}),"Cached Shaders")) {
 					armory_trait_internal_DebugConsole.ui.indent();
 					var h = iron_data_Data.cachedShaders.h;
 					var c_h = h;
@@ -4367,9 +4375,9 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 				}
 			}
 			if(armory_trait_internal_DebugConsole.ui.tab(htab,armory_trait_internal_DebugConsole.lastTraces[0] == "" ? "Console" : HxOverrides.substr(armory_trait_internal_DebugConsole.lastTraces[0],0,20))) {
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(29,{ selected : false}),"Script")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(30,{ selected : false}),"Script")) {
 					armory_trait_internal_DebugConsole.ui.indent();
-					var t = armory_trait_internal_DebugConsole.ui.textInput(zui_Handle.global.nest(30,null));
+					var t = armory_trait_internal_DebugConsole.ui.textInput(zui_Handle.global.nest(31,null));
 					if(armory_trait_internal_DebugConsole.ui.button("Run")) {
 						try {
 							haxe_Log.trace("> " + t,{ fileName : "Sources/armory/trait/internal/DebugConsole.hx", lineNumber : 774, className : "armory.trait.internal.DebugConsole", methodName : "render2D"});
@@ -4381,9 +4389,9 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 					}
 					armory_trait_internal_DebugConsole.ui.unindent();
 				}
-				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(31,{ selected : true}),"Log")) {
+				if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(32,{ selected : true}),"Log")) {
 					armory_trait_internal_DebugConsole.ui.indent();
-					var h = zui_Handle.global.nest(32,null);
+					var h = zui_Handle.global.nest(33,null);
 					h.selected = armory_trait_internal_DebugConsole.traceWithPosition;
 					armory_trait_internal_DebugConsole.traceWithPosition = armory_trait_internal_DebugConsole.ui.check(h,"Print With Position");
 					if(armory_trait_internal_DebugConsole.ui.isHovered) {
@@ -4420,7 +4428,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			}
 			armory_trait_internal_DebugConsole.ui.separator();
 		}
-		var handleWinTrait = zui_Handle.global.nest(33,null);
+		var handleWinTrait = zui_Handle.global.nest(34,null);
 		var _g = 0;
 		var _g1 = this.selectedTraits;
 		while(_g < _g1.length) {
@@ -4452,7 +4460,7 @@ armory_trait_internal_DebugConsole.prototype = $extend(iron_Trait.prototype,{
 			armory_trait_internal_DebugConsole.ui.text("Object:");
 			armory_trait_internal_DebugConsole.ui.text(trait.object.name,2);
 			armory_trait_internal_DebugConsole.ui.separator();
-			if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(34,null).nest(objectID).nest(traitIndex),"Attributes")) {
+			if(armory_trait_internal_DebugConsole.ui.panel(zui_Handle.global.nest(35,null).nest(objectID).nest(traitIndex),"Attributes")) {
 				armory_trait_internal_DebugConsole.ui.indent();
 				var _g2 = 0;
 				var _g3 = Reflect.fields(trait);
@@ -12032,9 +12040,6 @@ iron_object_MeshObject.prototype = $extend(iron_object_Object.prototype,{
 		if(this.particleSystems != null && this.particleSystems.length > 0 && !this.raw.render_emitter) {
 			return;
 		}
-		if(this.tilesheet != null) {
-			this.tilesheet.update();
-		}
 		if(this.cullMaterial(context)) {
 			return;
 		}
@@ -12623,30 +12628,45 @@ iron_object_ParticleSystem.prototype = {
 	,setupGeomGpu: function(object,owner) {
 		var instancedData = kha_arrays_Float32Array._new(this.particles.length * 3);
 		var i = 0;
-		var scaleFactorVol = owner.data.scalePos / this.r.particle_size;
-		var scaleFactorVertFace = 3.05185094759971923e-05 * scaleFactorVol;
+		var x = object.transform.dim.x / 2.0 / this.r.particle_size;
+		var y = object.transform.dim.y / 2.0 / this.r.particle_size;
+		var z = object.transform.dim.z / 2.0 / this.r.particle_size;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var scaleFactor_x = x;
+		var scaleFactor_y = y;
+		var scaleFactor_z = z;
 		switch(this.r.emit_from) {
 		case 0:
 			var pa = owner.data.geom.positions;
+			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
 				var p = _g1[_g];
 				++_g;
 				var j = this.fhash(i) * ((pa.values.byteLength >> 1) / pa.size) | 0;
-				var v = pa.values.getInt16(j * pa.size * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v = pa.values.getInt16(j * pa.size * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = pa.values.getInt16((j * pa.size + 1) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v1 = pa.values.getInt16((j * pa.size + 1) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = pa.values.getInt16((j * pa.size + 2) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * scaleFactorVertFace;
+				var v2 = pa.values.getInt16((j * pa.size + 2) * 2,kha_arrays_ByteArray.LITTLE_ENDIAN) * normFactor * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
 			break;
 		case 1:
 			var positions = owner.data.geom.positions.values;
+			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
@@ -12726,13 +12746,13 @@ iron_object_ParticleSystem.prototype = {
 				pos_x += v_x;
 				pos_y += v_y;
 				pos_z += v_z;
-				var v = pos_x * scaleFactorVertFace;
+				var v = pos_x * normFactor * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = pos_y * scaleFactorVertFace;
+				var v1 = pos_y * normFactor * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = pos_z * scaleFactorVertFace;
+				var v2 = pos_z * normFactor * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
@@ -12743,13 +12763,13 @@ iron_object_ParticleSystem.prototype = {
 			while(_g < _g1.length) {
 				var p = _g1[_g];
 				++_g;
-				var v = (Math.random() * 2.0 - 1.0) * (object.transform.dim.x / 2.0) * scaleFactorVol;
+				var v = (Math.random() * 2.0 - 1.0) * scaleFactor_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = (Math.random() * 2.0 - 1.0) * (object.transform.dim.y / 2.0) * scaleFactorVol;
+				var v1 = (Math.random() * 2.0 - 1.0) * scaleFactor_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = (Math.random() * 2.0 - 1.0) * (object.transform.dim.z / 2.0) * scaleFactorVol;
+				var v2 = (Math.random() * 2.0 - 1.0) * scaleFactor_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
@@ -12943,6 +12963,7 @@ var iron_object_Tilesheet = function(sceneName,tilesheet_ref,tilesheet_action_re
 			++_g;
 			if(ts.name == tilesheet_ref) {
 				_gthis.raw = ts;
+				iron_Scene.active.tilesheets.push(_gthis);
 				_gthis.play(tilesheet_action_ref);
 				_gthis.ready = true;
 				break;
@@ -12969,19 +12990,25 @@ iron_object_Tilesheet.prototype = {
 		this.paused = false;
 	}
 	,remove: function() {
+		HxOverrides.remove(iron_Scene.active.tilesheets,this);
 	}
 	,update: function() {
 		if(!this.ready || this.paused || this.action.start >= this.action.end) {
 			return;
 		}
-		this.time += iron_system_Time.get_delta();
-		if(this.time >= 1 / this.raw.framerate) {
-			this.setFrame(this.frame + 1);
+		this.time += iron_system_Time.realDelta;
+		var frameTime = 1 / this.raw.framerate;
+		var framesToAdvance = 0;
+		while(this.time >= frameTime) {
+			this.time -= frameTime;
+			++framesToAdvance;
+		}
+		if(framesToAdvance != 0) {
+			this.setFrame(this.frame + framesToAdvance);
 		}
 	}
 	,setFrame: function(f) {
 		this.frame = f;
-		this.time = 0;
 		var tx = this.frame % this.raw.tilesx;
 		var ty = this.frame / this.raw.tilesx | 0;
 		this.tileX = tx * (1 / this.raw.tilesx);
@@ -15954,6 +15981,30 @@ iron_object_Uniforms.setObjectConstant = function(g,object,location,c) {
 				m = mo.particleOwner.particleSystems[mo.particleIndex].getData();
 			}
 			break;
+		case "_sunWorldMatrix":
+			var sun = iron_RenderPath.active.sun;
+			if(sun != null) {
+				var _this = iron_object_Uniforms.helpMat;
+				var m1 = sun.transform.worldUnpack;
+				_this.self._00 = m1.self._00;
+				_this.self._01 = m1.self._01;
+				_this.self._02 = m1.self._02;
+				_this.self._03 = m1.self._03;
+				_this.self._10 = m1.self._10;
+				_this.self._11 = m1.self._11;
+				_this.self._12 = m1.self._12;
+				_this.self._13 = m1.self._13;
+				_this.self._20 = m1.self._20;
+				_this.self._21 = m1.self._21;
+				_this.self._22 = m1.self._22;
+				_this.self._23 = m1.self._23;
+				_this.self._30 = m1.self._30;
+				_this.self._31 = m1.self._31;
+				_this.self._32 = m1.self._32;
+				_this.self._33 = m1.self._33;
+				m = iron_object_Uniforms.helpMat;
+			}
+			break;
 		case "_worldMatrix":
 			m = object.transform.worldUnpack;
 			break;
@@ -17783,7 +17834,7 @@ js_lib__$ArrayBuffer_ArrayBufferCompat.sliceImpl = function(begin,end) {
 	return resultArray.buffer;
 };
 var kha__$Assets_FontList = function() {
-	this.font_defaultDescription = { name : "font_default", file_sizes : [22544], files : ["font_default.ttf"], type : "font"};
+	this.font_defaultDescription = { name : "font_default", file_sizes : [918020], files : ["font_default.ttf"], type : "font"};
 	this.font_default = null;
 };
 $hxClasses["kha._Assets.FontList"] = kha__$Assets_FontList;
@@ -37503,6 +37554,7 @@ var zui_Zui = function(ops) {
 	this.tooltipText = "";
 	this.comboToSubmit = 0;
 	this.submitComboHandle = null;
+	this.comboSearchBar = false;
 	this.comboSelectedWindow = null;
 	this.comboSelectedHandle = null;
 	this.tabPressedHandle = null;
@@ -38235,13 +38287,16 @@ zui_Zui.prototype = {
 		}
 	}
 	,submitTextEdit: function() {
+		this.submitTextHandle.changed = this.submitTextHandle.text != this.textToSubmit;
 		this.submitTextHandle.text = this.textToSubmit;
-		this.submitTextHandle.changed = this.changed = true;
 		this.submitTextHandle = null;
 		this.textToSubmit = "";
 		this.textSelected = "";
 	}
-	,updateTextEdit: function(align,editable) {
+	,updateTextEdit: function(align,editable,liveUpdate) {
+		if(liveUpdate == null) {
+			liveUpdate = false;
+		}
 		if(editable == null) {
 			editable = true;
 		}
@@ -38355,8 +38410,15 @@ zui_Zui.prototype = {
 			this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,this.ops.scaleFactor,cursorHeight);
 		}
 		this.textSelected = text;
+		if(liveUpdate && this.textSelectedHandle != null) {
+			this.textSelectedHandle.changed = this.textSelectedHandle.text != this.textSelected;
+			this.textSelectedHandle.text = this.textSelected;
+		}
 	}
-	,textInput: function(handle,label,align,editable) {
+	,textInput: function(handle,label,align,editable,liveUpdate) {
+		if(liveUpdate == null) {
+			liveUpdate = false;
+		}
 		if(editable == null) {
 			editable = true;
 		}
@@ -38400,16 +38462,15 @@ zui_Zui.prototype = {
 			this.setCursorToInput(align);
 		}
 		var startEdit = released || this.tabPressed;
+		handle.changed = false;
 		if(this.textSelectedHandle != handle && startEdit) {
 			this.startTextEdit(handle,align);
 		}
 		if(this.textSelectedHandle == handle) {
-			this.updateTextEdit(align,editable);
+			this.updateTextEdit(align,editable,liveUpdate);
 		}
 		if(this.submitTextHandle == handle) {
 			this.submitTextEdit();
-		} else {
-			handle.changed = false;
 		}
 		if(label != "") {
 			this.g.set_color(this.t.LABEL_COL);
@@ -38722,7 +38783,7 @@ zui_Zui.prototype = {
 		var _g = this.g;
 		this.globalG.set_color(this.t.SEPARATOR_COL);
 		this.globalG.begin(false);
-		var comboH = (this.comboSelectedTexts.length + (this.comboSelectedLabel != "" ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
+		var comboH = (this.comboSelectedTexts.length + (this.comboSelectedLabel != "" ? 1 : 0) + (this.comboSearchBar ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) - this.windowBorderTop;
 		var distBottom = kha_System.windowHeight() - this.windowBorderBottom - (this.comboSelectedY + comboH);
 		var unrollUp = distBottom < 0 && distBottom < distTop;
@@ -38733,10 +38794,26 @@ zui_Zui.prototype = {
 			var wheelUp = unrollUp && this.inputWheelDelta > 0 || !unrollUp && this.inputWheelDelta < 0;
 			var wheelDown = unrollUp && this.inputWheelDelta < 0 || !unrollUp && this.inputWheelDelta > 0;
 			if((arrowUp || wheelUp) && this.comboToSubmit > 0) {
-				this.comboToSubmit--;
+				var step = 1;
+				if(this.comboSearchBar && this.textSelected.length > 0) {
+					var search = this.textSelected.toLowerCase();
+					while(this.comboSelectedTexts[this.comboToSubmit - step].toLowerCase().indexOf(search) < 0 && this.comboToSubmit - step > 0) ++step;
+					if(this.comboSelectedTexts[this.comboToSubmit - step].toLowerCase().indexOf(search) < 0) {
+						step = 0;
+					}
+				}
+				this.comboToSubmit -= step;
 				this.submitComboHandle = this.comboSelectedHandle;
 			} else if((arrowDown || wheelDown) && this.comboToSubmit < this.comboSelectedTexts.length - 1) {
-				this.comboToSubmit++;
+				var step = 1;
+				if(this.comboSearchBar && this.textSelected.length > 0) {
+					var search = this.textSelected.toLowerCase();
+					while(this.comboSelectedTexts[this.comboToSubmit + step].toLowerCase().indexOf(search) < 0 && this.comboToSubmit + step < this.comboSelectedTexts.length - 1) ++step;
+					if(this.comboSelectedTexts[this.comboToSubmit + step].toLowerCase().indexOf(search) < 0) {
+						step = 0;
+					}
+				}
+				this.comboToSubmit += step;
 				this.submitComboHandle = this.comboSelectedHandle;
 			}
 			if(this.comboSelectedWindow != null) {
@@ -38748,10 +38825,35 @@ zui_Zui.prototype = {
 		var _ELEMENT_OFFSET = this.t.ELEMENT_OFFSET;
 		this.t.ELEMENT_OFFSET = 0;
 		var unrollRight = this._x + this.comboSelectedW * 2 < kha_System.windowWidth() - this.windowBorderRight ? 1 : -1;
+		var resetPosition = false;
+		var search = "";
+		if(this.comboSearchBar) {
+			if(unrollUp) {
+				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
+			}
+			var comboSearchHandle = zui_Handle.global.nest(0,null);
+			if(zui_Zui.comboFirst) {
+				comboSearchHandle.text = "";
+			}
+			this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
+			search = this.textInput(comboSearchHandle,"",0,true,true).toLowerCase();
+			if(zui_Zui.comboFirst) {
+				this.startTextEdit(comboSearchHandle);
+			}
+			resetPosition = comboSearchHandle.changed;
+		}
 		var _g1 = 0;
 		var _g2 = this.comboSelectedTexts.length;
 		while(_g1 < _g2) {
 			var i = _g1++;
+			if(search.length > 0 && this.comboSelectedTexts[i].toLowerCase().indexOf(search) < 0) {
+				continue;
+			}
+			if(resetPosition) {
+				this.comboToSubmit = this.comboSelectedHandle.position = i;
+				this.submitComboHandle = this.comboSelectedHandle;
+				resetPosition = false;
+			}
 			if(unrollUp) {
 				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
 			}
@@ -38787,7 +38889,7 @@ zui_Zui.prototype = {
 				this.drawString(this.g,this.comboSelectedLabel,null,0,2);
 			}
 		}
-		if((this.inputReleased || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
+		if((this.inputReleased || this.inputReleasedR || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
 			this.comboSelectedHandle = null;
 			zui_Zui.comboFirst = true;
 		} else {
