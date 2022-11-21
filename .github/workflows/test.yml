@@ -11,11 +11,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - uses: krdlab/setup-haxe@v1
+      - uses: krdlab/setup-haxe@v1.2.0
         with:
           haxe-version: 4.2.5
       - name: Install blender
-        run: sudo snap install blender --channel=2.93lts/stable --classic
+        run: sudo snap install blender --channel=3.3lts/stable --classic
       - name: Install armsdk
         run: |
           git clone --recurse-submodules https://github.com/armory3d/armsdk.git
