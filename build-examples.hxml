@@ -1,3 +1,2 @@
 -cp src
---macro Project.buildGroup("armory_examples","web/examples",false,true,false,["dev_logicnode","logic_mouselock","logic_pong","logic_triggers"])
-#--macro Project.build("armory_examples","logic_callgroup","web/examples",true)
+--macro Project.buildGroup("../armory_examples","web/examples",false,true,false,[])

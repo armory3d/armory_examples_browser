@@ -1,2 +1,2 @@
 -cp src
---macro Project.buildGroup("armory_templates","web/templates",false,true,false,[])
+--macro Project.buildGroup("../armory_templates","web/templates",false,true,false,[])
