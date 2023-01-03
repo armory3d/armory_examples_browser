@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [ master, ci ]
+    #branches: [ master, ci ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
       - uses: krdlab/setup-haxe@v1.2.0
@@ -23,17 +23,19 @@ jobs:
       - name: Build examples
         run: |
           git clone https://github.com/armory3d/armory_examples.git
-          haxe build-examples.hxml 
+          haxe -cp src --macro 'Project.buildGroup("armory_examples","web/examples",false,true,true,[])'
       - name: Build templates
         run: |
           git clone https://github.com/armory3d/armory_templates.git
-          haxe build-templates.hxml 
+          haxe -cp src --macro 'Project.buildGroup("armory_templates","web/templates",false,true,true,[])'
       - name: Build tutorials
         run: |
           git clone https://github.com/armory3d/armory_tutorials.git
-          haxe build-tutorials.hxml 
+          haxe -cp src --macro 'Project.buildGroup("armory_tutorials","web/tutorials",false,true,true,[])'
       - name: Build application
         run: |
           export ARMSDK="$(pwd)/armsdk"
           haxelib install app.hxml --always
           haxe app.hxml 
+
+
