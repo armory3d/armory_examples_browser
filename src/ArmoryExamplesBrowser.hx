@@ -57,11 +57,15 @@ class ArmoryExamplesBrowser {
 			readme = mainElement.querySelector('.readme');
 
 			var build = getBuildInfo();
-			console.debug(build);
-			readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>';
-			if (build.commit != null)
-				readme.innerHTML += '/<a href="$GITHUB/armsdk/commit/${build.commit}">' + ${build.commit.substr(0, 7)} + '</a>';
-			readme.innerHTML += ' ' + build.time;
+            if(build == null) {
+                console.warn("no armsdk version info available");
+            } else {
+                console.debug(build);
+                readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>';
+                if (build.commit != null)
+                    readme.innerHTML += '/<a href="$GITHUB/armsdk/commit/${build.commit}">' + ${build.commit.substr(0, 7)} + '</a>';
+                readme.innerHTML += ' ' + build.time;
+            }
 
 			iframe.src = "start.html";
 
@@ -369,7 +373,8 @@ class ArmoryExamplesBrowser {
 	macro public static function getBuildInfo() {
 		var armsdk = getArmsdkPath();
 		if (armsdk == null) {
-			Context.fatalError('armsdk not found', Context.currentPos());
+            
+			//Context.fatalError('armsdk not found', Context.currentPos());
 		}
 		Sys.println('armsdk path = $armsdk');
 		var commit = Git.getCommit(armsdk);
