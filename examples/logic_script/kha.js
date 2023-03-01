@@ -86,6 +86,21 @@ HxOverrides.remove = function(a,obj) {
 HxOverrides.now = function() {
 	return Date.now();
 };
+var IntIterator = function(min,max) {
+	this.min = min;
+	this.max = max;
+};
+$hxClasses["IntIterator"] = IntIterator;
+IntIterator.__name__ = true;
+IntIterator.prototype = {
+	hasNext: function() {
+		return this.min < this.max;
+	}
+	,next: function() {
+		return this.min++;
+	}
+	,__class__: IntIterator
+};
 var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = true;
@@ -93,7 +108,7 @@ Main.main = function() {
 	iron_object_BoneAnimation.skinMaxBones = 8;
 	iron_object_LightObject.cascadeCount = 4;
 	iron_object_LightObject.cascadeSplitFactor = 0.800000011920929;
-	armory_system_Starter.numAssets = 17;
+	armory_system_Starter.numAssets = 15;
 	armory_system_Starter.drawLoading = armory_trait_internal_LoadingScreen.render;
 	armory_system_Starter.main("Scene",0,false,true,false,960,540,1,true,armory_renderpath_RenderPathCreator.get);
 };
@@ -106,6 +121,25 @@ Reflect.field = function(o,field) {
 		return o[field];
 	} catch( _g ) {
 		return null;
+	}
+};
+Reflect.getProperty = function(o,field) {
+	var tmp;
+	if(o == null) {
+		return null;
+	} else {
+		var tmp1;
+		if(o.__properties__) {
+			tmp = o.__properties__["get_" + field];
+			tmp1 = tmp;
+		} else {
+			tmp1 = false;
+		}
+		if(tmp1) {
+			return o[tmp]();
+		} else {
+			return o[field];
+		}
 	}
 };
 Reflect.setProperty = function(o,field,value) {
@@ -129,6 +163,45 @@ Reflect.isFunction = function(f) {
 	} else {
 		return false;
 	}
+};
+Reflect.compare = function(a,b) {
+	if(a == b) {
+		return 0;
+	} else if(a > b) {
+		return 1;
+	} else {
+		return -1;
+	}
+};
+Reflect.isObject = function(v) {
+	if(v == null) {
+		return false;
+	}
+	var t = typeof(v);
+	if(!(t == "string" || t == "object" && v.__enum__ == null)) {
+		if(t == "function") {
+			return (v.__name__ || v.__ename__) != null;
+		} else {
+			return false;
+		}
+	} else {
+		return true;
+	}
+};
+Reflect.isEnumValue = function(v) {
+	if(v != null) {
+		return v.__enum__ != null;
+	} else {
+		return false;
+	}
+};
+Reflect.makeVarArgs = function(f) {
+	return function() {
+		var a = Array.prototype.slice;
+		var a1 = arguments;
+		var a2 = a.call(a1);
+		return f(a2);
+	};
 };
 var Std = function() { };
 $hxClasses["Std"] = Std;
@@ -207,6 +280,49 @@ Type.createEnum = function(e,constr,params) {
 		throw haxe_Exception.thrown("Constructor " + constr + " does not need parameters");
 	}
 	return f;
+};
+Type.enumEq = function(a,b) {
+	if(a == b) {
+		return true;
+	}
+	try {
+		var e = a.__enum__;
+		if(e == null || e != b.__enum__) {
+			return false;
+		}
+		if(a._hx_index != b._hx_index) {
+			return false;
+		}
+		var enm = $hxEnums[e];
+		var params = enm.__constructs__[a._hx_index].__params__;
+		var _g = 0;
+		while(_g < params.length) {
+			var f = params[_g];
+			++_g;
+			if(!Type.enumEq(a[f],b[f])) {
+				return false;
+			}
+		}
+	} catch( _g ) {
+		return false;
+	}
+	return true;
+};
+Type.enumParameters = function(e) {
+	var enm = $hxEnums[e.__enum__];
+	var params = enm.__constructs__[e._hx_index].__params__;
+	if(params != null) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < params.length) {
+			var p = params[_g1];
+			++_g1;
+			_g.push(e[p]);
+		}
+		return _g;
+	} else {
+		return [];
+	}
 };
 var UInt = {};
 UInt.gt = function(a,b) {
@@ -305,15 +421,15 @@ arm_node_NodeTree.__name__ = true;
 arm_node_NodeTree.__super__ = armory_logicnode_LogicTree;
 arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 	add: function() {
-		var _SetObjectRotation_001 = new armory_logicnode_SetRotationNode(this);
-		_SetObjectRotation_001.property0 = "Euler Angles";
-		_SetObjectRotation_001.inputs.length = 4;
-		_SetObjectRotation_001.outputs.length = 1;
+		var _SetObjectRotation = new armory_logicnode_SetRotationNode(this);
+		_SetObjectRotation.property0 = "Euler Angles";
+		_SetObjectRotation.inputs.length = 3;
+		_SetObjectRotation.outputs.length = 1;
 		var _g = 0;
-		var _g1 = _SetObjectRotation_001.outputs.length;
+		var _g1 = _SetObjectRotation.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_SetObjectRotation_001.outputs[i] = [];
+			_SetObjectRotation.outputs[i] = [];
 		}
 		var _Script = new armory_logicnode_ScriptNode(this);
 		_Script.property0 = "// Haxe script\n// Make sure 'Properties - Armory Project - Hscript' is enabled\nvar v = input[0] + input[1];\ntrace(v);\nreturn Math.sin(v);\n";
@@ -345,19 +461,19 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 			_OnUpdate.outputs[i] = [];
 		}
 		armory_logicnode_LogicNode.addLink(_OnUpdate,_ArraySet,0,0);
-		var _ArrayFloat = new armory_logicnode_ArrayFloatNode(this);
-		_ArrayFloat.inputs.length = 2;
-		_ArrayFloat.outputs.length = 2;
+		var _ArrayFloat_001 = new armory_logicnode_ArrayFloatNode(this);
+		_ArrayFloat_001.inputs.length = 2;
+		_ArrayFloat_001.outputs.length = 2;
 		var _g = 0;
-		var _g1 = _ArrayFloat.outputs.length;
+		var _g1 = _ArrayFloat_001.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_ArrayFloat.outputs[i] = [];
+			_ArrayFloat_001.outputs[i] = [];
 		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_ArrayFloat,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,2.0),_ArrayFloat,0,1);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,new armory_logicnode_IntegerNode(this,0),1,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,_ArraySet,0,1);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_ArrayFloat_001,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,2.0),_ArrayFloat_001,0,1);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_IntegerNode(this,0),1,0);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,_ArraySet,0,1);
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_IntegerNode(this,0),_ArraySet,0,2);
 		var _GetApplicationTime_001 = new armory_logicnode_TimeNode(this);
 		_GetApplicationTime_001.inputs.length = 0;
@@ -371,9 +487,9 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 		armory_logicnode_LogicNode.addLink(_GetApplicationTime_001,new armory_logicnode_FloatNode(this,0.0),1,0);
 		armory_logicnode_LogicNode.addLink(_GetApplicationTime_001,_ArraySet,0,3);
 		armory_logicnode_LogicNode.addLink(_ArraySet,_Script,0,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat,_Script,0,1);
-		armory_logicnode_LogicNode.addLink(_Script,_SetObjectRotation_001,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectRotation_001,0,1);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,_Script,0,1);
+		armory_logicnode_LogicNode.addLink(_Script,_SetObjectRotation,0,0);
+		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_SetObjectRotation,0,1);
 		var _Vector = new armory_logicnode_VectorNode(this);
 		_Vector.inputs.length = 3;
 		_Vector.outputs.length = 1;
@@ -386,48 +502,31 @@ arm_node_NodeTree.prototype = $extend(armory_logicnode_LogicTree.prototype,{
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,0);
 		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Vector,0,1);
 		armory_logicnode_LogicNode.addLink(_Script,_Vector,1,2);
-		armory_logicnode_LogicNode.addLink(_Vector,_SetObjectRotation_001,0,2);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_SetObjectRotation_001,0,3);
-		armory_logicnode_LogicNode.addLink(_SetObjectRotation_001,new armory_logicnode_NullNode(this),0,0);
-		var _RotateObject = new armory_logicnode_RotateObjectNode(this);
-		_RotateObject.property0 = "Local";
-		_RotateObject.inputs.length = 3;
-		_RotateObject.outputs.length = 1;
+		armory_logicnode_LogicNode.addLink(_Vector,_SetObjectRotation,0,2);
+		armory_logicnode_LogicNode.addLink(_SetObjectRotation,new armory_logicnode_NullNode(this),0,0);
+		var _Print = new armory_logicnode_PrintNode(this);
+		_Print.inputs.length = 2;
+		_Print.outputs.length = 1;
 		var _g = 0;
-		var _g1 = _RotateObject.outputs.length;
+		var _g1 = _Print.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_RotateObject.outputs[i] = [];
+			_Print.outputs[i] = [];
 		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_NullNode(this),_RotateObject,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_ObjectNode(this,""),_RotateObject,0,1);
-		var _Rotation = new armory_logicnode_RotationNode(this);
-		_Rotation.property0 = "EulerAngles";
-		_Rotation.property1 = "Rad";
-		_Rotation.property2 = "XYZ";
-		_Rotation.inputs.length = 2;
-		_Rotation.outputs.length = 1;
+		armory_logicnode_LogicNode.addLink(_Script,_Print,0,0);
+		armory_logicnode_LogicNode.addLink(_Script,_Print,1,1);
+		armory_logicnode_LogicNode.addLink(_Print,new armory_logicnode_NullNode(this),0,0);
+		var _ArrayFloat_002 = new armory_logicnode_ArrayFloatNode(this);
+		_ArrayFloat_002.inputs.length = 0;
+		_ArrayFloat_002.outputs.length = 2;
 		var _g = 0;
-		var _g1 = _Rotation.outputs.length;
+		var _g1 = _ArrayFloat_002.outputs.length;
 		while(_g < _g1) {
 			var i = _g++;
-			_Rotation.outputs[i] = [];
+			_ArrayFloat_002.outputs[i] = [];
 		}
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_VectorNode(this,0.0,0.0,0.0),_Rotation,0,0);
-		armory_logicnode_LogicNode.addLink(new armory_logicnode_FloatNode(this,0.0),_Rotation,0,1);
-		armory_logicnode_LogicNode.addLink(_Rotation,_RotateObject,0,2);
-		armory_logicnode_LogicNode.addLink(_RotateObject,new armory_logicnode_NullNode(this),0,0);
-		var _ArrayFloat_001 = new armory_logicnode_ArrayFloatNode(this);
-		_ArrayFloat_001.inputs.length = 0;
-		_ArrayFloat_001.outputs.length = 2;
-		var _g = 0;
-		var _g1 = _ArrayFloat_001.outputs.length;
-		while(_g < _g1) {
-			var i = _g++;
-			_ArrayFloat_001.outputs[i] = [];
-		}
-		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_NullNode(this),0,0);
-		armory_logicnode_LogicNode.addLink(_ArrayFloat_001,new armory_logicnode_IntegerNode(this,0),1,0);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_002,new armory_logicnode_NullNode(this),0,0);
+		armory_logicnode_LogicNode.addLink(_ArrayFloat_002,new armory_logicnode_IntegerNode(this,0),1,0);
 	}
 	,__class__: arm_node_NodeTree
 });
@@ -673,338 +772,25 @@ armory_logicnode_OnUpdateNode.prototype = $extend(armory_logicnode_LogicNode.pro
 	}
 	,__class__: armory_logicnode_OnUpdateNode
 });
-var armory_logicnode_RotateObjectNode = function(tree) {
-	this.property0 = "Local";
+var armory_logicnode_PrintNode = function(tree) {
 	armory_logicnode_LogicNode.call(this,tree);
 };
-$hxClasses["armory.logicnode.RotateObjectNode"] = armory_logicnode_RotateObjectNode;
-armory_logicnode_RotateObjectNode.__name__ = true;
-armory_logicnode_RotateObjectNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotateObjectNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
+$hxClasses["armory.logicnode.PrintNode"] = armory_logicnode_PrintNode;
+armory_logicnode_PrintNode.__name__ = true;
+armory_logicnode_PrintNode.__super__ = armory_logicnode_LogicNode;
+armory_logicnode_PrintNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
 	run: function(from) {
 		var _this = this.inputs[1];
-		var object = _this.fromNode.get(_this.fromIndex);
-		var _this = this.inputs[2];
-		var q = _this.fromNode.get(_this.fromIndex);
-		if(object == null || q == null) {
-			return;
-		}
-		var l = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
-		if(l == 0.0) {
-			q.x = 0;
-			q.y = 0;
-			q.z = 0;
-			q.w = 0;
-		} else {
-			l = 1.0 / l;
-			q.x *= l;
-			q.y *= l;
-			q.z *= l;
-			q.w *= l;
-		}
-		switch(this.property0) {
-		case "Global":
-			var _this = object.transform.rot;
-			var q2 = object.transform.rot;
-			var q1x = q.x;
-			var q1y = q.y;
-			var q1z = q.z;
-			var q1w = q.w;
-			var q2x = q2.x;
-			var q2y = q2.y;
-			var q2z = q2.z;
-			var q2w = q2.w;
-			_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-			_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-			_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-			_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-			break;
-		case "Local":
-			var _this = object.transform.rot;
-			var q1x = _this.x;
-			var q1y = _this.y;
-			var q1z = _this.z;
-			var q1w = _this.w;
-			var q2x = q.x;
-			var q2y = q.y;
-			var q2z = q.z;
-			var q2w = q.w;
-			_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-			_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-			_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-			_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-			break;
-		}
-		object.transform.buildMatrix();
+		var value = _this.fromNode.get(_this.fromIndex);
+		haxe_Log.trace(value,{ fileName : "Sources/armory/logicnode/PrintNode.hx", lineNumber : 15, className : "armory.logicnode.PrintNode", methodName : "run"});
 		this.runOutput(0);
 	}
-	,__class__: armory_logicnode_RotateObjectNode
-});
-var armory_logicnode_RotationNode = function(tree,x,y,z,w) {
-	this.input_length = 0;
-	armory_logicnode_LogicNode.call(this,tree);
-	this.value = new iron_math_Quat();
-	if(x != null) {
-		var _this = this.value;
-		_this.x = x;
-		_this.y = y;
-		_this.z = z;
-		_this.w = w;
-	}
-	var _g = 0;
-	var _g1 = this.inputs;
-	while(_g < _g1.length) {
-		var input = _g1[_g];
-		++_g;
-		if(input != null) {
-			this.input_length += 1;
-		} else {
-			break;
-		}
-	}
-};
-$hxClasses["armory.logicnode.RotationNode"] = armory_logicnode_RotationNode;
-armory_logicnode_RotationNode.__name__ = true;
-armory_logicnode_RotationNode.__super__ = armory_logicnode_LogicNode;
-armory_logicnode_RotationNode.prototype = $extend(armory_logicnode_LogicNode.prototype,{
-	get: function(from) {
-		if(this.inputs.length == 0) {
-			return this.value;
-		}
-		switch(this.property0) {
-		case "AxisAngle":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vec = _this.fromNode.get(_this.fromIndex);
-				var _this = this.inputs[1];
-				var angle = _this.fromNode.get(_this.fromIndex);
-				if(this.property1 == "Deg") {
-					angle *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var s = Math.sin(angle * 0.5);
-				_this.x = vec.x * s;
-				_this.y = vec.y * s;
-				_this.z = vec.z * s;
-				_this.w = Math.cos(angle * 0.5);
-				var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
-				if(l == 0.0) {
-					_this.x = 0;
-					_this.y = 0;
-					_this.z = 0;
-					_this.w = 0;
-				} else {
-					l = 1.0 / l;
-					_this.x *= l;
-					_this.y *= l;
-					_this.z *= l;
-					_this.w *= l;
-				}
-			}
-			break;
-		case "EulerAngles":
-			if(this.inputs[0] != null) {
-				var vec_x = 0.0;
-				var vec_y = 0.0;
-				var vec_z = 0.0;
-				var vec_w = 1.0;
-				var _this = this.inputs[0];
-				var v = _this.fromNode.get(_this.fromIndex);
-				vec_x = v.x;
-				vec_y = v.y;
-				vec_z = v.z;
-				vec_w = v.w;
-				if(this.property1 == "Deg") {
-					vec_x *= 0.017453292519943295;
-					vec_y *= 0.017453292519943295;
-					vec_z *= 0.017453292519943295;
-				}
-				var _this = this.value;
-				var order = this.property2;
-				var c1 = Math.cos(vec_x / 2);
-				var c2 = Math.cos(vec_y / 2);
-				var c3 = Math.cos(vec_z / 2);
-				var s1 = Math.sin(vec_x / 2);
-				var s2 = Math.sin(vec_y / 2);
-				var s3 = Math.sin(vec_z / 2);
-				var x = s1;
-				var y = 0;
-				var z = 0;
-				var w = c1;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qx_x = x;
-				var qx_y = y;
-				var qx_z = z;
-				var qx_w = w;
-				var x = 0;
-				var y = s2;
-				var z = 0;
-				var w = c2;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qy_x = x;
-				var qy_y = y;
-				var qy_z = z;
-				var qy_w = w;
-				var x = 0;
-				var y = 0;
-				var z = s3;
-				var w = c3;
-				if(w == null) {
-					w = 1.0;
-				}
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var qz_x = x;
-				var qz_y = y;
-				var qz_z = z;
-				var qz_w = w;
-				if(order.charAt(2) == "X") {
-					_this.x = qx_x;
-					_this.y = qx_y;
-					_this.z = qx_z;
-					_this.w = qx_w;
-				} else if(order.charAt(2) == "Y") {
-					_this.x = qy_x;
-					_this.y = qy_y;
-					_this.z = qy_z;
-					_this.w = qy_w;
-				} else {
-					_this.x = qz_x;
-					_this.y = qz_y;
-					_this.z = qz_z;
-					_this.w = qz_w;
-				}
-				if(order.charAt(1) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(1) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-				if(order.charAt(0) == "X") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qx_x;
-					var q2y = qx_y;
-					var q2z = qx_z;
-					var q2w = qx_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else if(order.charAt(0) == "Y") {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qy_x;
-					var q2y = qy_y;
-					var q2z = qy_z;
-					var q2w = qy_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				} else {
-					var q1x = _this.x;
-					var q1y = _this.y;
-					var q1z = _this.z;
-					var q1w = _this.w;
-					var q2x = qz_x;
-					var q2y = qz_y;
-					var q2z = qz_z;
-					var q2w = qz_w;
-					_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-					_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-					_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-					_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-				}
-			}
-			break;
-		case "Quaternion":
-			if(this.inputs[0] != null && this.inputs[1] != null) {
-				var _this = this.inputs[0];
-				var vect = _this.fromNode.get(_this.fromIndex);
-				this.value.x = vect.x;
-				this.value.y = vect.y;
-				this.value.z = vect.z;
-				var _this = this.inputs[1];
-				var tmp = _this.fromNode.get(_this.fromIndex);
-				this.value.w = tmp;
-			}
-			break;
-		default:
-			return this.property0;
-		}
-		return this.value;
-	}
-	,__class__: armory_logicnode_RotationNode
+	,__class__: armory_logicnode_PrintNode
 });
 var armory_logicnode_ScriptNode = function(tree) {
+	this.ast = null;
+	this.interp = null;
+	this.parser = null;
 	armory_logicnode_LogicNode.call(this,tree);
 };
 $hxClasses["armory.logicnode.ScriptNode"] = armory_logicnode_ScriptNode;
@@ -1014,6 +800,17 @@ armory_logicnode_ScriptNode.prototype = $extend(armory_logicnode_LogicNode.proto
 	run: function(from) {
 		var _this = this.inputs[1];
 		var v = _this.fromNode.get(_this.fromIndex);
+		if(this.parser == null) {
+			this.parser = new hscript_Parser();
+			this.parser.allowJSON = true;
+			this.parser.allowTypes = true;
+			this.ast = this.parser.parseString(this.property0);
+			this.interp = new hscript_Interp();
+			this.interp.variables.h["Math"] = Math;
+			this.interp.variables.h["Std"] = Std;
+		}
+		this.interp.variables.h["input"] = v;
+		this.result = this.interp.execute(this.ast);
 		this.runOutput(0);
 	}
 	,get: function(from) {
@@ -1160,6 +957,118 @@ armory_object_Uniforms.textureLink = function(object,mat,link) {
 };
 armory_object_Uniforms.vec3Link = function(object,mat,link) {
 	var v = null;
+	switch(link) {
+	case "_hosekA":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.A.x;
+			v.y = armory_renderpath_HosekWilkie.data.A.y;
+			v.z = armory_renderpath_HosekWilkie.data.A.z;
+		}
+		break;
+	case "_hosekB":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.B.x;
+			v.y = armory_renderpath_HosekWilkie.data.B.y;
+			v.z = armory_renderpath_HosekWilkie.data.B.z;
+		}
+		break;
+	case "_hosekC":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.C.x;
+			v.y = armory_renderpath_HosekWilkie.data.C.y;
+			v.z = armory_renderpath_HosekWilkie.data.C.z;
+		}
+		break;
+	case "_hosekD":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.D.x;
+			v.y = armory_renderpath_HosekWilkie.data.D.y;
+			v.z = armory_renderpath_HosekWilkie.data.D.z;
+		}
+		break;
+	case "_hosekE":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.E.x;
+			v.y = armory_renderpath_HosekWilkie.data.E.y;
+			v.z = armory_renderpath_HosekWilkie.data.E.z;
+		}
+		break;
+	case "_hosekF":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.F.x;
+			v.y = armory_renderpath_HosekWilkie.data.F.y;
+			v.z = armory_renderpath_HosekWilkie.data.F.z;
+		}
+		break;
+	case "_hosekG":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.G.x;
+			v.y = armory_renderpath_HosekWilkie.data.G.y;
+			v.z = armory_renderpath_HosekWilkie.data.G.z;
+		}
+		break;
+	case "_hosekH":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.H.x;
+			v.y = armory_renderpath_HosekWilkie.data.H.y;
+			v.z = armory_renderpath_HosekWilkie.data.H.z;
+		}
+		break;
+	case "_hosekI":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.I.x;
+			v.y = armory_renderpath_HosekWilkie.data.I.y;
+			v.z = armory_renderpath_HosekWilkie.data.I.z;
+		}
+		break;
+	case "_hosekZ":
+		if(armory_renderpath_HosekWilkie.data == null) {
+			armory_renderpath_HosekWilkie.recompute(iron_Scene.active.world);
+		}
+		if(armory_renderpath_HosekWilkie.data != null) {
+			v = iron_object_Uniforms.helpVec;
+			v.x = armory_renderpath_HosekWilkie.data.Z.x;
+			v.y = armory_renderpath_HosekWilkie.data.Z.y;
+			v.z = armory_renderpath_HosekWilkie.data.Z.z;
+		}
+		break;
+	}
 	return v;
 };
 armory_object_Uniforms.vec2Link = function(object,mat,link) {
@@ -1177,6 +1086,152 @@ armory_object_Uniforms.vec2Link = function(object,mat,link) {
 armory_object_Uniforms.floatLink = function(object,mat,link) {
 	return null;
 };
+var armory_renderpath_HosekWilkieRadianceData = function() {
+	this.Z = new kha_math_FastVector3();
+	this.I = new kha_math_FastVector3();
+	this.H = new kha_math_FastVector3();
+	this.G = new kha_math_FastVector3();
+	this.F = new kha_math_FastVector3();
+	this.E = new kha_math_FastVector3();
+	this.D = new kha_math_FastVector3();
+	this.C = new kha_math_FastVector3();
+	this.B = new kha_math_FastVector3();
+	this.A = new kha_math_FastVector3();
+};
+$hxClasses["armory.renderpath.HosekWilkieRadianceData"] = armory_renderpath_HosekWilkieRadianceData;
+armory_renderpath_HosekWilkieRadianceData.__name__ = true;
+armory_renderpath_HosekWilkieRadianceData.prototype = {
+	evaluateSpline: function(spline,index,stride,value) {
+		return Math.pow(1 - value,5) * spline[index] + 5 * Math.pow(1 - value,4) * Math.pow(value,1) * spline[index + stride] + 10 * Math.pow(1 - value,3) * Math.pow(value,2) * spline[index + 2 * stride] + 10 * Math.pow(1 - value,2) * Math.pow(value,3) * spline[index + 3 * stride] + 5 * Math.pow(1 - value,1) * Math.pow(value,4) * spline[index + 4 * stride] + Math.pow(value,5) * spline[index + 5 * stride];
+	}
+	,clamp: function(n,lower,upper) {
+		if(n <= lower) {
+			return lower;
+		} else if(n >= upper) {
+			return upper;
+		} else {
+			return n;
+		}
+	}
+	,clampF: function(n,lower,upper) {
+		if(n <= lower) {
+			return lower;
+		} else if(n >= upper) {
+			return upper;
+		} else {
+			return n;
+		}
+	}
+	,evaluate: function(dataset,index,stride,turbidity,albedo,sunTheta) {
+		var elevationK = Math.pow(Math.max(0.0,1.0 - sunTheta / (Math.PI / 2.0)),0.333333333333333315);
+		var turbidity0 = this.clamp(turbidity | 0,1,10);
+		var turbidity1 = Math.min(turbidity0 + 1,10) | 0;
+		var turbidityK = this.clampF(turbidity - turbidity0,0.0,1.0);
+		var datasetA0Index = index;
+		var datasetA1Index = index + stride * 6 * 10;
+		var a0t0 = this.evaluateSpline(dataset,datasetA0Index + stride * 6 * (turbidity0 - 1),stride,elevationK);
+		var a1t0 = this.evaluateSpline(dataset,datasetA1Index + stride * 6 * (turbidity0 - 1),stride,elevationK);
+		var a0t1 = this.evaluateSpline(dataset,datasetA0Index + stride * 6 * (turbidity1 - 1),stride,elevationK);
+		var a1t1 = this.evaluateSpline(dataset,datasetA1Index + stride * 6 * (turbidity1 - 1),stride,elevationK);
+		return a0t0 * (1 - albedo) * (1 - turbidityK) + a1t0 * albedo * (1 - turbidityK) + a0t1 * (1 - albedo) * turbidityK + a1t1 * albedo * turbidityK;
+	}
+	,hosek_wilkie: function(cos_theta,gamma,cos_gamma,A,B,C,D,E,F,G,H,I) {
+		var val = 1.0 + cos_gamma * cos_gamma;
+		var chix = val / Math.pow(1.0 + H.x * H.x - 2.0 * cos_gamma * H.x,1.5);
+		var chiy = val / Math.pow(1.0 + H.y * H.y - 2.0 * cos_gamma * H.y,1.5);
+		var chiz = val / Math.pow(1.0 + H.z * H.z - 2.0 * cos_gamma * H.z,1.5);
+		var x = chix;
+		var y = chiy;
+		var z = chiz;
+		if(z == null) {
+			z = 0;
+		}
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var chi_x = x;
+		var chi_y = y;
+		var chi_z = z;
+		var vx = (1.0 + A.x * Math.exp(B.x / (cos_theta + 0.01))) * (C.x + D.x * Math.exp(E.x * gamma) + F.x * (cos_gamma * cos_gamma) + G.x * chi_x + I.x * Math.sqrt(Math.max(0.0,cos_theta)));
+		var vy = (1.0 + A.y * Math.exp(B.y / (cos_theta + 0.01))) * (C.y + D.y * Math.exp(E.y * gamma) + F.y * (cos_gamma * cos_gamma) + G.y * chi_y + I.y * Math.sqrt(Math.max(0.0,cos_theta)));
+		var vz = (1.0 + A.z * Math.exp(B.z / (cos_theta + 0.01))) * (C.z + D.z * Math.exp(E.z * gamma) + F.z * (cos_gamma * cos_gamma) + G.z * chi_z + I.z * Math.sqrt(Math.max(0.0,cos_theta)));
+		return new kha_math_FastVector3(vx,vy,vz);
+	}
+	,setVector: function(v,index,f) {
+		if(index == 0) {
+			v.x = f;
+		} else if(index == 1) {
+			v.y = f;
+		} else {
+			v.z = f;
+		}
+	}
+	,recompute: function(sunTheta,turbidity,albedo,normalizedSunY) {
+		var _g = 0;
+		while(_g < 3) {
+			var i = _g++;
+			this.setVector(this.A,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],0,9,turbidity,albedo,sunTheta));
+			this.setVector(this.B,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],1,9,turbidity,albedo,sunTheta));
+			this.setVector(this.C,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],2,9,turbidity,albedo,sunTheta));
+			this.setVector(this.D,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],3,9,turbidity,albedo,sunTheta));
+			this.setVector(this.E,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],4,9,turbidity,albedo,sunTheta));
+			this.setVector(this.F,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],5,9,turbidity,albedo,sunTheta));
+			this.setVector(this.G,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],6,9,turbidity,albedo,sunTheta));
+			this.setVector(this.H,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],8,9,turbidity,albedo,sunTheta));
+			this.setVector(this.I,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGB[i],7,9,turbidity,albedo,sunTheta));
+			this.setVector(this.Z,i,this.evaluate(armory_renderpath_HosekWilkieData.datasetsRGBRad[i],0,1,turbidity,albedo,sunTheta));
+		}
+		if(normalizedSunY != 0.0) {
+			var S = this.hosek_wilkie(Math.cos(sunTheta),0,1.0,this.A,this.B,this.C,this.D,this.E,this.F,this.G,this.H,this.I);
+			S.x *= this.Z.x;
+			S.y *= this.Z.y;
+			S.z *= this.Z.z;
+			var x = 0.2126;
+			var y = 0.7152;
+			var z = 0.0722;
+			if(z == null) {
+				z = 0;
+			}
+			if(y == null) {
+				y = 0;
+			}
+			if(x == null) {
+				x = 0;
+			}
+			var v_x = x;
+			var v_y = y;
+			var v_z = z;
+			var dotS = S.x * v_x + S.y * v_y + S.z * v_z;
+			this.Z.x /= dotS;
+			this.Z.y /= dotS;
+			this.Z.z /= dotS;
+			var _this = this.Z;
+			this.Z = new kha_math_FastVector3(_this.x * normalizedSunY,_this.y * normalizedSunY,_this.z * normalizedSunY);
+		}
+	}
+	,__class__: armory_renderpath_HosekWilkieRadianceData
+};
+var armory_renderpath_HosekWilkie = function() { };
+$hxClasses["armory.renderpath.HosekWilkie"] = armory_renderpath_HosekWilkie;
+armory_renderpath_HosekWilkie.__name__ = true;
+armory_renderpath_HosekWilkie.recompute = function(world) {
+	if(world == null || world.raw.sun_direction == null) {
+		return;
+	}
+	if(armory_renderpath_HosekWilkie.data == null) {
+		armory_renderpath_HosekWilkie.data = new armory_renderpath_HosekWilkieRadianceData();
+	}
+	var sunZ = world.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) > 0 ? world.raw.sun_direction.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN) : 0;
+	var sunPositionX = Math.acos(sunZ);
+	var normalizedSunY = 1.15;
+	armory_renderpath_HosekWilkie.data.recompute(sunPositionX,world.raw.turbidity,world.raw.ground_albedo,normalizedSunY);
+};
+var armory_renderpath_HosekWilkieData = function() { };
+$hxClasses["armory.renderpath.HosekWilkieData"] = armory_renderpath_HosekWilkieData;
+armory_renderpath_HosekWilkieData.__name__ = true;
 var armory_renderpath_Inc = function() { };
 $hxClasses["armory.renderpath.Inc"] = armory_renderpath_Inc;
 armory_renderpath_Inc.__name__ = true;
@@ -1350,7 +1405,7 @@ armory_renderpath_NishitaData.prototype = {
 			var x = _g++;
 			var height = x / (armory_renderpath_NishitaData.lutHeightSteps - 1);
 			height *= height;
-			height *= armory_renderpath_NishitaData.radiusAtmo;
+			height *= armory_renderpath_NishitaData.radiusAtmo * 1000;
 			var _g2 = 0;
 			var _g3 = armory_renderpath_NishitaData.lutAngleSteps;
 			while(_g2 < _g3) {
@@ -1369,7 +1424,22 @@ armory_renderpath_NishitaData.prototype = {
 		this.lut = kha_Image.fromBytes(haxe_io_Bytes.ofData(imageData.buffer),armory_renderpath_NishitaData.lutHeightSteps,armory_renderpath_NishitaData.lutAngleSteps,2,0);
 	}
 	,sampleSecondaryRay: function(height,sunTheta,density) {
-		var iPos = new iron_math_Vec3(0,0,height + armory_renderpath_NishitaData.radiusPlanet);
+		var radiusPlanetMeters = armory_renderpath_NishitaData.radiusPlanet * 1000;
+		var x = 0;
+		var y = 0;
+		var z = height + radiusPlanetMeters;
+		if(z == null) {
+			z = 0.0;
+		}
+		if(y == null) {
+			y = 0.0;
+		}
+		if(x == null) {
+			x = 0.0;
+		}
+		var iPos_x = x;
+		var iPos_y = y;
+		var iPos_z = z;
 		var _this = new iron_math_Vec3(0.0,Math.sin(sunTheta),Math.cos(sunTheta));
 		var n = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z);
 		if(n > 0.0) {
@@ -1380,7 +1450,12 @@ armory_renderpath_NishitaData.prototype = {
 		}
 		var pSun = _this;
 		var jTime = 0.0;
-		var jStepSize = this.raySphereIntersection(iPos,pSun,armory_renderpath_NishitaData.radiusAtmo).y / armory_renderpath_NishitaData.jSteps;
+		var _this = new iron_math_Vec3(iPos_x,iPos_y,iPos_z);
+		_this.x *= 0.001;
+		_this.y *= 0.001;
+		_this.z *= 0.001;
+		var jStepSize = this.raySphereIntersection(_this,pSun,armory_renderpath_NishitaData.radiusAtmo).y / armory_renderpath_NishitaData.jSteps;
+		jStepSize *= 1000;
 		var jODepth_x = 0.0;
 		var jODepth_y = 0.0;
 		var jODepth_z = 0.0;
@@ -1388,9 +1463,9 @@ armory_renderpath_NishitaData.prototype = {
 		var _g1 = armory_renderpath_NishitaData.jSteps;
 		while(_g < _g1) {
 			var i = _g++;
-			var x = iPos.x;
-			var y = iPos.y;
-			var z = iPos.z;
+			var x = iPos_x;
+			var y = iPos_y;
+			var z = iPos_z;
 			if(z == null) {
 				z = 0.0;
 			}
@@ -1425,7 +1500,7 @@ armory_renderpath_NishitaData.prototype = {
 			jPos_x += v_x;
 			jPos_y += v_y;
 			jPos_z += v_z;
-			var jHeight = Math.sqrt(jPos_x * jPos_x + jPos_y * jPos_y + jPos_z * jPos_z) - armory_renderpath_NishitaData.radiusPlanet;
+			var jHeight = Math.sqrt(jPos_x * jPos_x + jPos_y * jPos_y + jPos_z * jPos_z) - radiusPlanetMeters;
 			var optDepthRayleigh = Math.exp(-jHeight / armory_renderpath_NishitaData.rayleighScale) * density.x;
 			var optDepthMie = Math.exp(-jHeight / armory_renderpath_NishitaData.mieScale) * density.y;
 			var optDepthOzone = this.getOzoneDensity(jHeight) * density.z;
@@ -1661,7 +1736,7 @@ armory_renderpath_RenderPathDeferred.setupDepthTexture = function() {
 	armory_renderpath_RenderPathDeferred.path.drawShader("shader_datas/copy_pass/copy_pass");
 	armory_renderpath_RenderPathDeferred.path.setDepthFrom("gbuffer0","tex");
 	armory_renderpath_RenderPathDeferred.path.depthToRenderTarget.h["main"] = armory_renderpath_RenderPathDeferred.path.renderTargets.h["gbuffer0"];
-	armory_renderpath_RenderPathDeferred.setTargetMeshes();
+	armory_renderpath_RenderPathDeferred.path.setTarget("gbuffer0",["gbuffer1"]);
 	armory_renderpath_RenderPathDeferred.path.bindTarget("depthtex","depthtex");
 };
 var armory_renderpath_RenderPathCreator = function() { };
@@ -1820,440 +1895,17 @@ armory_system_Starter.main = function(scene,mode,resize,min,max,w,h,msaa,vsync,g
 	tasks -= 1;
 	start();
 };
-var armory_trait_WalkNavigation = function() {
-	this.ease = 1.0;
-	this.yvec = new iron_math_Vec4();
-	this.xvec = new iron_math_Vec4();
-	this.dir = new iron_math_Vec4();
-	this.speed = 5.0;
-	iron_Trait.call(this);
-	this.notifyOnInit($bind(this,this.init));
-};
-$hxClasses["armory.trait.WalkNavigation"] = armory_trait_WalkNavigation;
-armory_trait_WalkNavigation.__name__ = true;
-armory_trait_WalkNavigation.__super__ = iron_Trait;
-armory_trait_WalkNavigation.prototype = $extend(iron_Trait.prototype,{
-	init: function() {
-		this.keyboard = iron_system_Input.getKeyboard();
-		this.gamepad = iron_system_Input.getGamepad();
-		this.mouse = iron_system_Input.getMouse();
-		try {
-			this.camera = js_Boot.__cast(this.object , iron_object_CameraObject);
-		} catch( _g ) {
-			var _g1 = haxe_Exception.caught(_g).unwrap();
-			if(typeof(_g1) == "string") {
-				var msg = _g1;
-				haxe_Log.trace("Error occurred: " + msg + "\nWalkNavigation trait should be used with a camera object.",{ fileName : "Sources/armory/trait/WalkNavigation.hx", lineNumber : 38, className : "armory.trait.WalkNavigation", methodName : "init"});
-			} else {
-				throw _g;
-			}
-		}
-		if(this.camera != null) {
-			this.notifyOnUpdate($bind(this,this.update));
-		}
-	}
-	,update: function() {
-		if(!armory_trait_WalkNavigation.enabled || iron_system_Input.occupied) {
-			return;
-		}
-		var moveForward = this.keyboard.down("w") || this.keyboard.down("up");
-		var moveBackward = this.keyboard.down("s") || this.keyboard.down("down");
-		var strafeLeft = this.keyboard.down("a") || this.keyboard.down("left");
-		var strafeRight = this.keyboard.down("d") || this.keyboard.down("right");
-		var strafeUp = this.keyboard.down("e");
-		var strafeDown = this.keyboard.down("q");
-		var fast = this.keyboard.down("shift") ? 2.0 : this.keyboard.down("alt") ? 0.5 : 1.0;
-		if(this.gamepad != null) {
-			var leftStickY = Math.abs(this.gamepad.leftStick.y) > 0.05;
-			var leftStickX = Math.abs(this.gamepad.leftStick.x) > 0.05;
-			var r1 = this.gamepad.down("r1") > 0.0;
-			var l1 = this.gamepad.down("l1") > 0.0;
-			var rightStickX = Math.abs(this.gamepad.rightStick.x) > 0.1;
-			var rightStickY = Math.abs(this.gamepad.rightStick.y) > 0.1;
-			if(leftStickY || leftStickX || r1 || l1 || rightStickX || rightStickY) {
-				var _this = this.dir;
-				_this.x = 0;
-				_this.y = 0;
-				_this.z = 0;
-				_this.w = 1.0;
-				if(leftStickY) {
-					var _this = this.yvec;
-					var _this1 = this.camera;
-					var x = -_this1.transform.local.self._20;
-					var y = -_this1.transform.local.self._21;
-					var z = -_this1.transform.local.self._22;
-					if(z == null) {
-						z = 0.0;
-					}
-					if(y == null) {
-						y = 0.0;
-					}
-					if(x == null) {
-						x = 0.0;
-					}
-					var v_x = x;
-					var v_y = y;
-					var v_z = z;
-					var v_w = 1.0;
-					_this.x = v_x;
-					_this.y = v_y;
-					_this.z = v_z;
-					_this.w = v_w;
-					var _this = this.yvec;
-					var f = this.gamepad.leftStick.y;
-					_this.x *= f;
-					_this.y *= f;
-					_this.z *= f;
-					var _this = this.dir;
-					var v = this.yvec;
-					_this.x += v.x;
-					_this.y += v.y;
-					_this.z += v.z;
-				}
-				if(leftStickX) {
-					var _this = this.xvec;
-					var _this1 = this.camera;
-					var x = _this1.transform.local.self._00;
-					var y = _this1.transform.local.self._01;
-					var z = _this1.transform.local.self._02;
-					if(z == null) {
-						z = 0.0;
-					}
-					if(y == null) {
-						y = 0.0;
-					}
-					if(x == null) {
-						x = 0.0;
-					}
-					var v_x = x;
-					var v_y = y;
-					var v_z = z;
-					var v_w = 1.0;
-					_this.x = v_x;
-					_this.y = v_y;
-					_this.z = v_z;
-					_this.w = v_w;
-					var _this = this.xvec;
-					var f = this.gamepad.leftStick.x;
-					_this.x *= f;
-					_this.y *= f;
-					_this.z *= f;
-					var _this = this.dir;
-					var v = this.xvec;
-					_this.x += v.x;
-					_this.y += v.y;
-					_this.z += v.z;
-				}
-				if(r1) {
-					var _this = this.dir;
-					_this.x += 0;
-					_this.y += 0;
-					_this.z += 1;
-				}
-				if(l1) {
-					var _this = this.dir;
-					_this.x += 0;
-					_this.y += 0;
-					_this.z += -1;
-				}
-				var d = iron_system_Time.get_delta() * this.speed * fast;
-				this.camera.transform.move(this.dir,d);
-				if(rightStickX) {
-					this.camera.transform.rotate(new iron_math_Vec4(0.0,0.0,1.0),-this.gamepad.rightStick.x / 15.0);
-				}
-				if(rightStickY) {
-					var _this = this.camera;
-					this.camera.transform.rotate(new iron_math_Vec4(_this.transform.local.self._00,_this.transform.local.self._01,_this.transform.local.self._02),this.gamepad.rightStick.y / 15.0);
-				}
-			}
-		}
-		if(moveForward || moveBackward || strafeRight || strafeLeft || strafeUp || strafeDown) {
-			this.ease += iron_system_Time.get_delta() * 15;
-			if(this.ease > 1.0) {
-				this.ease = 1.0;
-			}
-			var _this = this.dir;
-			_this.x = 0;
-			_this.y = 0;
-			_this.z = 0;
-			_this.w = 1.0;
-			if(moveForward) {
-				var _this = this.dir;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y1 = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				_this.x += inlVec4_x;
-				_this.y += inlVec4_y;
-				_this.z += inlVec4_z;
-			}
-			if(moveBackward) {
-				var _this = this.dir;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = -_this1.transform.local.self._20;
-				var y = -_this1.transform.local.self._21;
-				var z = -_this1.transform.local.self._22;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y1 = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				_this.x += -inlVec4_x;
-				_this.y += -inlVec4_y;
-				_this.z += -inlVec4_z;
-			}
-			if(strafeRight) {
-				var _this = this.dir;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y1 = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				_this.x += inlVec4_x;
-				_this.y += inlVec4_y;
-				_this.z += inlVec4_z;
-			}
-			if(strafeLeft) {
-				var _this = this.dir;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				var _this1 = this.camera;
-				var x = _this1.transform.local.self._00;
-				var y = _this1.transform.local.self._01;
-				var z = _this1.transform.local.self._02;
-				if(z == null) {
-					z = 0.0;
-				}
-				if(y == null) {
-					y = 0.0;
-				}
-				if(x == null) {
-					x = 0.0;
-				}
-				var inlVec4_x1 = x;
-				var inlVec4_y1 = y;
-				var inlVec4_z = z;
-				var inlVec4_w = 1.0;
-				_this.x += -inlVec4_x;
-				_this.y += -inlVec4_y;
-				_this.z += -inlVec4_z;
-			}
-			if(strafeUp) {
-				var _this = this.dir;
-				_this.x += 0;
-				_this.y += 0;
-				_this.z += 1;
-			}
-			if(strafeDown) {
-				var _this = this.dir;
-				_this.x += 0;
-				_this.y += 0;
-				_this.z += -1;
-			}
-		} else {
-			this.ease -= iron_system_Time.get_delta() * 20.0 * this.ease;
-			if(this.ease < 0.0) {
-				this.ease = 0.0;
-			}
-		}
-		if(this.mouse.wheelDelta < 0) {
-			this.speed *= 1.1;
-		} else if(this.mouse.wheelDelta > 0) {
-			this.speed *= 0.9;
-			if(this.speed < 0.5) {
-				this.speed = 0.5;
-			}
-		}
-		var d = iron_system_Time.get_delta() * this.speed * fast * this.ease;
-		if(d > 0.0) {
-			this.camera.transform.move(this.dir,d);
-		}
-		if(this.mouse.down()) {
-			this.camera.transform.rotate(new iron_math_Vec4(0.0,0.0,1.0),-this.mouse.movementX / 200);
-			var _this = this.camera;
-			this.camera.transform.rotate(new iron_math_Vec4(_this.transform.local.self._00,_this.transform.local.self._01,_this.transform.local.self._02),-this.mouse.movementY / 200);
-		}
-	}
-	,__class__: armory_trait_WalkNavigation
-});
 var armory_trait_internal_LoadingScreen = function() { };
 $hxClasses["armory.trait.internal.LoadingScreen"] = armory_trait_internal_LoadingScreen;
 armory_trait_internal_LoadingScreen.__name__ = true;
 armory_trait_internal_LoadingScreen.render = function(g,assetsLoaded,assetsTotal) {
 	g.set_color(-3200189);
-	g.fillRect(0,kha_System.windowHeight() - 6,kha_System.windowWidth() / assetsTotal * assetsLoaded,6);
+	g.fillRect(0,iron_App.h() - 6,iron_App.w() / assetsTotal * assetsLoaded,6);
 };
 var armory_trait_internal_UniformsManager = function() {
 	this.uniformExists = false;
 	iron_Trait.call(this);
-	this.notifyOnInit($bind(this,this.init));
+	this.notifyOnAdd($bind(this,this.init));
 	this.notifyOnRemove($bind(this,this.removeObject));
 	if(!armory_trait_internal_UniformsManager.sceneRemoveInitalized) {
 		iron_Scene.active.notifyOnRemove(armory_trait_internal_UniformsManager.removeScene);
@@ -2406,9 +2058,13 @@ armory_trait_internal_UniformsManager.floatLink = function(object,mat,link) {
 	if(object == null || mat == null) {
 		return null;
 	}
-	if(armory_trait_internal_UniformsManager.floatsMap.h.__keys__[object.__id__] == null) {
-		object = iron_Scene.active.root;
+	var res = armory_trait_internal_UniformsManager.getObjectFloatLink(object,mat,link);
+	if(res == null) {
+		res = armory_trait_internal_UniformsManager.getObjectFloatLink(iron_Scene.active.root,mat,link);
 	}
+	return res;
+};
+armory_trait_internal_UniformsManager.getObjectFloatLink = function(object,mat,link) {
 	var material = armory_trait_internal_UniformsManager.floatsMap.h[object.__id__];
 	if(material == null) {
 		return null;
@@ -2423,9 +2079,13 @@ armory_trait_internal_UniformsManager.vec3Link = function(object,mat,link) {
 	if(object == null || mat == null) {
 		return null;
 	}
-	if(armory_trait_internal_UniformsManager.vectorsMap.h.__keys__[object.__id__] == null) {
-		object = iron_Scene.active.root;
+	var res = armory_trait_internal_UniformsManager.getObjectVec3Link(object,mat,link);
+	if(res == null) {
+		res = armory_trait_internal_UniformsManager.getObjectVec3Link(iron_Scene.active.root,mat,link);
 	}
+	return res;
+};
+armory_trait_internal_UniformsManager.getObjectVec3Link = function(object,mat,link) {
 	var material = armory_trait_internal_UniformsManager.vectorsMap.h[object.__id__];
 	if(material == null) {
 		return null;
@@ -2440,9 +2100,13 @@ armory_trait_internal_UniformsManager.textureLink = function(object,mat,link) {
 	if(object == null || mat == null) {
 		return null;
 	}
-	if(armory_trait_internal_UniformsManager.texturesMap.h.__keys__[object.__id__] == null) {
-		object = iron_Scene.active.root;
+	var res = armory_trait_internal_UniformsManager.getObjectTextureLink(object,mat,link);
+	if(res == null) {
+		res = armory_trait_internal_UniformsManager.getObjectTextureLink(iron_Scene.active.root,mat,link);
 	}
+	return res;
+};
+armory_trait_internal_UniformsManager.getObjectTextureLink = function(object,mat,link) {
 	var material = armory_trait_internal_UniformsManager.texturesMap.h[object.__id__];
 	if(material == null) {
 		return null;
@@ -2478,6 +2142,78 @@ armory_trait_internal_UniformsManager.removeObjectFromMap = function(object,type
 	case 2:
 		armory_trait_internal_UniformsManager.texturesMap.remove(object);
 		break;
+	}
+};
+armory_trait_internal_UniformsManager.removeFloatValue = function(object,mat,link) {
+	var material = armory_trait_internal_UniformsManager.floatsMap.h[object.__id__];
+	if(material == null) {
+		return;
+	}
+	var entry = material.h[mat.__id__];
+	if(entry == null) {
+		return;
+	}
+	if(Object.prototype.hasOwnProperty.call(entry.h,link)) {
+		delete(entry.h[link]);
+	}
+	var h = entry.h;
+	var inlStringMapKeyIterator_h = h;
+	var inlStringMapKeyIterator_keys = Object.keys(h);
+	var inlStringMapKeyIterator_length = inlStringMapKeyIterator_keys.length;
+	var inlStringMapKeyIterator_current = 0;
+	if(inlStringMapKeyIterator_current >= inlStringMapKeyIterator_length) {
+		material.remove(mat);
+	}
+	if(!material.keys().hasNext()) {
+		armory_trait_internal_UniformsManager.floatsMap.remove(object);
+	}
+};
+armory_trait_internal_UniformsManager.removeVectorValue = function(object,mat,link) {
+	var material = armory_trait_internal_UniformsManager.vectorsMap.h[object.__id__];
+	if(material == null) {
+		return;
+	}
+	var entry = material.h[mat.__id__];
+	if(entry == null) {
+		return;
+	}
+	if(Object.prototype.hasOwnProperty.call(entry.h,link)) {
+		delete(entry.h[link]);
+	}
+	var h = entry.h;
+	var inlStringMapKeyIterator_h = h;
+	var inlStringMapKeyIterator_keys = Object.keys(h);
+	var inlStringMapKeyIterator_length = inlStringMapKeyIterator_keys.length;
+	var inlStringMapKeyIterator_current = 0;
+	if(inlStringMapKeyIterator_current >= inlStringMapKeyIterator_length) {
+		material.remove(mat);
+	}
+	if(!material.keys().hasNext()) {
+		armory_trait_internal_UniformsManager.vectorsMap.remove(object);
+	}
+};
+armory_trait_internal_UniformsManager.removeTextureValue = function(object,mat,link) {
+	var material = armory_trait_internal_UniformsManager.texturesMap.h[object.__id__];
+	if(material == null) {
+		return;
+	}
+	var entry = material.h[mat.__id__];
+	if(entry == null) {
+		return;
+	}
+	if(Object.prototype.hasOwnProperty.call(entry.h,link)) {
+		delete(entry.h[link]);
+	}
+	var h = entry.h;
+	var inlStringMapKeyIterator_h = h;
+	var inlStringMapKeyIterator_keys = Object.keys(h);
+	var inlStringMapKeyIterator_length = inlStringMapKeyIterator_keys.length;
+	var inlStringMapKeyIterator_current = 0;
+	if(inlStringMapKeyIterator_current >= inlStringMapKeyIterator_length) {
+		material.remove(mat);
+	}
+	if(!material.keys().hasNext()) {
+		armory_trait_internal_UniformsManager.texturesMap.remove(object);
 	}
 };
 armory_trait_internal_UniformsManager.__super__ = iron_Trait;
@@ -2523,6 +2259,9 @@ var haxe_IMap = function() { };
 $hxClasses["haxe.IMap"] = haxe_IMap;
 haxe_IMap.__name__ = true;
 haxe_IMap.__isInterface__ = true;
+haxe_IMap.prototype = {
+	__class__: haxe_IMap
+};
 var haxe_Log = function() { };
 $hxClasses["haxe.Log"] = haxe_Log;
 haxe_Log.__name__ = true;
@@ -3011,6 +2750,165 @@ var haxe_io_Encoding = $hxEnums["haxe.io.Encoding"] = { __ename__:true,__constru
 	,RawNative: {_hx_name:"RawNative",_hx_index:1,__enum__:"haxe.io.Encoding",toString:$estr}
 };
 haxe_io_Encoding.__constructs__ = [haxe_io_Encoding.UTF8,haxe_io_Encoding.RawNative];
+var haxe_ds_BalancedTree = function() {
+};
+$hxClasses["haxe.ds.BalancedTree"] = haxe_ds_BalancedTree;
+haxe_ds_BalancedTree.__name__ = true;
+haxe_ds_BalancedTree.__interfaces__ = [haxe_IMap];
+haxe_ds_BalancedTree.prototype = {
+	set: function(key,value) {
+		this.root = this.setLoop(key,value,this.root);
+	}
+	,get: function(key) {
+		var node = this.root;
+		while(node != null) {
+			var c = this.compare(key,node.key);
+			if(c == 0) {
+				return node.value;
+			}
+			if(c < 0) {
+				node = node.left;
+			} else {
+				node = node.right;
+			}
+		}
+		return null;
+	}
+	,setLoop: function(k,v,node) {
+		if(node == null) {
+			return new haxe_ds_TreeNode(null,k,v,null);
+		}
+		var c = this.compare(k,node.key);
+		if(c == 0) {
+			return new haxe_ds_TreeNode(node.left,k,v,node.right,node == null ? 0 : node._height);
+		} else if(c < 0) {
+			var nl = this.setLoop(k,v,node.left);
+			return this.balance(nl,node.key,node.value,node.right);
+		} else {
+			var nr = this.setLoop(k,v,node.right);
+			return this.balance(node.left,node.key,node.value,nr);
+		}
+	}
+	,balance: function(l,k,v,r) {
+		var hl = l == null ? 0 : l._height;
+		var hr = r == null ? 0 : r._height;
+		if(hl > hr + 2) {
+			var _this = l.left;
+			var _this1 = l.right;
+			if((_this == null ? 0 : _this._height) >= (_this1 == null ? 0 : _this1._height)) {
+				return new haxe_ds_TreeNode(l.left,l.key,l.value,new haxe_ds_TreeNode(l.right,k,v,r));
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l.left,l.key,l.value,l.right.left),l.right.key,l.right.value,new haxe_ds_TreeNode(l.right.right,k,v,r));
+			}
+		} else if(hr > hl + 2) {
+			var _this = r.right;
+			var _this1 = r.left;
+			if((_this == null ? 0 : _this._height) > (_this1 == null ? 0 : _this1._height)) {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left),r.key,r.value,r.right);
+			} else {
+				return new haxe_ds_TreeNode(new haxe_ds_TreeNode(l,k,v,r.left.left),r.left.key,r.left.value,new haxe_ds_TreeNode(r.left.right,r.key,r.value,r.right));
+			}
+		} else {
+			return new haxe_ds_TreeNode(l,k,v,r,(hl > hr ? hl : hr) + 1);
+		}
+	}
+	,compare: function(k1,k2) {
+		return Reflect.compare(k1,k2);
+	}
+	,__class__: haxe_ds_BalancedTree
+};
+var haxe_ds_TreeNode = function(l,k,v,r,h) {
+	if(h == null) {
+		h = -1;
+	}
+	this.left = l;
+	this.key = k;
+	this.value = v;
+	this.right = r;
+	if(h == -1) {
+		var tmp;
+		var _this = this.left;
+		var _this1 = this.right;
+		if((_this == null ? 0 : _this._height) > (_this1 == null ? 0 : _this1._height)) {
+			var _this = this.left;
+			tmp = _this == null ? 0 : _this._height;
+		} else {
+			var _this = this.right;
+			tmp = _this == null ? 0 : _this._height;
+		}
+		this._height = tmp + 1;
+	} else {
+		this._height = h;
+	}
+};
+$hxClasses["haxe.ds.TreeNode"] = haxe_ds_TreeNode;
+haxe_ds_TreeNode.__name__ = true;
+haxe_ds_TreeNode.prototype = {
+	__class__: haxe_ds_TreeNode
+};
+var haxe_ds_EnumValueMap = function() {
+	haxe_ds_BalancedTree.call(this);
+};
+$hxClasses["haxe.ds.EnumValueMap"] = haxe_ds_EnumValueMap;
+haxe_ds_EnumValueMap.__name__ = true;
+haxe_ds_EnumValueMap.__interfaces__ = [haxe_IMap];
+haxe_ds_EnumValueMap.__super__ = haxe_ds_BalancedTree;
+haxe_ds_EnumValueMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
+	compare: function(k1,k2) {
+		var d = k1._hx_index - k2._hx_index;
+		if(d != 0) {
+			return d;
+		}
+		var p1 = Type.enumParameters(k1);
+		var p2 = Type.enumParameters(k2);
+		if(p1.length == 0 && p2.length == 0) {
+			return 0;
+		}
+		return this.compareArgs(p1,p2);
+	}
+	,compareArgs: function(a1,a2) {
+		var ld = a1.length - a2.length;
+		if(ld != 0) {
+			return ld;
+		}
+		var _g = 0;
+		var _g1 = a1.length;
+		while(_g < _g1) {
+			var i = _g++;
+			var d = this.compareArg(a1[i],a2[i]);
+			if(d != 0) {
+				return d;
+			}
+		}
+		return 0;
+	}
+	,compareArg: function(v1,v2) {
+		if(Reflect.isEnumValue(v1) && Reflect.isEnumValue(v2)) {
+			return this.compare(v1,v2);
+		} else if(((v1) instanceof Array) && ((v2) instanceof Array)) {
+			return this.compareArgs(v1,v2);
+		} else {
+			return Reflect.compare(v1,v2);
+		}
+	}
+	,__class__: haxe_ds_EnumValueMap
+});
+var haxe_ds_GenericCell = function(elt,next) {
+	this.elt = elt;
+	this.next = next;
+};
+$hxClasses["haxe.ds.GenericCell"] = haxe_ds_GenericCell;
+haxe_ds_GenericCell.__name__ = true;
+haxe_ds_GenericCell.prototype = {
+	__class__: haxe_ds_GenericCell
+};
+var haxe_ds_GenericStack = function() {
+};
+$hxClasses["haxe.ds.GenericStack"] = haxe_ds_GenericStack;
+haxe_ds_GenericStack.__name__ = true;
+haxe_ds_GenericStack.prototype = {
+	__class__: haxe_ds_GenericStack
+};
 var haxe_ds_IntMap = function() {
 	this.h = { };
 };
@@ -3018,7 +2916,13 @@ $hxClasses["haxe.ds.IntMap"] = haxe_ds_IntMap;
 haxe_ds_IntMap.__name__ = true;
 haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
 haxe_ds_IntMap.prototype = {
-	__class__: haxe_ds_IntMap
+	set: function(key,value) {
+		this.h[key] = value;
+	}
+	,get: function(key) {
+		return this.h[key];
+	}
+	,__class__: haxe_ds_IntMap
 };
 var haxe_ds_List = function() {
 	this.length = 0;
@@ -3062,6 +2966,9 @@ haxe_ds_ObjectMap.prototype = {
 		this.h[id] = value;
 		this.h.__keys__[id] = key;
 	}
+	,get: function(key) {
+		return this.h[key.__id__];
+	}
 	,remove: function(key) {
 		var id = key.__id__;
 		if(this.h.__keys__[id] == null) {
@@ -3070,6 +2977,15 @@ haxe_ds_ObjectMap.prototype = {
 		delete(this.h[id]);
 		delete(this.h.__keys__[id]);
 		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h.__keys__ ) {
+		if(this.h.hasOwnProperty(key)) {
+			a.push(this.h.__keys__[key]);
+		}
+		}
+		return new haxe_iterators_ArrayIterator(a);
 	}
 	,__class__: haxe_ds_ObjectMap
 };
@@ -3080,7 +2996,13 @@ $hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
 haxe_ds_StringMap.__name__ = true;
 haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
 haxe_ds_StringMap.prototype = {
-	__class__: haxe_ds_StringMap
+	get: function(key) {
+		return this.h[key];
+	}
+	,set: function(key,value) {
+		this.h[key] = value;
+	}
+	,__class__: haxe_ds_StringMap
 };
 var haxe_exceptions_NotImplementedException = function(message,previous,pos) {
 	if(message == null) {
@@ -3427,6 +3349,3044 @@ haxe_iterators_ArrayIterator.prototype = {
 	}
 	,__class__: haxe_iterators_ArrayIterator
 };
+var hscript_Const = $hxEnums["hscript.Const"] = { __ename__:true,__constructs__:null
+	,CInt: ($_=function(v) { return {_hx_index:0,v:v,__enum__:"hscript.Const",toString:$estr}; },$_._hx_name="CInt",$_.__params__ = ["v"],$_)
+	,CFloat: ($_=function(f) { return {_hx_index:1,f:f,__enum__:"hscript.Const",toString:$estr}; },$_._hx_name="CFloat",$_.__params__ = ["f"],$_)
+	,CString: ($_=function(s) { return {_hx_index:2,s:s,__enum__:"hscript.Const",toString:$estr}; },$_._hx_name="CString",$_.__params__ = ["s"],$_)
+};
+hscript_Const.__constructs__ = [hscript_Const.CInt,hscript_Const.CFloat,hscript_Const.CString];
+var hscript_Expr = $hxEnums["hscript.Expr"] = { __ename__:true,__constructs__:null
+	,EConst: ($_=function(c) { return {_hx_index:0,c:c,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EConst",$_.__params__ = ["c"],$_)
+	,EIdent: ($_=function(v) { return {_hx_index:1,v:v,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EIdent",$_.__params__ = ["v"],$_)
+	,EVar: ($_=function(n,t,e) { return {_hx_index:2,n:n,t:t,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EVar",$_.__params__ = ["n","t","e"],$_)
+	,EParent: ($_=function(e) { return {_hx_index:3,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EParent",$_.__params__ = ["e"],$_)
+	,EBlock: ($_=function(e) { return {_hx_index:4,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EBlock",$_.__params__ = ["e"],$_)
+	,EField: ($_=function(e,f) { return {_hx_index:5,e:e,f:f,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EField",$_.__params__ = ["e","f"],$_)
+	,EBinop: ($_=function(op,e1,e2) { return {_hx_index:6,op:op,e1:e1,e2:e2,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EBinop",$_.__params__ = ["op","e1","e2"],$_)
+	,EUnop: ($_=function(op,prefix,e) { return {_hx_index:7,op:op,prefix:prefix,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EUnop",$_.__params__ = ["op","prefix","e"],$_)
+	,ECall: ($_=function(e,params) { return {_hx_index:8,e:e,params:params,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ECall",$_.__params__ = ["e","params"],$_)
+	,EIf: ($_=function(cond,e1,e2) { return {_hx_index:9,cond:cond,e1:e1,e2:e2,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EIf",$_.__params__ = ["cond","e1","e2"],$_)
+	,EWhile: ($_=function(cond,e) { return {_hx_index:10,cond:cond,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EWhile",$_.__params__ = ["cond","e"],$_)
+	,EFor: ($_=function(v,it,e) { return {_hx_index:11,v:v,it:it,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EFor",$_.__params__ = ["v","it","e"],$_)
+	,EBreak: {_hx_name:"EBreak",_hx_index:12,__enum__:"hscript.Expr",toString:$estr}
+	,EContinue: {_hx_name:"EContinue",_hx_index:13,__enum__:"hscript.Expr",toString:$estr}
+	,EFunction: ($_=function(args,e,name,ret) { return {_hx_index:14,args:args,e:e,name:name,ret:ret,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EFunction",$_.__params__ = ["args","e","name","ret"],$_)
+	,EReturn: ($_=function(e) { return {_hx_index:15,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EReturn",$_.__params__ = ["e"],$_)
+	,EArray: ($_=function(e,index) { return {_hx_index:16,e:e,index:index,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EArray",$_.__params__ = ["e","index"],$_)
+	,EArrayDecl: ($_=function(e) { return {_hx_index:17,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EArrayDecl",$_.__params__ = ["e"],$_)
+	,ENew: ($_=function(cl,params) { return {_hx_index:18,cl:cl,params:params,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ENew",$_.__params__ = ["cl","params"],$_)
+	,EThrow: ($_=function(e) { return {_hx_index:19,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EThrow",$_.__params__ = ["e"],$_)
+	,ETry: ($_=function(e,v,t,ecatch) { return {_hx_index:20,e:e,v:v,t:t,ecatch:ecatch,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ETry",$_.__params__ = ["e","v","t","ecatch"],$_)
+	,EObject: ($_=function(fl) { return {_hx_index:21,fl:fl,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EObject",$_.__params__ = ["fl"],$_)
+	,ETernary: ($_=function(cond,e1,e2) { return {_hx_index:22,cond:cond,e1:e1,e2:e2,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ETernary",$_.__params__ = ["cond","e1","e2"],$_)
+	,ESwitch: ($_=function(e,cases,defaultExpr) { return {_hx_index:23,e:e,cases:cases,defaultExpr:defaultExpr,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ESwitch",$_.__params__ = ["e","cases","defaultExpr"],$_)
+	,EDoWhile: ($_=function(cond,e) { return {_hx_index:24,cond:cond,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EDoWhile",$_.__params__ = ["cond","e"],$_)
+	,EMeta: ($_=function(name,args,e) { return {_hx_index:25,name:name,args:args,e:e,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="EMeta",$_.__params__ = ["name","args","e"],$_)
+	,ECheckType: ($_=function(e,t) { return {_hx_index:26,e:e,t:t,__enum__:"hscript.Expr",toString:$estr}; },$_._hx_name="ECheckType",$_.__params__ = ["e","t"],$_)
+};
+hscript_Expr.__constructs__ = [hscript_Expr.EConst,hscript_Expr.EIdent,hscript_Expr.EVar,hscript_Expr.EParent,hscript_Expr.EBlock,hscript_Expr.EField,hscript_Expr.EBinop,hscript_Expr.EUnop,hscript_Expr.ECall,hscript_Expr.EIf,hscript_Expr.EWhile,hscript_Expr.EFor,hscript_Expr.EBreak,hscript_Expr.EContinue,hscript_Expr.EFunction,hscript_Expr.EReturn,hscript_Expr.EArray,hscript_Expr.EArrayDecl,hscript_Expr.ENew,hscript_Expr.EThrow,hscript_Expr.ETry,hscript_Expr.EObject,hscript_Expr.ETernary,hscript_Expr.ESwitch,hscript_Expr.EDoWhile,hscript_Expr.EMeta,hscript_Expr.ECheckType];
+var hscript_CType = $hxEnums["hscript.CType"] = { __ename__:true,__constructs__:null
+	,CTPath: ($_=function(path,params) { return {_hx_index:0,path:path,params:params,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTPath",$_.__params__ = ["path","params"],$_)
+	,CTFun: ($_=function(args,ret) { return {_hx_index:1,args:args,ret:ret,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTFun",$_.__params__ = ["args","ret"],$_)
+	,CTAnon: ($_=function(fields) { return {_hx_index:2,fields:fields,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTAnon",$_.__params__ = ["fields"],$_)
+	,CTParent: ($_=function(t) { return {_hx_index:3,t:t,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTParent",$_.__params__ = ["t"],$_)
+	,CTOpt: ($_=function(t) { return {_hx_index:4,t:t,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTOpt",$_.__params__ = ["t"],$_)
+	,CTNamed: ($_=function(n,t) { return {_hx_index:5,n:n,t:t,__enum__:"hscript.CType",toString:$estr}; },$_._hx_name="CTNamed",$_.__params__ = ["n","t"],$_)
+};
+hscript_CType.__constructs__ = [hscript_CType.CTPath,hscript_CType.CTFun,hscript_CType.CTAnon,hscript_CType.CTParent,hscript_CType.CTOpt,hscript_CType.CTNamed];
+var hscript_Error = $hxEnums["hscript.Error"] = { __ename__:true,__constructs__:null
+	,EInvalidChar: ($_=function(c) { return {_hx_index:0,c:c,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EInvalidChar",$_.__params__ = ["c"],$_)
+	,EUnexpected: ($_=function(s) { return {_hx_index:1,s:s,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EUnexpected",$_.__params__ = ["s"],$_)
+	,EUnterminatedString: {_hx_name:"EUnterminatedString",_hx_index:2,__enum__:"hscript.Error",toString:$estr}
+	,EUnterminatedComment: {_hx_name:"EUnterminatedComment",_hx_index:3,__enum__:"hscript.Error",toString:$estr}
+	,EInvalidPreprocessor: ($_=function(msg) { return {_hx_index:4,msg:msg,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EInvalidPreprocessor",$_.__params__ = ["msg"],$_)
+	,EUnknownVariable: ($_=function(v) { return {_hx_index:5,v:v,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EUnknownVariable",$_.__params__ = ["v"],$_)
+	,EInvalidIterator: ($_=function(v) { return {_hx_index:6,v:v,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EInvalidIterator",$_.__params__ = ["v"],$_)
+	,EInvalidOp: ($_=function(op) { return {_hx_index:7,op:op,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EInvalidOp",$_.__params__ = ["op"],$_)
+	,EInvalidAccess: ($_=function(f) { return {_hx_index:8,f:f,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="EInvalidAccess",$_.__params__ = ["f"],$_)
+	,ECustom: ($_=function(msg) { return {_hx_index:9,msg:msg,__enum__:"hscript.Error",toString:$estr}; },$_._hx_name="ECustom",$_.__params__ = ["msg"],$_)
+};
+hscript_Error.__constructs__ = [hscript_Error.EInvalidChar,hscript_Error.EUnexpected,hscript_Error.EUnterminatedString,hscript_Error.EUnterminatedComment,hscript_Error.EInvalidPreprocessor,hscript_Error.EUnknownVariable,hscript_Error.EInvalidIterator,hscript_Error.EInvalidOp,hscript_Error.EInvalidAccess,hscript_Error.ECustom];
+var hscript__$Interp_Stop = $hxEnums["hscript._Interp.Stop"] = { __ename__:true,__constructs__:null
+	,SBreak: {_hx_name:"SBreak",_hx_index:0,__enum__:"hscript._Interp.Stop",toString:$estr}
+	,SContinue: {_hx_name:"SContinue",_hx_index:1,__enum__:"hscript._Interp.Stop",toString:$estr}
+	,SReturn: {_hx_name:"SReturn",_hx_index:2,__enum__:"hscript._Interp.Stop",toString:$estr}
+};
+hscript__$Interp_Stop.__constructs__ = [hscript__$Interp_Stop.SBreak,hscript__$Interp_Stop.SContinue,hscript__$Interp_Stop.SReturn];
+var hscript_Interp = function() {
+	this.locals = new haxe_ds_StringMap();
+	this.declared = [];
+	this.resetVariables();
+	this.initOps();
+};
+$hxClasses["hscript.Interp"] = hscript_Interp;
+hscript_Interp.__name__ = true;
+hscript_Interp.prototype = {
+	resetVariables: function() {
+		var _gthis = this;
+		this.variables = new haxe_ds_StringMap();
+		this.variables.h["null"] = null;
+		this.variables.h["true"] = true;
+		this.variables.h["false"] = false;
+		var this1 = this.variables;
+		var value = Reflect.makeVarArgs(function(el) {
+			var inf = _gthis.posInfos();
+			var v = el.shift();
+			if(el.length > 0) {
+				inf.customParams = el;
+			}
+			haxe_Log.trace(Std.string(v),inf);
+		});
+		this1.h["trace"] = value;
+	}
+	,posInfos: function() {
+		return { fileName : "hscript", lineNumber : 0};
+	}
+	,initOps: function() {
+		var me = this;
+		this.binops = new haxe_ds_StringMap();
+		this.binops.h["+"] = function(e1,e2) {
+			return me.expr(e1) + me.expr(e2);
+		};
+		this.binops.h["-"] = function(e1,e2) {
+			return me.expr(e1) - me.expr(e2);
+		};
+		this.binops.h["*"] = function(e1,e2) {
+			return me.expr(e1) * me.expr(e2);
+		};
+		this.binops.h["/"] = function(e1,e2) {
+			return me.expr(e1) / me.expr(e2);
+		};
+		this.binops.h["%"] = function(e1,e2) {
+			return me.expr(e1) % me.expr(e2);
+		};
+		this.binops.h["&"] = function(e1,e2) {
+			return me.expr(e1) & me.expr(e2);
+		};
+		this.binops.h["|"] = function(e1,e2) {
+			return me.expr(e1) | me.expr(e2);
+		};
+		this.binops.h["^"] = function(e1,e2) {
+			return me.expr(e1) ^ me.expr(e2);
+		};
+		this.binops.h["<<"] = function(e1,e2) {
+			return me.expr(e1) << me.expr(e2);
+		};
+		this.binops.h[">>"] = function(e1,e2) {
+			return me.expr(e1) >> me.expr(e2);
+		};
+		this.binops.h[">>>"] = function(e1,e2) {
+			return me.expr(e1) >>> me.expr(e2);
+		};
+		this.binops.h["=="] = function(e1,e2) {
+			return me.expr(e1) == me.expr(e2);
+		};
+		this.binops.h["!="] = function(e1,e2) {
+			return me.expr(e1) != me.expr(e2);
+		};
+		this.binops.h[">="] = function(e1,e2) {
+			return me.expr(e1) >= me.expr(e2);
+		};
+		this.binops.h["<="] = function(e1,e2) {
+			return me.expr(e1) <= me.expr(e2);
+		};
+		this.binops.h[">"] = function(e1,e2) {
+			return me.expr(e1) > me.expr(e2);
+		};
+		this.binops.h["<"] = function(e1,e2) {
+			return me.expr(e1) < me.expr(e2);
+		};
+		this.binops.h["||"] = function(e1,e2) {
+			if(me.expr(e1) != true) {
+				return me.expr(e2) == true;
+			} else {
+				return true;
+			}
+		};
+		this.binops.h["&&"] = function(e1,e2) {
+			if(me.expr(e1) == true) {
+				return me.expr(e2) == true;
+			} else {
+				return false;
+			}
+		};
+		this.binops.h["="] = $bind(this,this.assign);
+		this.binops.h["..."] = function(e1,e2) {
+			return new IntIterator(me.expr(e1),me.expr(e2));
+		};
+		this.assignOp("+=",function(v1,v2) {
+			return v1 + v2;
+		});
+		this.assignOp("-=",function(v1,v2) {
+			return v1 - v2;
+		});
+		this.assignOp("*=",function(v1,v2) {
+			return v1 * v2;
+		});
+		this.assignOp("/=",function(v1,v2) {
+			return v1 / v2;
+		});
+		this.assignOp("%=",function(v1,v2) {
+			return v1 % v2;
+		});
+		this.assignOp("&=",function(v1,v2) {
+			return v1 & v2;
+		});
+		this.assignOp("|=",function(v1,v2) {
+			return v1 | v2;
+		});
+		this.assignOp("^=",function(v1,v2) {
+			return v1 ^ v2;
+		});
+		this.assignOp("<<=",function(v1,v2) {
+			return v1 << v2;
+		});
+		this.assignOp(">>=",function(v1,v2) {
+			return v1 >> v2;
+		});
+		this.assignOp(">>>=",function(v1,v2) {
+			return v1 >>> v2;
+		});
+	}
+	,assign: function(e1,e2) {
+		var v = this.expr(e2);
+		switch(e1._hx_index) {
+		case 1:
+			var id = e1.v;
+			var l = this.locals.h[id];
+			if(l == null) {
+				this.variables.h[id] = v;
+			} else {
+				l.r = v;
+			}
+			break;
+		case 5:
+			var e = e1.e;
+			var f = e1.f;
+			v = this.set(this.expr(e),f,v);
+			break;
+		case 16:
+			var e = e1.e;
+			var index = e1.index;
+			var arr = this.expr(e);
+			var index1 = this.expr(index);
+			if(js_Boot.__implements(arr,haxe_IMap)) {
+				(js_Boot.__cast(arr , haxe_IMap)).set(index1,v);
+			} else {
+				arr[index1] = v;
+			}
+			break;
+		default:
+			var e = hscript_Error.EInvalidOp("=");
+			throw haxe_Exception.thrown(e);
+		}
+		return v;
+	}
+	,assignOp: function(op,fop) {
+		var me = this;
+		this.binops.h[op] = function(e1,e2) {
+			return me.evalAssignOp(op,fop,e1,e2);
+		};
+	}
+	,evalAssignOp: function(op,fop,e1,e2) {
+		var v;
+		switch(e1._hx_index) {
+		case 1:
+			var id = e1.v;
+			var l = this.locals.h[id];
+			v = fop(this.expr(e1),this.expr(e2));
+			if(l == null) {
+				this.variables.h[id] = v;
+			} else {
+				l.r = v;
+			}
+			break;
+		case 5:
+			var e = e1.e;
+			var f = e1.f;
+			var obj = this.expr(e);
+			v = fop(this.get(obj,f),this.expr(e2));
+			v = this.set(obj,f,v);
+			break;
+		case 16:
+			var e = e1.e;
+			var index = e1.index;
+			var arr = this.expr(e);
+			var index1 = this.expr(index);
+			if(js_Boot.__implements(arr,haxe_IMap)) {
+				v = fop((js_Boot.__cast(arr , haxe_IMap)).get(index1),this.expr(e2));
+				(js_Boot.__cast(arr , haxe_IMap)).set(index1,v);
+			} else {
+				v = fop(arr[index1],this.expr(e2));
+				arr[index1] = v;
+			}
+			break;
+		default:
+			var e = hscript_Error.EInvalidOp(op);
+			throw haxe_Exception.thrown(e);
+		}
+		return v;
+	}
+	,increment: function(e,prefix,delta) {
+		switch(e._hx_index) {
+		case 1:
+			var id = e.v;
+			var l = this.locals.h[id];
+			var v = l == null ? this.variables.h[id] : l.r;
+			if(prefix) {
+				v += delta;
+				if(l == null) {
+					this.variables.h[id] = v;
+				} else {
+					l.r = v;
+				}
+			} else if(l == null) {
+				this.variables.h[id] = v + delta;
+			} else {
+				l.r = v + delta;
+			}
+			return v;
+		case 5:
+			var e1 = e.e;
+			var f = e.f;
+			var obj = this.expr(e1);
+			var v = this.get(obj,f);
+			if(prefix) {
+				v += delta;
+				this.set(obj,f,v);
+			} else {
+				this.set(obj,f,v + delta);
+			}
+			return v;
+		case 16:
+			var e1 = e.e;
+			var index = e.index;
+			var arr = this.expr(e1);
+			var index1 = this.expr(index);
+			if(js_Boot.__implements(arr,haxe_IMap)) {
+				var v = (js_Boot.__cast(arr , haxe_IMap)).get(index1);
+				if(prefix) {
+					v += delta;
+					(js_Boot.__cast(arr , haxe_IMap)).set(index1,v);
+				} else {
+					(js_Boot.__cast(arr , haxe_IMap)).set(index1,v + delta);
+				}
+				return v;
+			} else {
+				var v = arr[index1];
+				if(prefix) {
+					v += delta;
+					arr[index1] = v;
+				} else {
+					arr[index1] = v + delta;
+				}
+				return v;
+			}
+			break;
+		default:
+			var e = hscript_Error.EInvalidOp(delta > 0 ? "++" : "--");
+			throw haxe_Exception.thrown(e);
+		}
+	}
+	,execute: function(expr) {
+		this.depth = 0;
+		this.locals = new haxe_ds_StringMap();
+		this.declared = [];
+		return this.exprReturn(expr);
+	}
+	,exprReturn: function(e) {
+		try {
+			return this.expr(e);
+		} catch( _g ) {
+			var _g1 = haxe_Exception.caught(_g).unwrap();
+			if(js_Boot.__instanceof(_g1,hscript__$Interp_Stop)) {
+				var e = _g1;
+				switch(e._hx_index) {
+				case 0:
+					throw haxe_Exception.thrown("Invalid break");
+				case 1:
+					throw haxe_Exception.thrown("Invalid continue");
+				case 2:
+					var v = this.returnValue;
+					this.returnValue = null;
+					return v;
+				}
+			} else {
+				throw _g;
+			}
+		}
+	}
+	,duplicate: function(h) {
+		var h2 = new haxe_ds_StringMap();
+		var h1 = h.h;
+		var k_h = h1;
+		var k_keys = Object.keys(h1);
+		var k_length = k_keys.length;
+		var k_current = 0;
+		while(k_current < k_length) {
+			var k = k_keys[k_current++];
+			h2.h[k] = h.h[k];
+		}
+		return h2;
+	}
+	,restore: function(old) {
+		while(this.declared.length > old) {
+			var d = this.declared.pop();
+			this.locals.h[d.n] = d.old;
+		}
+	}
+	,resolve: function(id) {
+		var l = this.locals.h[id];
+		if(l != null) {
+			return l.r;
+		}
+		var v = this.variables.h[id];
+		if(v == null && !Object.prototype.hasOwnProperty.call(this.variables.h,id)) {
+			var e = hscript_Error.EUnknownVariable(id);
+			throw haxe_Exception.thrown(e);
+		}
+		return v;
+	}
+	,expr: function(e) {
+		var _gthis = this;
+		switch(e._hx_index) {
+		case 0:
+			var c = e.c;
+			switch(c._hx_index) {
+			case 0:
+				var v = c.v;
+				return v;
+			case 1:
+				var f = c.f;
+				return f;
+			case 2:
+				var s = c.s;
+				return s;
+			}
+			break;
+		case 1:
+			var id = e.v;
+			return this.resolve(id);
+		case 2:
+			var _g = e.t;
+			var n = e.n;
+			var e1 = e.e;
+			this.declared.push({ n : n, old : this.locals.h[n]});
+			var this1 = this.locals;
+			var value = e1 == null ? null : this.expr(e1);
+			this1.h[n] = { r : value};
+			return null;
+		case 3:
+			var e1 = e.e;
+			return this.expr(e1);
+		case 4:
+			var exprs = e.e;
+			var old = this.declared.length;
+			var v = null;
+			var _g = 0;
+			while(_g < exprs.length) {
+				var e1 = exprs[_g];
+				++_g;
+				v = this.expr(e1);
+			}
+			this.restore(old);
+			return v;
+		case 5:
+			var e1 = e.e;
+			var f = e.f;
+			return this.get(this.expr(e1),f);
+		case 6:
+			var op = e.op;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			var fop = this.binops.h[op];
+			if(fop == null) {
+				var e3 = hscript_Error.EInvalidOp(op);
+				throw haxe_Exception.thrown(e3);
+			}
+			return fop(e1,e2);
+		case 7:
+			var op = e.op;
+			var prefix = e.prefix;
+			var e1 = e.e;
+			switch(op) {
+			case "!":
+				return this.expr(e1) != true;
+			case "++":
+				return this.increment(e1,prefix,1);
+			case "-":
+				return -this.expr(e1);
+			case "--":
+				return this.increment(e1,prefix,-1);
+			case "~":
+				return ~this.expr(e1);
+			default:
+				var e1 = hscript_Error.EInvalidOp(op);
+				throw haxe_Exception.thrown(e1);
+			}
+			break;
+		case 8:
+			var e1 = e.e;
+			var params = e.params;
+			var args = [];
+			var _g = 0;
+			while(_g < params.length) {
+				var p = params[_g];
+				++_g;
+				args.push(this.expr(p));
+			}
+			if(e1._hx_index == 5) {
+				var e2 = e1.e;
+				var f = e1.f;
+				var obj = this.expr(e2);
+				if(obj == null) {
+					var e2 = hscript_Error.EInvalidAccess(f);
+					throw haxe_Exception.thrown(e2);
+				}
+				return this.fcall(obj,f,args);
+			} else {
+				return this.call(null,this.expr(e1),args);
+			}
+			break;
+		case 9:
+			var econd = e.cond;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			if(this.expr(econd) == true) {
+				return this.expr(e1);
+			} else if(e2 == null) {
+				return null;
+			} else {
+				return this.expr(e2);
+			}
+			break;
+		case 10:
+			var econd = e.cond;
+			var e1 = e.e;
+			this.whileLoop(econd,e1);
+			return null;
+		case 11:
+			var v = e.v;
+			var it = e.it;
+			var e1 = e.e;
+			this.forLoop(v,it,e1);
+			return null;
+		case 12:
+			throw haxe_Exception.thrown(hscript__$Interp_Stop.SBreak);
+		case 13:
+			throw haxe_Exception.thrown(hscript__$Interp_Stop.SContinue);
+		case 14:
+			var _g = e.ret;
+			var params = e.args;
+			var fexpr = e.e;
+			var name = e.name;
+			var capturedLocals = this.duplicate(this.locals);
+			var me = this;
+			var hasOpt = false;
+			var minParams = 0;
+			var _g = 0;
+			while(_g < params.length) {
+				var p = params[_g];
+				++_g;
+				if(p.opt) {
+					hasOpt = true;
+				} else {
+					minParams += 1;
+				}
+			}
+			var f = function(args) {
+				if((args == null ? 0 : args.length) != params.length) {
+					if(args.length < minParams) {
+						var str = "Invalid number of parameters. Got " + args.length + ", required " + minParams;
+						if(name != null) {
+							str += " for function '" + name + "'";
+						}
+						var e = hscript_Error.ECustom(str);
+						throw haxe_Exception.thrown(e);
+					}
+					var args2 = [];
+					var extraParams = args.length - minParams;
+					var pos = 0;
+					var _g = 0;
+					while(_g < params.length) {
+						var p = params[_g];
+						++_g;
+						if(p.opt) {
+							if(extraParams > 0) {
+								args2.push(args[pos++]);
+								--extraParams;
+							} else {
+								args2.push(null);
+							}
+						} else {
+							args2.push(args[pos++]);
+						}
+					}
+					args = args2;
+				}
+				var old = me.locals;
+				var depth = me.depth;
+				me.depth++;
+				me.locals = me.duplicate(capturedLocals);
+				var _g = 0;
+				var _g1 = params.length;
+				while(_g < _g1) {
+					var i = _g++;
+					me.locals.h[params[i].name] = { r : args[i]};
+				}
+				var r = null;
+				if(_gthis.inTry) {
+					try {
+						r = me.exprReturn(fexpr);
+					} catch( _g ) {
+						var e = haxe_Exception.caught(_g).unwrap();
+						me.locals = old;
+						me.depth = depth;
+						throw haxe_Exception.thrown(e);
+					}
+				} else {
+					r = me.exprReturn(fexpr);
+				}
+				me.locals = old;
+				me.depth = depth;
+				return r;
+			};
+			var f1 = Reflect.makeVarArgs(f);
+			if(name != null) {
+				if(this.depth == 0) {
+					this.variables.h[name] = f1;
+				} else {
+					this.declared.push({ n : name, old : this.locals.h[name]});
+					var ref = { r : f1};
+					this.locals.h[name] = ref;
+					capturedLocals.h[name] = ref;
+				}
+			}
+			return f1;
+		case 15:
+			var e1 = e.e;
+			this.returnValue = e1 == null ? null : this.expr(e1);
+			throw haxe_Exception.thrown(hscript__$Interp_Stop.SReturn);
+		case 16:
+			var e1 = e.e;
+			var index = e.index;
+			var arr = this.expr(e1);
+			var index1 = this.expr(index);
+			if(js_Boot.__implements(arr,haxe_IMap)) {
+				return (js_Boot.__cast(arr , haxe_IMap)).get(index1);
+			} else {
+				return arr[index1];
+			}
+			break;
+		case 17:
+			var arr = e.e;
+			var tmp;
+			if(arr.length > 0) {
+				var _g = arr[0];
+				if(_g._hx_index == 6) {
+					var _g1 = _g.e1;
+					var _g1 = _g.e2;
+					tmp = _g.op == "=>";
+				} else {
+					tmp = false;
+				}
+			} else {
+				tmp = false;
+			}
+			if(tmp) {
+				var isAllString = true;
+				var isAllInt = true;
+				var isAllObject = true;
+				var isAllEnum = true;
+				var keys = [];
+				var values = [];
+				var _g = 0;
+				while(_g < arr.length) {
+					var e1 = arr[_g];
+					++_g;
+					if(e1._hx_index == 6) {
+						if(e1.op == "=>") {
+							var eKey = e1.e1;
+							var eValue = e1.e2;
+							var key = this.expr(eKey);
+							var value = this.expr(eValue);
+							isAllString = isAllString && typeof(key) == "string";
+							isAllInt = isAllInt && (typeof(key) == "number" && ((key | 0) === key));
+							isAllObject = isAllObject && Reflect.isObject(key);
+							isAllEnum = isAllEnum && Reflect.isEnumValue(key);
+							keys.push(key);
+							values.push(value);
+						} else {
+							throw haxe_Exception.thrown("=> expected");
+						}
+					} else {
+						throw haxe_Exception.thrown("=> expected");
+					}
+				}
+				var map;
+				if(isAllInt) {
+					map = new haxe_ds_IntMap();
+				} else if(isAllString) {
+					map = new haxe_ds_StringMap();
+				} else if(isAllEnum) {
+					map = new haxe_ds_EnumValueMap();
+				} else if(isAllObject) {
+					map = new haxe_ds_ObjectMap();
+				} else {
+					throw haxe_Exception.thrown("Inconsistent key types");
+				}
+				var _g = 0;
+				var _g1 = keys.length;
+				while(_g < _g1) {
+					var n = _g++;
+					(js_Boot.__cast(map , haxe_IMap)).set(keys[n],values[n]);
+				}
+				return map;
+			} else {
+				var a = [];
+				var _g = 0;
+				while(_g < arr.length) {
+					var e1 = arr[_g];
+					++_g;
+					a.push(this.expr(e1));
+				}
+				return a;
+			}
+			break;
+		case 18:
+			var cl = e.cl;
+			var params1 = e.params;
+			var a = [];
+			var _g = 0;
+			while(_g < params1.length) {
+				var e1 = params1[_g];
+				++_g;
+				a.push(this.expr(e1));
+			}
+			return this.cnew(cl,a);
+		case 19:
+			var e1 = e.e;
+			throw haxe_Exception.thrown(this.expr(e1));
+		case 20:
+			var _g = e.t;
+			var e1 = e.e;
+			var n = e.v;
+			var ecatch = e.ecatch;
+			var old = this.declared.length;
+			var oldTry = this.inTry;
+			try {
+				this.inTry = true;
+				var v = this.expr(e1);
+				this.restore(old);
+				this.inTry = oldTry;
+				return v;
+			} catch( _g ) {
+				var _g1 = haxe_Exception.caught(_g).unwrap();
+				if(js_Boot.__instanceof(_g1,hscript__$Interp_Stop)) {
+					var err = _g1;
+					this.inTry = oldTry;
+					throw haxe_Exception.thrown(err);
+				} else {
+					var err = _g1;
+					this.restore(old);
+					this.inTry = oldTry;
+					this.declared.push({ n : n, old : this.locals.h[n]});
+					this.locals.h[n] = { r : err};
+					var v = this.expr(ecatch);
+					this.restore(old);
+					return v;
+				}
+			}
+			break;
+		case 21:
+			var fl = e.fl;
+			var o = { };
+			var _g = 0;
+			while(_g < fl.length) {
+				var f = fl[_g];
+				++_g;
+				this.set(o,f.name,this.expr(f.e));
+			}
+			return o;
+		case 22:
+			var econd = e.cond;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			if(this.expr(econd) == true) {
+				return this.expr(e1);
+			} else {
+				return this.expr(e2);
+			}
+			break;
+		case 23:
+			var e1 = e.e;
+			var cases = e.cases;
+			var def = e.defaultExpr;
+			var val = this.expr(e1);
+			var match = false;
+			var _g = 0;
+			while(_g < cases.length) {
+				var c = cases[_g];
+				++_g;
+				var _g1 = 0;
+				var _g2 = c.values;
+				while(_g1 < _g2.length) {
+					var v = _g2[_g1];
+					++_g1;
+					if(this.expr(v) == val) {
+						match = true;
+						break;
+					}
+				}
+				if(match) {
+					val = this.expr(c.expr);
+					break;
+				}
+			}
+			if(!match) {
+				val = def == null ? null : this.expr(def);
+			}
+			return val;
+		case 24:
+			var econd = e.cond;
+			var e1 = e.e;
+			this.doWhileLoop(econd,e1);
+			return null;
+		case 25:
+			var _g = e.name;
+			var _g = e.args;
+			var e1 = e.e;
+			return this.expr(e1);
+		case 26:
+			var _g = e.t;
+			var e1 = e.e;
+			return this.expr(e1);
+		}
+	}
+	,doWhileLoop: function(econd,e) {
+		var old = this.declared.length;
+		_hx_loop1: while(true) {
+			try {
+				this.expr(e);
+			} catch( _g ) {
+				var _g1 = haxe_Exception.caught(_g).unwrap();
+				if(js_Boot.__instanceof(_g1,hscript__$Interp_Stop)) {
+					var err = _g1;
+					switch(err._hx_index) {
+					case 0:
+						break _hx_loop1;
+					case 1:
+						break;
+					case 2:
+						throw haxe_Exception.thrown(err);
+					}
+				} else {
+					throw _g;
+				}
+			}
+			if(!(this.expr(econd) == true)) {
+				break;
+			}
+		}
+		this.restore(old);
+	}
+	,whileLoop: function(econd,e) {
+		var old = this.declared.length;
+		_hx_loop1: while(this.expr(econd) == true) try {
+			this.expr(e);
+		} catch( _g ) {
+			var _g1 = haxe_Exception.caught(_g).unwrap();
+			if(js_Boot.__instanceof(_g1,hscript__$Interp_Stop)) {
+				var err = _g1;
+				switch(err._hx_index) {
+				case 0:
+					break _hx_loop1;
+				case 1:
+					break;
+				case 2:
+					throw haxe_Exception.thrown(err);
+				}
+			} else {
+				throw _g;
+			}
+		}
+		this.restore(old);
+	}
+	,makeIterator: function(v) {
+		try {
+			v = $getIterator(v);
+		} catch( _g ) {
+		}
+		if(v.hasNext == null || v.next == null) {
+			var e = hscript_Error.EInvalidIterator(v);
+			throw haxe_Exception.thrown(e);
+		}
+		return v;
+	}
+	,forLoop: function(n,it,e) {
+		var old = this.declared.length;
+		this.declared.push({ n : n, old : this.locals.h[n]});
+		var it1 = this.makeIterator(this.expr(it));
+		_hx_loop1: while(it1.hasNext()) {
+			var this1 = this.locals;
+			var value = { r : it1.next()};
+			this1.h[n] = value;
+			try {
+				this.expr(e);
+			} catch( _g ) {
+				var _g1 = haxe_Exception.caught(_g).unwrap();
+				if(js_Boot.__instanceof(_g1,hscript__$Interp_Stop)) {
+					var err = _g1;
+					switch(err._hx_index) {
+					case 0:
+						break _hx_loop1;
+					case 1:
+						break;
+					case 2:
+						throw haxe_Exception.thrown(err);
+					}
+				} else {
+					throw _g;
+				}
+			}
+		}
+		this.restore(old);
+	}
+	,get: function(o,f) {
+		if(o == null) {
+			var e = hscript_Error.EInvalidAccess(f);
+			throw haxe_Exception.thrown(e);
+		}
+		return Reflect.getProperty(o,f);
+	}
+	,set: function(o,f,v) {
+		if(o == null) {
+			var e = hscript_Error.EInvalidAccess(f);
+			throw haxe_Exception.thrown(e);
+		}
+		Reflect.setProperty(o,f,v);
+		return v;
+	}
+	,fcall: function(o,f,args) {
+		return this.call(o,this.get(o,f),args);
+	}
+	,call: function(o,f,args) {
+		return f.apply(o,args);
+	}
+	,cnew: function(cl,args) {
+		var c = $hxClasses[cl];
+		if(c == null) {
+			c = this.resolve(cl);
+		}
+		return Type.createInstance(c,args);
+	}
+	,__class__: hscript_Interp
+};
+var hscript_Token = $hxEnums["hscript.Token"] = { __ename__:true,__constructs__:null
+	,TEof: {_hx_name:"TEof",_hx_index:0,__enum__:"hscript.Token",toString:$estr}
+	,TConst: ($_=function(c) { return {_hx_index:1,c:c,__enum__:"hscript.Token",toString:$estr}; },$_._hx_name="TConst",$_.__params__ = ["c"],$_)
+	,TId: ($_=function(s) { return {_hx_index:2,s:s,__enum__:"hscript.Token",toString:$estr}; },$_._hx_name="TId",$_.__params__ = ["s"],$_)
+	,TOp: ($_=function(s) { return {_hx_index:3,s:s,__enum__:"hscript.Token",toString:$estr}; },$_._hx_name="TOp",$_.__params__ = ["s"],$_)
+	,TPOpen: {_hx_name:"TPOpen",_hx_index:4,__enum__:"hscript.Token",toString:$estr}
+	,TPClose: {_hx_name:"TPClose",_hx_index:5,__enum__:"hscript.Token",toString:$estr}
+	,TBrOpen: {_hx_name:"TBrOpen",_hx_index:6,__enum__:"hscript.Token",toString:$estr}
+	,TBrClose: {_hx_name:"TBrClose",_hx_index:7,__enum__:"hscript.Token",toString:$estr}
+	,TDot: {_hx_name:"TDot",_hx_index:8,__enum__:"hscript.Token",toString:$estr}
+	,TComma: {_hx_name:"TComma",_hx_index:9,__enum__:"hscript.Token",toString:$estr}
+	,TSemicolon: {_hx_name:"TSemicolon",_hx_index:10,__enum__:"hscript.Token",toString:$estr}
+	,TBkOpen: {_hx_name:"TBkOpen",_hx_index:11,__enum__:"hscript.Token",toString:$estr}
+	,TBkClose: {_hx_name:"TBkClose",_hx_index:12,__enum__:"hscript.Token",toString:$estr}
+	,TQuestion: {_hx_name:"TQuestion",_hx_index:13,__enum__:"hscript.Token",toString:$estr}
+	,TDoubleDot: {_hx_name:"TDoubleDot",_hx_index:14,__enum__:"hscript.Token",toString:$estr}
+	,TMeta: ($_=function(s) { return {_hx_index:15,s:s,__enum__:"hscript.Token",toString:$estr}; },$_._hx_name="TMeta",$_.__params__ = ["s"],$_)
+	,TPrepro: ($_=function(s) { return {_hx_index:16,s:s,__enum__:"hscript.Token",toString:$estr}; },$_._hx_name="TPrepro",$_.__params__ = ["s"],$_)
+};
+hscript_Token.__constructs__ = [hscript_Token.TEof,hscript_Token.TConst,hscript_Token.TId,hscript_Token.TOp,hscript_Token.TPOpen,hscript_Token.TPClose,hscript_Token.TBrOpen,hscript_Token.TBrClose,hscript_Token.TDot,hscript_Token.TComma,hscript_Token.TSemicolon,hscript_Token.TBkOpen,hscript_Token.TBkClose,hscript_Token.TQuestion,hscript_Token.TDoubleDot,hscript_Token.TMeta,hscript_Token.TPrepro];
+var hscript_Parser = function() {
+	this.uid = 0;
+	this.preprocesorValues = new haxe_ds_StringMap();
+	this.line = 1;
+	this.opChars = "+*/-=!><&|^%~";
+	this.identChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+	var priorities = [["%"],["*","/"],["+","-"],["<<",">>",">>>"],["|","&","^"],["==","!=",">","<",">=","<="],["..."],["&&"],["||"],["=","+=","-=","*=","/=","%=","<<=",">>=",">>>=","|=","&=","^=","=>"]];
+	this.opPriority = new haxe_ds_StringMap();
+	this.opRightAssoc = new haxe_ds_StringMap();
+	this.unops = new haxe_ds_StringMap();
+	var _g = 0;
+	var _g1 = priorities.length;
+	while(_g < _g1) {
+		var i = _g++;
+		var _g2 = 0;
+		var _g3 = priorities[i];
+		while(_g2 < _g3.length) {
+			var x = _g3[_g2];
+			++_g2;
+			this.opPriority.h[x] = i;
+			if(i == 9) {
+				this.opRightAssoc.h[x] = true;
+			}
+		}
+	}
+	var x = "!";
+	this.unops.h[x] = x == "++" || x == "--";
+	var x = "++";
+	this.unops.h[x] = x == "++" || x == "--";
+	var x = "--";
+	this.unops.h[x] = x == "++" || x == "--";
+	var x = "-";
+	this.unops.h[x] = x == "++" || x == "--";
+	var x = "~";
+	this.unops.h[x] = x == "++" || x == "--";
+};
+$hxClasses["hscript.Parser"] = hscript_Parser;
+hscript_Parser.__name__ = true;
+hscript_Parser.prototype = {
+	invalidChar: function(c) {
+		if(!this.resumeErrors) {
+			throw haxe_Exception.thrown(hscript_Error.EInvalidChar(c));
+		}
+	}
+	,initParser: function(origin) {
+		this.preprocStack = [];
+		this.tokens = new haxe_ds_GenericStack();
+		this.char = -1;
+		this.ops = [];
+		this.idents = [];
+		this.uid = 0;
+		var _g = 0;
+		var _g1 = this.opChars.length;
+		while(_g < _g1) {
+			var i = _g++;
+			this.ops[HxOverrides.cca(this.opChars,i)] = true;
+		}
+		var _g = 0;
+		var _g1 = this.identChars.length;
+		while(_g < _g1) {
+			var i = _g++;
+			this.idents[HxOverrides.cca(this.identChars,i)] = true;
+		}
+	}
+	,parseString: function(s,origin) {
+		if(origin == null) {
+			origin = "hscript";
+		}
+		this.initParser(origin);
+		this.input = s;
+		this.readPos = 0;
+		var a = [];
+		while(true) {
+			var tk = this.token();
+			if(tk == hscript_Token.TEof) {
+				break;
+			}
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			this.parseFullExpr(a);
+		}
+		if(a.length == 1) {
+			return a[0];
+		} else {
+			return hscript_Expr.EBlock(a);
+		}
+	}
+	,unexpected: function(tk) {
+		var err = hscript_Error.EUnexpected(this.tokenString(tk));
+		if(!this.resumeErrors) {
+			throw haxe_Exception.thrown(err);
+		}
+		return null;
+	}
+	,maybe: function(tk) {
+		var t = this.token();
+		if(Type.enumEq(t,tk)) {
+			return true;
+		}
+		var _this = this.tokens;
+		_this.head = new haxe_ds_GenericCell(t,_this.head);
+		return false;
+	}
+	,getIdent: function() {
+		var tk = this.token();
+		if(tk == null) {
+			this.unexpected(tk);
+			return null;
+		} else if(tk._hx_index == 2) {
+			var id = tk.s;
+			return id;
+		} else {
+			this.unexpected(tk);
+			return null;
+		}
+	}
+	,isBlock: function(e) {
+		if(e == null) {
+			return false;
+		}
+		switch(e._hx_index) {
+		case 2:
+			var _g = e.n;
+			var t = e.t;
+			var e1 = e.e;
+			if(e1 != null) {
+				return this.isBlock(e1);
+			} else if(t != null) {
+				if(t == null) {
+					return false;
+				} else if(t._hx_index == 2) {
+					var _g = t.fields;
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+			break;
+		case 4:
+			var _g = e.e;
+			return true;
+		case 6:
+			var _g = e.op;
+			var _g = e.e1;
+			var e1 = e.e2;
+			return this.isBlock(e1);
+		case 7:
+			var _g = e.op;
+			var prefix = e.prefix;
+			var e1 = e.e;
+			if(!prefix) {
+				return this.isBlock(e1);
+			} else {
+				return false;
+			}
+			break;
+		case 9:
+			var _g = e.cond;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			if(e2 != null) {
+				return this.isBlock(e2);
+			} else {
+				return this.isBlock(e1);
+			}
+			break;
+		case 10:
+			var _g = e.cond;
+			var e1 = e.e;
+			return this.isBlock(e1);
+		case 11:
+			var _g = e.v;
+			var _g = e.it;
+			var e1 = e.e;
+			return this.isBlock(e1);
+		case 14:
+			var _g = e.args;
+			var _g = e.name;
+			var _g = e.ret;
+			var e1 = e.e;
+			return this.isBlock(e1);
+		case 15:
+			var e1 = e.e;
+			if(e1 != null) {
+				return this.isBlock(e1);
+			} else {
+				return false;
+			}
+			break;
+		case 20:
+			var _g = e.e;
+			var _g = e.v;
+			var _g = e.t;
+			var e1 = e.ecatch;
+			return this.isBlock(e1);
+		case 21:
+			var _g = e.fl;
+			return true;
+		case 23:
+			var _g = e.e;
+			var _g = e.cases;
+			var _g = e.defaultExpr;
+			return true;
+		case 24:
+			var _g = e.cond;
+			var e1 = e.e;
+			return this.isBlock(e1);
+		case 25:
+			var _g = e.name;
+			var _g = e.args;
+			var e1 = e.e;
+			return this.isBlock(e1);
+		default:
+			return false;
+		}
+	}
+	,parseFullExpr: function(exprs) {
+		var e = this.parseExpr();
+		exprs.push(e);
+		var tk = this.token();
+		while(true) {
+			var tmp;
+			if(tk == hscript_Token.TComma && e != null) {
+				if(e._hx_index == 2) {
+					var _g = e.n;
+					var _g1 = e.t;
+					var _g2 = e.e;
+					tmp = true;
+				} else {
+					tmp = false;
+				}
+			} else {
+				tmp = false;
+			}
+			if(!tmp) {
+				break;
+			}
+			e = this.parseStructure("var");
+			exprs.push(e);
+			tk = this.token();
+		}
+		if(tk != hscript_Token.TSemicolon && tk != hscript_Token.TEof) {
+			if(this.isBlock(e)) {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			} else {
+				this.unexpected(tk);
+			}
+		}
+	}
+	,parseObject: function(p1) {
+		var fl = [];
+		_hx_loop1: while(true) {
+			var tk = this.token();
+			var id = null;
+			if(tk == null) {
+				this.unexpected(tk);
+				break;
+			} else {
+				switch(tk._hx_index) {
+				case 1:
+					var c = tk.c;
+					if(!this.allowJSON) {
+						this.unexpected(tk);
+					}
+					if(c._hx_index == 2) {
+						var s = c.s;
+						id = s;
+					} else {
+						this.unexpected(tk);
+					}
+					break;
+				case 2:
+					var i = tk.s;
+					id = i;
+					break;
+				case 7:
+					break _hx_loop1;
+				default:
+					this.unexpected(tk);
+					break _hx_loop1;
+				}
+			}
+			var t = this.token();
+			if(t != hscript_Token.TDoubleDot) {
+				this.unexpected(t);
+			}
+			fl.push({ name : id, e : this.parseExpr()});
+			tk = this.token();
+			if(tk == null) {
+				this.unexpected(tk);
+			} else {
+				switch(tk._hx_index) {
+				case 7:
+					break _hx_loop1;
+				case 9:
+					break;
+				default:
+					this.unexpected(tk);
+				}
+			}
+		}
+		return this.parseExprNext(hscript_Expr.EObject(fl));
+	}
+	,parseExpr: function() {
+		var tk = this.token();
+		if(tk == null) {
+			return this.unexpected(tk);
+		} else {
+			switch(tk._hx_index) {
+			case 1:
+				var c = tk.c;
+				return this.parseExprNext(hscript_Expr.EConst(c));
+			case 2:
+				var id = tk.s;
+				var e = this.parseStructure(id);
+				if(e == null) {
+					e = hscript_Expr.EIdent(id);
+				}
+				return this.parseExprNext(e);
+			case 3:
+				var op = tk.s;
+				if(Object.prototype.hasOwnProperty.call(this.unops.h,op)) {
+					var start = 0;
+					var e = this.parseExpr();
+					if(op == "-" && e != null) {
+						if(e._hx_index == 0) {
+							var _g = e.c;
+							switch(_g._hx_index) {
+							case 0:
+								var i = _g.v;
+								return hscript_Expr.EConst(hscript_Const.CInt(-i));
+							case 1:
+								var f = _g.f;
+								return hscript_Expr.EConst(hscript_Const.CFloat(-f));
+							default:
+							}
+						}
+					}
+					return this.makeUnop(op,e);
+				}
+				return this.unexpected(tk);
+			case 4:
+				var e = this.parseExpr();
+				tk = this.token();
+				if(tk != null) {
+					switch(tk._hx_index) {
+					case 5:
+						return this.parseExprNext(hscript_Expr.EParent(e));
+					case 9:
+						if(e._hx_index == 1) {
+							var v = e.v;
+							return this.parseLambda([{ name : v}],0);
+						}
+						break;
+					case 14:
+						var t = this.parseType();
+						tk = this.token();
+						if(tk != null) {
+							switch(tk._hx_index) {
+							case 5:
+								return this.parseExprNext(hscript_Expr.ECheckType(e,t));
+							case 9:
+								if(e._hx_index == 1) {
+									var v = e.v;
+									return this.parseLambda([{ name : v, t : t}],0);
+								}
+								break;
+							default:
+							}
+						}
+						break;
+					default:
+					}
+				}
+				return this.unexpected(tk);
+			case 6:
+				tk = this.token();
+				if(tk == null) {
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				} else {
+					switch(tk._hx_index) {
+					case 1:
+						var c = tk.c;
+						if(this.allowJSON) {
+							if(c._hx_index == 2) {
+								var _g = c.s;
+								var tk2 = this.token();
+								var _this = this.tokens;
+								_this.head = new haxe_ds_GenericCell(tk2,_this.head);
+								var _this = this.tokens;
+								_this.head = new haxe_ds_GenericCell(tk,_this.head);
+								if(tk2 != null) {
+									if(tk2._hx_index == 14) {
+										return this.parseExprNext(this.parseObject(0));
+									}
+								}
+							} else {
+								var _this = this.tokens;
+								_this.head = new haxe_ds_GenericCell(tk,_this.head);
+							}
+						} else {
+							var _this = this.tokens;
+							_this.head = new haxe_ds_GenericCell(tk,_this.head);
+						}
+						break;
+					case 2:
+						var _g = tk.s;
+						var tk2 = this.token();
+						var _this = this.tokens;
+						_this.head = new haxe_ds_GenericCell(tk2,_this.head);
+						var _this = this.tokens;
+						_this.head = new haxe_ds_GenericCell(tk,_this.head);
+						if(tk2 != null) {
+							if(tk2._hx_index == 14) {
+								return this.parseExprNext(this.parseObject(0));
+							}
+						}
+						break;
+					case 7:
+						return this.parseExprNext(hscript_Expr.EObject([]));
+					default:
+						var _this = this.tokens;
+						_this.head = new haxe_ds_GenericCell(tk,_this.head);
+					}
+				}
+				var a = [];
+				while(true) {
+					this.parseFullExpr(a);
+					tk = this.token();
+					if(tk == hscript_Token.TBrClose || this.resumeErrors && tk == hscript_Token.TEof) {
+						break;
+					}
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				}
+				return hscript_Expr.EBlock(a);
+			case 11:
+				var a = [];
+				tk = this.token();
+				while(tk != hscript_Token.TBkClose && (!this.resumeErrors || tk != hscript_Token.TEof)) {
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(tk,_this.head);
+					a.push(this.parseExpr());
+					tk = this.token();
+					if(tk == hscript_Token.TComma) {
+						tk = this.token();
+					}
+				}
+				if(a.length == 1 && a[0] != null) {
+					var _g = a[0];
+					switch(_g._hx_index) {
+					case 10:
+						var _g1 = _g.cond;
+						var _g1 = _g.e;
+						var tmp = "__a_" + this.uid++;
+						var e = hscript_Expr.EBlock([hscript_Expr.EVar(tmp,null,hscript_Expr.EArrayDecl([])),this.mapCompr(tmp,a[0]),hscript_Expr.EIdent(tmp)]);
+						return this.parseExprNext(e);
+					case 11:
+						var _g1 = _g.v;
+						var _g1 = _g.it;
+						var _g1 = _g.e;
+						var tmp = "__a_" + this.uid++;
+						var e = hscript_Expr.EBlock([hscript_Expr.EVar(tmp,null,hscript_Expr.EArrayDecl([])),this.mapCompr(tmp,a[0]),hscript_Expr.EIdent(tmp)]);
+						return this.parseExprNext(e);
+					case 24:
+						var _g1 = _g.cond;
+						var _g1 = _g.e;
+						var tmp = "__a_" + this.uid++;
+						var e = hscript_Expr.EBlock([hscript_Expr.EVar(tmp,null,hscript_Expr.EArrayDecl([])),this.mapCompr(tmp,a[0]),hscript_Expr.EIdent(tmp)]);
+						return this.parseExprNext(e);
+					default:
+					}
+				}
+				return this.parseExprNext(hscript_Expr.EArrayDecl(a));
+			case 15:
+				var id = tk.s;
+				if(this.allowMetadata) {
+					var args = this.parseMetaArgs();
+					return hscript_Expr.EMeta(id,args,this.parseExpr());
+				} else {
+					return this.unexpected(tk);
+				}
+				break;
+			default:
+				return this.unexpected(tk);
+			}
+		}
+	}
+	,parseLambda: function(args,pmin) {
+		_hx_loop1: while(true) {
+			var id = this.getIdent();
+			var t = this.maybe(hscript_Token.TDoubleDot) ? this.parseType() : null;
+			args.push({ name : id, t : t});
+			var tk = this.token();
+			if(tk == null) {
+				this.unexpected(tk);
+				break;
+			} else {
+				switch(tk._hx_index) {
+				case 5:
+					break _hx_loop1;
+				case 9:
+					break;
+				default:
+					this.unexpected(tk);
+					break _hx_loop1;
+				}
+			}
+		}
+		var t = this.token();
+		if(!Type.enumEq(t,hscript_Token.TOp("->"))) {
+			this.unexpected(t);
+		}
+		var eret = this.parseExpr();
+		return hscript_Expr.EFunction(args,hscript_Expr.EReturn(eret));
+	}
+	,parseMetaArgs: function() {
+		var tk = this.token();
+		if(tk != hscript_Token.TPOpen) {
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			return null;
+		}
+		var args = [];
+		tk = this.token();
+		if(tk != hscript_Token.TPClose) {
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			_hx_loop1: while(true) {
+				args.push(this.parseExpr());
+				var _g = this.token();
+				if(_g == null) {
+					var tk = _g;
+					this.unexpected(tk);
+				} else {
+					switch(_g._hx_index) {
+					case 5:
+						break _hx_loop1;
+					case 9:
+						break;
+					default:
+						var tk1 = _g;
+						this.unexpected(tk1);
+					}
+				}
+			}
+		}
+		return args;
+	}
+	,mapCompr: function(tmp,e) {
+		if(e == null) {
+			return null;
+		}
+		var edef;
+		switch(e._hx_index) {
+		case 3:
+			var e2 = e.e;
+			edef = hscript_Expr.EParent(this.mapCompr(tmp,e2));
+			break;
+		case 4:
+			var _g = e.e;
+			if(_g.length == 1) {
+				var e1 = _g[0];
+				edef = hscript_Expr.EBlock([this.mapCompr(tmp,e1)]);
+			} else {
+				edef = hscript_Expr.ECall(hscript_Expr.EField(hscript_Expr.EIdent(tmp),"push"),[e]);
+			}
+			break;
+		case 9:
+			var cond = e.cond;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			edef = e2 == null ? hscript_Expr.EIf(cond,this.mapCompr(tmp,e1),null) : hscript_Expr.ECall(hscript_Expr.EField(hscript_Expr.EIdent(tmp),"push"),[e]);
+			break;
+		case 10:
+			var cond = e.cond;
+			var e2 = e.e;
+			edef = hscript_Expr.EWhile(cond,this.mapCompr(tmp,e2));
+			break;
+		case 11:
+			var v = e.v;
+			var it = e.it;
+			var e2 = e.e;
+			edef = hscript_Expr.EFor(v,it,this.mapCompr(tmp,e2));
+			break;
+		case 24:
+			var cond = e.cond;
+			var e2 = e.e;
+			edef = hscript_Expr.EDoWhile(cond,this.mapCompr(tmp,e2));
+			break;
+		default:
+			edef = hscript_Expr.ECall(hscript_Expr.EField(hscript_Expr.EIdent(tmp),"push"),[e]);
+		}
+		return edef;
+	}
+	,makeUnop: function(op,e) {
+		if(e == null && this.resumeErrors) {
+			return null;
+		}
+		switch(e._hx_index) {
+		case 6:
+			var bop = e.op;
+			var e1 = e.e1;
+			var e2 = e.e2;
+			return hscript_Expr.EBinop(bop,this.makeUnop(op,e1),e2);
+		case 22:
+			var e1 = e.cond;
+			var e2 = e.e1;
+			var e3 = e.e2;
+			return hscript_Expr.ETernary(this.makeUnop(op,e1),e2,e3);
+		default:
+			return hscript_Expr.EUnop(op,true,e);
+		}
+	}
+	,makeBinop: function(op,e1,e) {
+		if(e == null && this.resumeErrors) {
+			return hscript_Expr.EBinop(op,e1,e);
+		}
+		switch(e._hx_index) {
+		case 6:
+			var op2 = e.op;
+			var e2 = e.e1;
+			var e3 = e.e2;
+			if(this.opPriority.h[op] <= this.opPriority.h[op2] && !Object.prototype.hasOwnProperty.call(this.opRightAssoc.h,op)) {
+				return hscript_Expr.EBinop(op2,this.makeBinop(op,e1,e2),e3);
+			} else {
+				return hscript_Expr.EBinop(op,e1,e);
+			}
+			break;
+		case 22:
+			var e2 = e.cond;
+			var e3 = e.e1;
+			var e4 = e.e2;
+			if(Object.prototype.hasOwnProperty.call(this.opRightAssoc.h,op)) {
+				return hscript_Expr.EBinop(op,e1,e);
+			} else {
+				return hscript_Expr.ETernary(this.makeBinop(op,e1,e2),e3,e4);
+			}
+			break;
+		default:
+			return hscript_Expr.EBinop(op,e1,e);
+		}
+	}
+	,parseStructure: function(id) {
+		switch(id) {
+		case "break":
+			return hscript_Expr.EBreak;
+		case "continue":
+			return hscript_Expr.EContinue;
+		case "do":
+			var e = this.parseExpr();
+			var tk = this.token();
+			if(tk == null) {
+				this.unexpected(tk);
+			} else if(tk._hx_index == 2) {
+				if(tk.s != "while") {
+					this.unexpected(tk);
+				}
+			} else {
+				this.unexpected(tk);
+			}
+			var econd = this.parseExpr();
+			return hscript_Expr.EDoWhile(econd,e);
+		case "else":
+			return this.unexpected(hscript_Token.TId(id));
+		case "for":
+			var t = this.token();
+			if(t != hscript_Token.TPOpen) {
+				this.unexpected(t);
+			}
+			var vname = this.getIdent();
+			var t = this.token();
+			if(!Type.enumEq(t,hscript_Token.TId("in"))) {
+				this.unexpected(t);
+			}
+			var eiter = this.parseExpr();
+			var t = this.token();
+			if(t != hscript_Token.TPClose) {
+				this.unexpected(t);
+			}
+			var e = this.parseExpr();
+			return hscript_Expr.EFor(vname,eiter,e);
+		case "function":
+			var tk = this.token();
+			var name = null;
+			if(tk == null) {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			} else if(tk._hx_index == 2) {
+				var id = tk.s;
+				name = id;
+			} else {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			}
+			var inf = this.parseFunctionDecl();
+			return hscript_Expr.EFunction(inf.args,inf.body,name,inf.ret);
+		case "if":
+			var t = this.token();
+			if(t != hscript_Token.TPOpen) {
+				this.unexpected(t);
+			}
+			var cond = this.parseExpr();
+			var t = this.token();
+			if(t != hscript_Token.TPClose) {
+				this.unexpected(t);
+			}
+			var e1 = this.parseExpr();
+			var e2 = null;
+			var semic = false;
+			var tk = this.token();
+			if(tk == hscript_Token.TSemicolon) {
+				semic = true;
+				tk = this.token();
+			}
+			if(Type.enumEq(tk,hscript_Token.TId("else"))) {
+				e2 = this.parseExpr();
+			} else {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				if(semic) {
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(hscript_Token.TSemicolon,_this.head);
+				}
+			}
+			return hscript_Expr.EIf(cond,e1,e2);
+		case "inline":
+			if(!this.maybe(hscript_Token.TId("function"))) {
+				this.unexpected(hscript_Token.TId("inline"));
+			}
+			return this.parseStructure("function");
+		case "new":
+			var a = [];
+			a.push(this.getIdent());
+			_hx_loop1: while(true) {
+				var tk = this.token();
+				if(tk == null) {
+					this.unexpected(tk);
+					break;
+				} else {
+					switch(tk._hx_index) {
+					case 4:
+						break _hx_loop1;
+					case 8:
+						a.push(this.getIdent());
+						break;
+					default:
+						this.unexpected(tk);
+						break _hx_loop1;
+					}
+				}
+			}
+			var args = this.parseExprList(hscript_Token.TPClose);
+			return hscript_Expr.ENew(a.join("."),args);
+		case "return":
+			var tk = this.token();
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			var e = tk == hscript_Token.TSemicolon ? null : this.parseExpr();
+			return hscript_Expr.EReturn(e);
+		case "switch":
+			var e = this.parseExpr();
+			var def = null;
+			var cases = [];
+			var t = this.token();
+			if(t != hscript_Token.TBrOpen) {
+				this.unexpected(t);
+			}
+			_hx_loop2: while(true) {
+				var tk = this.token();
+				if(tk == null) {
+					this.unexpected(tk);
+					break;
+				} else {
+					switch(tk._hx_index) {
+					case 2:
+						switch(tk.s) {
+						case "case":
+							var c = { values : [], expr : null};
+							cases.push(c);
+							_hx_loop3: while(true) {
+								var e1 = this.parseExpr();
+								c.values.push(e1);
+								tk = this.token();
+								if(tk == null) {
+									this.unexpected(tk);
+									break;
+								} else {
+									switch(tk._hx_index) {
+									case 9:
+										break;
+									case 14:
+										break _hx_loop3;
+									default:
+										this.unexpected(tk);
+										break _hx_loop3;
+									}
+								}
+							}
+							var exprs = [];
+							_hx_loop4: while(true) {
+								tk = this.token();
+								var _this = this.tokens;
+								_this.head = new haxe_ds_GenericCell(tk,_this.head);
+								if(tk == null) {
+									this.parseFullExpr(exprs);
+								} else {
+									switch(tk._hx_index) {
+									case 0:
+										if(this.resumeErrors) {
+											break _hx_loop4;
+										} else {
+											this.parseFullExpr(exprs);
+										}
+										break;
+									case 2:
+										switch(tk.s) {
+										case "case":case "default":
+											break _hx_loop4;
+										default:
+											this.parseFullExpr(exprs);
+										}
+										break;
+									case 7:
+										break _hx_loop4;
+									default:
+										this.parseFullExpr(exprs);
+									}
+								}
+							}
+							c.expr = exprs.length == 1 ? exprs[0] : exprs.length == 0 ? hscript_Expr.EBlock([]) : hscript_Expr.EBlock(exprs);
+							break;
+						case "default":
+							if(def != null) {
+								this.unexpected(tk);
+							}
+							var t = this.token();
+							if(t != hscript_Token.TDoubleDot) {
+								this.unexpected(t);
+							}
+							var exprs1 = [];
+							_hx_loop5: while(true) {
+								tk = this.token();
+								var _this1 = this.tokens;
+								_this1.head = new haxe_ds_GenericCell(tk,_this1.head);
+								if(tk == null) {
+									this.parseFullExpr(exprs1);
+								} else {
+									switch(tk._hx_index) {
+									case 0:
+										if(this.resumeErrors) {
+											break _hx_loop5;
+										} else {
+											this.parseFullExpr(exprs1);
+										}
+										break;
+									case 2:
+										switch(tk.s) {
+										case "case":case "default":
+											break _hx_loop5;
+										default:
+											this.parseFullExpr(exprs1);
+										}
+										break;
+									case 7:
+										break _hx_loop5;
+									default:
+										this.parseFullExpr(exprs1);
+									}
+								}
+							}
+							def = exprs1.length == 1 ? exprs1[0] : exprs1.length == 0 ? hscript_Expr.EBlock([]) : hscript_Expr.EBlock(exprs1);
+							break;
+						default:
+							this.unexpected(tk);
+							break _hx_loop2;
+						}
+						break;
+					case 7:
+						break _hx_loop2;
+					default:
+						this.unexpected(tk);
+						break _hx_loop2;
+					}
+				}
+			}
+			return hscript_Expr.ESwitch(e,cases,def);
+		case "throw":
+			var e = this.parseExpr();
+			return hscript_Expr.EThrow(e);
+		case "try":
+			var e = this.parseExpr();
+			var t = this.token();
+			if(!Type.enumEq(t,hscript_Token.TId("catch"))) {
+				this.unexpected(t);
+			}
+			var t = this.token();
+			if(t != hscript_Token.TPOpen) {
+				this.unexpected(t);
+			}
+			var vname = this.getIdent();
+			var t = this.token();
+			if(t != hscript_Token.TDoubleDot) {
+				this.unexpected(t);
+			}
+			var t = null;
+			if(this.allowTypes) {
+				t = this.parseType();
+			} else {
+				var t1 = this.token();
+				if(!Type.enumEq(t1,hscript_Token.TId("Dynamic"))) {
+					this.unexpected(t1);
+				}
+			}
+			var t1 = this.token();
+			if(t1 != hscript_Token.TPClose) {
+				this.unexpected(t1);
+			}
+			var ec = this.parseExpr();
+			return hscript_Expr.ETry(e,vname,t,ec);
+		case "var":
+			var ident = this.getIdent();
+			var tk = this.token();
+			var t = null;
+			if(tk == hscript_Token.TDoubleDot && this.allowTypes) {
+				t = this.parseType();
+				tk = this.token();
+			}
+			var e = null;
+			if(Type.enumEq(tk,hscript_Token.TOp("="))) {
+				e = this.parseExpr();
+			} else {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			}
+			return hscript_Expr.EVar(ident,t,e);
+		case "while":
+			var econd = this.parseExpr();
+			var e = this.parseExpr();
+			return hscript_Expr.EWhile(econd,e);
+		default:
+			return null;
+		}
+	}
+	,parseExprNext: function(e1) {
+		var tk = this.token();
+		if(tk == null) {
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			return e1;
+		} else {
+			switch(tk._hx_index) {
+			case 3:
+				var op = tk.s;
+				if(op == "->") {
+					switch(e1._hx_index) {
+					case 1:
+						var i = e1.v;
+						var eret = this.parseExpr();
+						return hscript_Expr.EFunction([{ name : i}],hscript_Expr.EReturn(eret));
+					case 3:
+						var _hx_tmp = e1.e;
+						if(_hx_tmp._hx_index == 1) {
+							var i = _hx_tmp.v;
+							var eret = this.parseExpr();
+							return hscript_Expr.EFunction([{ name : i}],hscript_Expr.EReturn(eret));
+						}
+						break;
+					case 26:
+						var _hx_tmp = e1.e;
+						if(_hx_tmp._hx_index == 1) {
+							var i = _hx_tmp.v;
+							var t = e1.t;
+							var eret = this.parseExpr();
+							return hscript_Expr.EFunction([{ name : i, t : t}],hscript_Expr.EReturn(eret));
+						}
+						break;
+					default:
+					}
+					this.unexpected(tk);
+				}
+				if(this.unops.h[op]) {
+					var tmp;
+					if(!this.isBlock(e1)) {
+						if(e1._hx_index == 3) {
+							var _g = e1.e;
+							tmp = true;
+						} else {
+							tmp = false;
+						}
+					} else {
+						tmp = true;
+					}
+					if(tmp) {
+						var _this = this.tokens;
+						_this.head = new haxe_ds_GenericCell(tk,_this.head);
+						return e1;
+					}
+					return this.parseExprNext(hscript_Expr.EUnop(op,false,e1));
+				}
+				return this.makeBinop(op,e1,this.parseExpr());
+			case 4:
+				return this.parseExprNext(hscript_Expr.ECall(e1,this.parseExprList(hscript_Token.TPClose)));
+			case 8:
+				var field = this.getIdent();
+				return this.parseExprNext(hscript_Expr.EField(e1,field));
+			case 11:
+				var e2 = this.parseExpr();
+				var t = this.token();
+				if(t != hscript_Token.TBkClose) {
+					this.unexpected(t);
+				}
+				return this.parseExprNext(hscript_Expr.EArray(e1,e2));
+			case 13:
+				var e2 = this.parseExpr();
+				var t = this.token();
+				if(t != hscript_Token.TDoubleDot) {
+					this.unexpected(t);
+				}
+				var e3 = this.parseExpr();
+				return hscript_Expr.ETernary(e1,e2,e3);
+			default:
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				return e1;
+			}
+		}
+	}
+	,parseFunctionArgs: function() {
+		var args = [];
+		var tk = this.token();
+		if(tk != hscript_Token.TPClose) {
+			var done = false;
+			while(!done) {
+				var name = null;
+				var opt = false;
+				if(tk != null) {
+					if(tk._hx_index == 13) {
+						opt = true;
+						tk = this.token();
+					}
+				}
+				if(tk == null) {
+					this.unexpected(tk);
+					break;
+				} else if(tk._hx_index == 2) {
+					var id = tk.s;
+					name = id;
+				} else {
+					this.unexpected(tk);
+					break;
+				}
+				var arg = { name : name};
+				args.push(arg);
+				if(opt) {
+					arg.opt = true;
+				}
+				if(this.allowTypes) {
+					if(this.maybe(hscript_Token.TDoubleDot)) {
+						arg.t = this.parseType();
+					}
+					if(this.maybe(hscript_Token.TOp("="))) {
+						arg.value = this.parseExpr();
+					}
+				}
+				tk = this.token();
+				if(tk == null) {
+					this.unexpected(tk);
+				} else {
+					switch(tk._hx_index) {
+					case 5:
+						done = true;
+						break;
+					case 9:
+						tk = this.token();
+						break;
+					default:
+						this.unexpected(tk);
+					}
+				}
+			}
+		}
+		return args;
+	}
+	,parseFunctionDecl: function() {
+		var t = this.token();
+		if(t != hscript_Token.TPOpen) {
+			this.unexpected(t);
+		}
+		var args = this.parseFunctionArgs();
+		var ret = null;
+		if(this.allowTypes) {
+			var tk = this.token();
+			if(tk != hscript_Token.TDoubleDot) {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			} else {
+				ret = this.parseType();
+			}
+		}
+		return { args : args, ret : ret, body : this.parseExpr()};
+	}
+	,parsePath: function() {
+		var path = [this.getIdent()];
+		while(true) {
+			var t = this.token();
+			if(t != hscript_Token.TDot) {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(t,_this.head);
+				break;
+			}
+			path.push(this.getIdent());
+		}
+		return path;
+	}
+	,parseType: function() {
+		var _gthis = this;
+		var t = this.token();
+		if(t == null) {
+			return this.unexpected(t);
+		} else {
+			switch(t._hx_index) {
+			case 2:
+				var v = t.s;
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(t,_this.head);
+				var path = this.parsePath();
+				var params = null;
+				t = this.token();
+				if(t == null) {
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(t,_this.head);
+				} else if(t._hx_index == 3) {
+					var op = t.s;
+					if(op == "<") {
+						params = [];
+						_hx_loop1: while(true) {
+							params.push(this.parseType());
+							t = this.token();
+							if(t != null) {
+								switch(t._hx_index) {
+								case 3:
+									var op = t.s;
+									if(op == ">") {
+										break _hx_loop1;
+									}
+									if(HxOverrides.cca(op,0) == 62) {
+										var _this = this.tokens;
+										_this.head = new haxe_ds_GenericCell(hscript_Token.TOp(HxOverrides.substr(op,1,null)),_this.head);
+										break _hx_loop1;
+									}
+									break;
+								case 9:
+									continue;
+								default:
+								}
+							}
+							this.unexpected(t);
+							break;
+						}
+					} else {
+						var _this = this.tokens;
+						_this.head = new haxe_ds_GenericCell(t,_this.head);
+					}
+				} else {
+					var _this = this.tokens;
+					_this.head = new haxe_ds_GenericCell(t,_this.head);
+				}
+				return this.parseTypeNext(hscript_CType.CTPath(path,params));
+			case 4:
+				var a = this.token();
+				var b = this.token();
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(b,_this.head);
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(a,_this.head);
+				var withReturn = function(args) {
+					var _g = _gthis.token();
+					if(_g == null) {
+						var t = _g;
+						_gthis.unexpected(t);
+					} else if(_g._hx_index == 3) {
+						if(_g.s != "->") {
+							var t = _g;
+							_gthis.unexpected(t);
+						}
+					} else {
+						var t = _g;
+						_gthis.unexpected(t);
+					}
+					return hscript_CType.CTFun(args,_gthis.parseType());
+				};
+				if(a == null) {
+					var t1 = this.parseType();
+					var _g = this.token();
+					if(_g == null) {
+						var t2 = _g;
+						return this.unexpected(t2);
+					} else {
+						switch(_g._hx_index) {
+						case 5:
+							return this.parseTypeNext(hscript_CType.CTParent(t1));
+						case 9:
+							var args = [t1];
+							while(true) {
+								args.push(this.parseType());
+								if(!this.maybe(hscript_Token.TComma)) {
+									break;
+								}
+							}
+							var t1 = this.token();
+							if(t1 != hscript_Token.TPClose) {
+								this.unexpected(t1);
+							}
+							return withReturn(args);
+						default:
+							var t1 = _g;
+							return this.unexpected(t1);
+						}
+					}
+				} else {
+					switch(a._hx_index) {
+					case 2:
+						var _g = a.s;
+						if(b == null) {
+							var t1 = this.parseType();
+							var _g = this.token();
+							if(_g == null) {
+								var t2 = _g;
+								return this.unexpected(t2);
+							} else {
+								switch(_g._hx_index) {
+								case 5:
+									return this.parseTypeNext(hscript_CType.CTParent(t1));
+								case 9:
+									var args = [t1];
+									while(true) {
+										args.push(this.parseType());
+										if(!this.maybe(hscript_Token.TComma)) {
+											break;
+										}
+									}
+									var t1 = this.token();
+									if(t1 != hscript_Token.TPClose) {
+										this.unexpected(t1);
+									}
+									return withReturn(args);
+								default:
+									var t1 = _g;
+									return this.unexpected(t1);
+								}
+							}
+						} else if(b._hx_index == 14) {
+							var _g = [];
+							var _g1 = 0;
+							var _g2 = this.parseFunctionArgs();
+							while(_g1 < _g2.length) {
+								var arg = _g2[_g1];
+								++_g1;
+								var _g3 = arg.value;
+								if(_g3 != null) {
+									var v = _g3;
+									if(!this.resumeErrors) {
+										throw haxe_Exception.thrown(hscript_Error.ECustom("Default values not allowed in function types"));
+									}
+								}
+								_g.push(hscript_CType.CTNamed(arg.name,arg.opt ? hscript_CType.CTOpt(arg.t) : arg.t));
+							}
+							var args = _g;
+							return withReturn(args);
+						} else {
+							var t1 = this.parseType();
+							var _g = this.token();
+							if(_g == null) {
+								var t2 = _g;
+								return this.unexpected(t2);
+							} else {
+								switch(_g._hx_index) {
+								case 5:
+									return this.parseTypeNext(hscript_CType.CTParent(t1));
+								case 9:
+									var args = [t1];
+									while(true) {
+										args.push(this.parseType());
+										if(!this.maybe(hscript_Token.TComma)) {
+											break;
+										}
+									}
+									var t1 = this.token();
+									if(t1 != hscript_Token.TPClose) {
+										this.unexpected(t1);
+									}
+									return withReturn(args);
+								default:
+									var t1 = _g;
+									return this.unexpected(t1);
+								}
+							}
+						}
+						break;
+					case 5:
+						var _g = [];
+						var _g1 = 0;
+						var _g2 = this.parseFunctionArgs();
+						while(_g1 < _g2.length) {
+							var arg = _g2[_g1];
+							++_g1;
+							var _g3 = arg.value;
+							if(_g3 != null) {
+								var v = _g3;
+								if(!this.resumeErrors) {
+									throw haxe_Exception.thrown(hscript_Error.ECustom("Default values not allowed in function types"));
+								}
+							}
+							_g.push(hscript_CType.CTNamed(arg.name,arg.opt ? hscript_CType.CTOpt(arg.t) : arg.t));
+						}
+						var args = _g;
+						return withReturn(args);
+					default:
+						var t1 = this.parseType();
+						var _g = this.token();
+						if(_g == null) {
+							var t2 = _g;
+							return this.unexpected(t2);
+						} else {
+							switch(_g._hx_index) {
+							case 5:
+								return this.parseTypeNext(hscript_CType.CTParent(t1));
+							case 9:
+								var args = [t1];
+								while(true) {
+									args.push(this.parseType());
+									if(!this.maybe(hscript_Token.TComma)) {
+										break;
+									}
+								}
+								var t1 = this.token();
+								if(t1 != hscript_Token.TPClose) {
+									this.unexpected(t1);
+								}
+								return withReturn(args);
+							default:
+								var t1 = _g;
+								return this.unexpected(t1);
+							}
+						}
+					}
+				}
+				break;
+			case 6:
+				var fields = [];
+				var meta = null;
+				_hx_loop8: while(true) {
+					t = this.token();
+					if(t == null) {
+						this.unexpected(t);
+						break;
+					} else {
+						switch(t._hx_index) {
+						case 2:
+							var _g = t.s;
+							if(_g == "var") {
+								var name = this.getIdent();
+								var t1 = this.token();
+								if(t1 != hscript_Token.TDoubleDot) {
+									this.unexpected(t1);
+								}
+								fields.push({ name : name, t : this.parseType(), meta : meta});
+								meta = null;
+								var t2 = this.token();
+								if(t2 != hscript_Token.TSemicolon) {
+									this.unexpected(t2);
+								}
+							} else {
+								var name1 = _g;
+								var t3 = this.token();
+								if(t3 != hscript_Token.TDoubleDot) {
+									this.unexpected(t3);
+								}
+								fields.push({ name : name1, t : this.parseType(), meta : meta});
+								t = this.token();
+								if(t == null) {
+									this.unexpected(t);
+								} else {
+									switch(t._hx_index) {
+									case 7:
+										break _hx_loop8;
+									case 9:
+										break;
+									default:
+										this.unexpected(t);
+									}
+								}
+							}
+							break;
+						case 7:
+							break _hx_loop8;
+						case 15:
+							var name2 = t.s;
+							if(meta == null) {
+								meta = [];
+							}
+							meta.push({ name : name2, params : this.parseMetaArgs()});
+							break;
+						default:
+							this.unexpected(t);
+							break _hx_loop8;
+						}
+					}
+				}
+				return this.parseTypeNext(hscript_CType.CTAnon(fields));
+			default:
+				return this.unexpected(t);
+			}
+		}
+	}
+	,parseTypeNext: function(t) {
+		var tk = this.token();
+		if(tk == null) {
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			return t;
+		} else if(tk._hx_index == 3) {
+			var op = tk.s;
+			if(op != "->") {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				return t;
+			}
+		} else {
+			var _this = this.tokens;
+			_this.head = new haxe_ds_GenericCell(tk,_this.head);
+			return t;
+		}
+		var t2 = this.parseType();
+		if(t2._hx_index == 1) {
+			var _g = t2.ret;
+			var args = t2.args;
+			args.unshift(t);
+			return t2;
+		} else {
+			return hscript_CType.CTFun([t],t2);
+		}
+	}
+	,parseExprList: function(etk) {
+		var args = [];
+		var tk = this.token();
+		if(tk == etk) {
+			return args;
+		}
+		var _this = this.tokens;
+		_this.head = new haxe_ds_GenericCell(tk,_this.head);
+		while(true) {
+			args.push(this.parseExpr());
+			tk = this.token();
+			if(tk == null) {
+				if(tk == etk) {
+					break;
+				}
+				this.unexpected(tk);
+				break;
+			} else if(tk._hx_index != 9) {
+				if(tk == etk) {
+					break;
+				}
+				this.unexpected(tk);
+				break;
+			}
+		}
+		return args;
+	}
+	,readString: function(until) {
+		var c = 0;
+		var b_b = "";
+		var esc = false;
+		var old = this.line;
+		var s = this.input;
+		while(true) {
+			var c = this.input.charCodeAt(this.readPos++);
+			if(c != c) {
+				this.line = old;
+				if(!this.resumeErrors) {
+					throw haxe_Exception.thrown(hscript_Error.EUnterminatedString);
+				}
+				break;
+			}
+			if(esc) {
+				esc = false;
+				switch(c) {
+				case 34:case 39:case 92:
+					b_b += String.fromCodePoint(c);
+					break;
+				case 47:
+					if(this.allowJSON) {
+						b_b += String.fromCodePoint(c);
+					} else {
+						this.invalidChar(c);
+					}
+					break;
+				case 110:
+					b_b += String.fromCodePoint(10);
+					break;
+				case 114:
+					b_b += String.fromCodePoint(13);
+					break;
+				case 116:
+					b_b += String.fromCodePoint(9);
+					break;
+				case 117:
+					if(!this.allowJSON) {
+						this.invalidChar(c);
+					}
+					var k = 0;
+					var _g = 0;
+					while(_g < 4) {
+						var i = _g++;
+						k <<= 4;
+						var char = this.input.charCodeAt(this.readPos++);
+						switch(char) {
+						case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+							k += char - 48;
+							break;
+						case 65:case 66:case 67:case 68:case 69:case 70:
+							k += char - 55;
+							break;
+						case 97:case 98:case 99:case 100:case 101:case 102:
+							k += char - 87;
+							break;
+						default:
+							if(char != char) {
+								this.line = old;
+								if(!this.resumeErrors) {
+									throw haxe_Exception.thrown(hscript_Error.EUnterminatedString);
+								}
+							}
+							this.invalidChar(char);
+						}
+					}
+					b_b += String.fromCodePoint(k);
+					break;
+				default:
+					this.invalidChar(c);
+				}
+			} else if(c == 92) {
+				esc = true;
+			} else if(c == until) {
+				break;
+			} else {
+				if(c == 10) {
+					this.line++;
+				}
+				b_b += String.fromCodePoint(c);
+			}
+		}
+		return b_b;
+	}
+	,token: function() {
+		if(this.tokens.head != null) {
+			var _this = this.tokens;
+			var k = _this.head;
+			if(k == null) {
+				return null;
+			} else {
+				_this.head = k.next;
+				return k.elt;
+			}
+		}
+		var char;
+		if(this.char < 0) {
+			char = this.input.charCodeAt(this.readPos++);
+		} else {
+			char = this.char;
+			this.char = -1;
+		}
+		while(true) {
+			if(char != char) {
+				this.char = char;
+				return hscript_Token.TEof;
+			}
+			switch(char) {
+			case 0:
+				return hscript_Token.TEof;
+			case 10:
+				this.line++;
+				break;
+			case 9:case 13:case 32:
+				break;
+			case 35:
+				char = this.input.charCodeAt(this.readPos++);
+				if(this.idents[char]) {
+					var id = String.fromCodePoint(char);
+					while(true) {
+						char = this.input.charCodeAt(this.readPos++);
+						if(!this.idents[char]) {
+							this.char = char;
+							return this.preprocess(id);
+						}
+						id += String.fromCodePoint(char);
+					}
+				}
+				this.invalidChar(char);
+				break;
+			case 34:case 39:
+				return hscript_Token.TConst(hscript_Const.CString(this.readString(char)));
+			case 40:
+				return hscript_Token.TPOpen;
+			case 41:
+				return hscript_Token.TPClose;
+			case 44:
+				return hscript_Token.TComma;
+			case 46:
+				char = this.input.charCodeAt(this.readPos++);
+				switch(char) {
+				case 46:
+					char = this.input.charCodeAt(this.readPos++);
+					if(char != 46) {
+						this.invalidChar(char);
+					}
+					return hscript_Token.TOp("...");
+				case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+					var n = char - 48;
+					var exp = 1;
+					while(true) {
+						char = this.input.charCodeAt(this.readPos++);
+						exp *= 10;
+						switch(char) {
+						case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+							n = n * 10 + (char - 48);
+							break;
+						default:
+							this.char = char;
+							return hscript_Token.TConst(hscript_Const.CFloat(n / exp));
+						}
+					}
+					break;
+				default:
+					this.char = char;
+					return hscript_Token.TDot;
+				}
+				break;
+			case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+				var n1 = (char - 48) * 1.0;
+				var exp1 = 0.;
+				while(true) {
+					char = this.input.charCodeAt(this.readPos++);
+					exp1 *= 10;
+					switch(char) {
+					case 46:
+						if(exp1 > 0) {
+							if(exp1 == 10 && this.input.charCodeAt(this.readPos++) == 46) {
+								var _this = this.tokens;
+								_this.head = new haxe_ds_GenericCell(hscript_Token.TOp("..."),_this.head);
+								var i = n1 | 0;
+								return hscript_Token.TConst(i == n1 ? hscript_Const.CInt(i) : hscript_Const.CFloat(n1));
+							}
+							this.invalidChar(char);
+						}
+						exp1 = 1.;
+						break;
+					case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+						n1 = n1 * 10 + (char - 48);
+						break;
+					case 69:case 101:
+						var tk = this.token();
+						var pow = null;
+						if(tk == null) {
+							var _this1 = this.tokens;
+							_this1.head = new haxe_ds_GenericCell(tk,_this1.head);
+						} else {
+							switch(tk._hx_index) {
+							case 1:
+								var _g = tk.c;
+								if(_g._hx_index == 0) {
+									var e = _g.v;
+									pow = e;
+								} else {
+									var _this2 = this.tokens;
+									_this2.head = new haxe_ds_GenericCell(tk,_this2.head);
+								}
+								break;
+							case 3:
+								if(tk.s == "-") {
+									tk = this.token();
+									if(tk == null) {
+										var _this3 = this.tokens;
+										_this3.head = new haxe_ds_GenericCell(tk,_this3.head);
+									} else if(tk._hx_index == 1) {
+										var _g1 = tk.c;
+										if(_g1._hx_index == 0) {
+											var e1 = _g1.v;
+											pow = -e1;
+										} else {
+											var _this4 = this.tokens;
+											_this4.head = new haxe_ds_GenericCell(tk,_this4.head);
+										}
+									} else {
+										var _this5 = this.tokens;
+										_this5.head = new haxe_ds_GenericCell(tk,_this5.head);
+									}
+								} else {
+									var _this6 = this.tokens;
+									_this6.head = new haxe_ds_GenericCell(tk,_this6.head);
+								}
+								break;
+							default:
+								var _this7 = this.tokens;
+								_this7.head = new haxe_ds_GenericCell(tk,_this7.head);
+							}
+						}
+						if(pow == null) {
+							this.invalidChar(char);
+						}
+						return hscript_Token.TConst(hscript_Const.CFloat(Math.pow(10,pow) / exp1 * n1 * 10));
+					case 120:
+						if(n1 > 0 || exp1 > 0) {
+							this.invalidChar(char);
+						}
+						var n2 = 0;
+						while(true) {
+							char = this.input.charCodeAt(this.readPos++);
+							switch(char) {
+							case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:
+								n2 = (n2 << 4) + char - 48;
+								break;
+							case 65:case 66:case 67:case 68:case 69:case 70:
+								n2 = (n2 << 4) + (char - 55);
+								break;
+							case 97:case 98:case 99:case 100:case 101:case 102:
+								n2 = (n2 << 4) + (char - 87);
+								break;
+							default:
+								this.char = char;
+								return hscript_Token.TConst(hscript_Const.CInt(n2));
+							}
+						}
+						break;
+					default:
+						this.char = char;
+						var i1 = n1 | 0;
+						return hscript_Token.TConst(exp1 > 0 ? hscript_Const.CFloat(n1 * 10 / exp1) : i1 == n1 ? hscript_Const.CInt(i1) : hscript_Const.CFloat(n1));
+					}
+				}
+				break;
+			case 58:
+				return hscript_Token.TDoubleDot;
+			case 59:
+				return hscript_Token.TSemicolon;
+			case 61:
+				char = this.input.charCodeAt(this.readPos++);
+				if(char == 61) {
+					return hscript_Token.TOp("==");
+				} else if(char == 62) {
+					return hscript_Token.TOp("=>");
+				}
+				this.char = char;
+				return hscript_Token.TOp("=");
+			case 63:
+				return hscript_Token.TQuestion;
+			case 64:
+				char = this.input.charCodeAt(this.readPos++);
+				if(this.idents[char] || char == 58) {
+					var id1 = String.fromCodePoint(char);
+					while(true) {
+						char = this.input.charCodeAt(this.readPos++);
+						if(!this.idents[char]) {
+							this.char = char;
+							return hscript_Token.TMeta(id1);
+						}
+						id1 += String.fromCodePoint(char);
+					}
+				}
+				this.invalidChar(char);
+				break;
+			case 91:
+				return hscript_Token.TBkOpen;
+			case 93:
+				return hscript_Token.TBkClose;
+			case 123:
+				return hscript_Token.TBrOpen;
+			case 125:
+				return hscript_Token.TBrClose;
+			default:
+				if(this.ops[char]) {
+					var op = String.fromCodePoint(char);
+					var prev = -1;
+					while(true) {
+						char = this.input.charCodeAt(this.readPos++);
+						if(char != char) {
+							char = 0;
+						}
+						if(!this.ops[char] || prev == 61) {
+							if(HxOverrides.cca(op,0) == 47) {
+								return this.tokenComment(op,char);
+							}
+							this.char = char;
+							return hscript_Token.TOp(op);
+						}
+						prev = char;
+						op += String.fromCodePoint(char);
+					}
+				}
+				if(this.idents[char]) {
+					var id2 = String.fromCodePoint(char);
+					while(true) {
+						char = this.input.charCodeAt(this.readPos++);
+						if(char != char) {
+							char = 0;
+						}
+						if(!this.idents[char]) {
+							this.char = char;
+							return hscript_Token.TId(id2);
+						}
+						id2 += String.fromCodePoint(char);
+					}
+				}
+				this.invalidChar(char);
+			}
+			char = this.input.charCodeAt(this.readPos++);
+		}
+	}
+	,preprocValue: function(id) {
+		return this.preprocesorValues.h[id];
+	}
+	,parsePreproCond: function() {
+		var tk = this.token();
+		if(tk == null) {
+			return this.unexpected(tk);
+		} else {
+			switch(tk._hx_index) {
+			case 2:
+				var id = tk.s;
+				return hscript_Expr.EIdent(id);
+			case 3:
+				if(tk.s == "!") {
+					return hscript_Expr.EUnop("!",true,this.parsePreproCond());
+				} else {
+					return this.unexpected(tk);
+				}
+				break;
+			case 4:
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(hscript_Token.TPOpen,_this.head);
+				return this.parseExpr();
+			default:
+				return this.unexpected(tk);
+			}
+		}
+	}
+	,evalPreproCond: function(e) {
+		switch(e._hx_index) {
+		case 1:
+			var id = e.v;
+			return this.preprocValue(id) != null;
+		case 3:
+			var e1 = e.e;
+			return this.evalPreproCond(e1);
+		case 6:
+			var _g = e.e1;
+			var _g1 = e.e2;
+			switch(e.op) {
+			case "&&":
+				var e1 = _g;
+				var e2 = _g1;
+				if(this.evalPreproCond(e1)) {
+					return this.evalPreproCond(e2);
+				} else {
+					return false;
+				}
+				break;
+			case "||":
+				var e1 = _g;
+				var e2 = _g1;
+				if(!this.evalPreproCond(e1)) {
+					return this.evalPreproCond(e2);
+				} else {
+					return true;
+				}
+				break;
+			default:
+				if(!this.resumeErrors) {
+					throw haxe_Exception.thrown(hscript_Error.EInvalidPreprocessor("Can't eval " + $hxEnums[e.__enum__].__constructs__[e._hx_index]._hx_name));
+				}
+				return false;
+			}
+			break;
+		case 7:
+			var _g = e.prefix;
+			if(e.op == "!") {
+				var e1 = e.e;
+				return !this.evalPreproCond(e1);
+			} else {
+				if(!this.resumeErrors) {
+					throw haxe_Exception.thrown(hscript_Error.EInvalidPreprocessor("Can't eval " + $hxEnums[e.__enum__].__constructs__[e._hx_index]._hx_name));
+				}
+				return false;
+			}
+			break;
+		default:
+			if(!this.resumeErrors) {
+				throw haxe_Exception.thrown(hscript_Error.EInvalidPreprocessor("Can't eval " + $hxEnums[e.__enum__].__constructs__[e._hx_index]._hx_name));
+			}
+			return false;
+		}
+	}
+	,preprocess: function(id) {
+		switch(id) {
+		case "else":case "elseif":
+			if(this.preprocStack.length > 0) {
+				if(this.preprocStack[this.preprocStack.length - 1].r) {
+					this.preprocStack[this.preprocStack.length - 1].r = false;
+					this.skipTokens();
+					return this.token();
+				} else if(id == "else") {
+					this.preprocStack.pop();
+					this.preprocStack.push({ r : true});
+					return this.token();
+				} else {
+					this.preprocStack.pop();
+					return this.preprocess("if");
+				}
+			} else {
+				return hscript_Token.TPrepro(id);
+			}
+			break;
+		case "end":
+			if(this.preprocStack.length > 0) {
+				this.preprocStack.pop();
+				return this.token();
+			} else {
+				return hscript_Token.TPrepro(id);
+			}
+			break;
+		case "if":
+			var e = this.parsePreproCond();
+			if(this.evalPreproCond(e)) {
+				this.preprocStack.push({ r : true});
+				return this.token();
+			}
+			this.preprocStack.push({ r : false});
+			this.skipTokens();
+			return this.token();
+		default:
+			return hscript_Token.TPrepro(id);
+		}
+	}
+	,skipTokens: function() {
+		var spos = this.preprocStack.length - 1;
+		var obj = this.preprocStack[spos];
+		var pos = this.readPos;
+		while(true) {
+			var tk = this.token();
+			if(tk == hscript_Token.TEof) {
+				if(!this.resumeErrors) {
+					throw haxe_Exception.thrown(hscript_Error.EInvalidPreprocessor("Unclosed"));
+				}
+			}
+			if(this.preprocStack[spos] != obj) {
+				var _this = this.tokens;
+				_this.head = new haxe_ds_GenericCell(tk,_this.head);
+				break;
+			}
+		}
+	}
+	,tokenComment: function(op,char) {
+		var c = HxOverrides.cca(op,1);
+		var s = this.input;
+		if(c == 47) {
+			while(char != 13 && char != 10) {
+				char = this.input.charCodeAt(this.readPos++);
+				if(char != char) {
+					break;
+				}
+			}
+			this.char = char;
+			return this.token();
+		}
+		if(c == 42) {
+			var old = this.line;
+			if(op == "/**/") {
+				this.char = char;
+				return this.token();
+			}
+			while(true) {
+				while(char != 42) {
+					if(char == 10) {
+						this.line++;
+					}
+					char = this.input.charCodeAt(this.readPos++);
+					if(char != char) {
+						this.line = old;
+						if(!this.resumeErrors) {
+							throw haxe_Exception.thrown(hscript_Error.EUnterminatedComment);
+						}
+						break;
+					}
+				}
+				char = this.input.charCodeAt(this.readPos++);
+				if(char != char) {
+					this.line = old;
+					if(!this.resumeErrors) {
+						throw haxe_Exception.thrown(hscript_Error.EUnterminatedComment);
+					}
+					break;
+				}
+				if(char == 47) {
+					break;
+				}
+			}
+			return this.token();
+		}
+		this.char = char;
+		return hscript_Token.TOp(op);
+	}
+	,constString: function(c) {
+		switch(c._hx_index) {
+		case 0:
+			var v = c.v;
+			if(v == null) {
+				return "null";
+			} else {
+				return "" + v;
+			}
+			break;
+		case 1:
+			var f = c.f;
+			if(f == null) {
+				return "null";
+			} else {
+				return "" + f;
+			}
+			break;
+		case 2:
+			var s = c.s;
+			return s;
+		}
+	}
+	,tokenString: function(t) {
+		switch(t._hx_index) {
+		case 0:
+			return "<eof>";
+		case 1:
+			var c = t.c;
+			return this.constString(c);
+		case 2:
+			var s = t.s;
+			return s;
+		case 3:
+			var s = t.s;
+			return s;
+		case 4:
+			return "(";
+		case 5:
+			return ")";
+		case 6:
+			return "{";
+		case 7:
+			return "}";
+		case 8:
+			return ".";
+		case 9:
+			return ",";
+		case 10:
+			return ";";
+		case 11:
+			return "[";
+		case 12:
+			return "]";
+		case 13:
+			return "?";
+		case 14:
+			return ":";
+		case 15:
+			var id = t.s;
+			return "@" + id;
+		case 16:
+			var id = t.s;
+			return "#" + id;
+		}
+	}
+	,__class__: hscript_Parser
+};
 var iron_App = function(done) {
 	done();
 	kha_System.notifyOnFrames(iron_App.render);
@@ -3434,6 +6394,18 @@ var iron_App = function(done) {
 };
 $hxClasses["iron.App"] = iron_App;
 iron_App.__name__ = true;
+iron_App.w = function() {
+	return kha_System.windowWidth();
+};
+iron_App.h = function() {
+	return kha_System.windowHeight();
+};
+iron_App.x = function() {
+	return 0;
+};
+iron_App.y = function() {
+	return 0;
+};
 iron_App.init = function(done) {
 	new iron_App(done);
 };
@@ -3489,18 +6461,18 @@ iron_App.update = function() {
 		}
 	}
 	if(iron_App.lastw == -1) {
-		iron_App.lastw = kha_System.windowWidth();
-		iron_App.lasth = kha_System.windowHeight();
+		iron_App.lastw = iron_App.w();
+		iron_App.lasth = iron_App.h();
 	}
-	if(iron_App.lastw != kha_System.windowWidth() || iron_App.lasth != kha_System.windowHeight()) {
+	if(iron_App.lastw != iron_App.w() || iron_App.lasth != iron_App.h()) {
 		if(iron_App.onResize != null) {
 			iron_App.onResize();
 		} else if(iron_Scene.active != null && iron_Scene.active.camera != null) {
 			iron_Scene.active.camera.buildProjection();
 		}
 	}
-	iron_App.lastw = kha_System.windowWidth();
-	iron_App.lasth = kha_System.windowHeight();
+	iron_App.lastw = iron_App.w();
+	iron_App.lasth = iron_App.h();
 };
 iron_App.render = function(frames) {
 	var frame = frames[0];
@@ -3582,18 +6554,6 @@ iron_App.notifyOnRender2D = function(f) {
 iron_App.removeRender2D = function(f) {
 	HxOverrides.remove(iron_App.traitRenders2D,f);
 };
-iron_App.notifyOnReset = function(f) {
-	if(iron_App.onResets == null) {
-		iron_App.onResets = [];
-	}
-	iron_App.onResets.push(f);
-};
-iron_App.notifyOnEndFrame = function(f) {
-	if(iron_App.onEndFrames == null) {
-		iron_App.onEndFrames = [];
-	}
-	iron_App.onEndFrames.push(f);
-};
 iron_App.prototype = {
 	__class__: iron_App
 };
@@ -3656,14 +6616,14 @@ iron_RenderPath.prototype = {
 		return this.loading == 0;
 	}
 	,renderFrame: function(g) {
-		if(!this.get_ready() || this.paused || kha_System.windowWidth() == 0 || kha_System.windowHeight() == 0) {
+		if(!this.get_ready() || this.paused || iron_App.w() == 0 || iron_App.h() == 0) {
 			return;
 		}
-		if(this.lastW > 0 && (this.lastW != kha_System.windowWidth() || this.lastH != kha_System.windowHeight())) {
+		if(this.lastW > 0 && (this.lastW != iron_App.w() || this.lastH != iron_App.h())) {
 			this.resize();
 		}
-		this.lastW = kha_System.windowWidth();
-		this.lastH = kha_System.windowHeight();
+		this.lastW = iron_App.w();
+		this.lastH = iron_App.h();
 		this.frameTime = kha_Scheduler.time() - this.lastFrameTime;
 		this.lastFrameTime = kha_Scheduler.time();
 		var cam = iron_Scene.active.camera;
@@ -3677,8 +6637,8 @@ iron_RenderPath.prototype = {
 		} else {
 			this.frameG = g;
 		}
-		this.currentW = kha_System.windowWidth();
-		this.currentH = kha_System.windowHeight();
+		this.currentW = iron_App.w();
+		this.currentH = iron_App.h();
 		this.currentD = 1;
 		this.currentFace = -1;
 		this.meshesSorted = false;
@@ -3736,8 +6696,8 @@ iron_RenderPath.prototype = {
 					g.begin(additionalRenderTargets);
 				}
 			} else {
-				this.currentW = kha_System.windowWidth();
-				this.currentH = kha_System.windowHeight();
+				this.currentW = iron_App.w();
+				this.currentH = iron_App.h();
 				if(this.frameScissor) {
 					this.setFrameScissor();
 				}
@@ -3755,6 +6715,10 @@ iron_RenderPath.prototype = {
 				this.currentG = g;
 				this.additionalTargets = additionalRenderTargets;
 				g.begin(additionalRenderTargets);
+				if(!this.isProbe) {
+					this.setCurrentViewport(iron_App.w(),iron_App.h());
+					this.setCurrentScissor(iron_App.w(),iron_App.h());
+				}
 			}
 		} else {
 			var rt = this.renderTargets.h[target];
@@ -3815,10 +6779,10 @@ iron_RenderPath.prototype = {
 		rt.image.setDepthStencilFrom(this.renderTargets.h[from].image);
 	}
 	,setCurrentViewport: function(viewW,viewH) {
-		this.currentG.viewport(0,this.currentH - viewH,viewW,viewH);
+		this.currentG.viewport(iron_App.x(),this.currentH - (viewH - iron_App.y()),viewW,viewH);
 	}
 	,setCurrentScissor: function(viewW,viewH) {
-		this.currentG.scissor(0,this.currentH - viewH,viewW,viewH);
+		this.currentG.scissor(iron_App.x(),this.currentH - (viewH - iron_App.y()),viewW,viewH);
 		this.scissorSet = true;
 	}
 	,setFrameScissor: function() {
@@ -4102,8 +7066,8 @@ iron_RenderPath.prototype = {
 		return rt;
 	}
 	,createImage: function(t,depthStencil) {
-		var width = t.width == 0 ? kha_System.windowWidth() : t.width;
-		var height = t.height == 0 ? kha_System.windowHeight() : t.height;
+		var width = t.width == 0 ? iron_App.w() : t.width;
+		var height = t.height == 0 ? iron_App.h() : t.height;
 		var depth = t.depth != null ? t.depth : 0;
 		if(t.displayp != null) {
 			if(width > height) {
@@ -4549,7 +7513,7 @@ iron_Scene.createTraits = function(traits,object) {
 			}
 			var traitInst = iron_Scene.createTraitClassInstance(t.class_name,args);
 			if(traitInst == null) {
-				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 870, className : "iron.Scene", methodName : "createTraits"});
+				haxe_Log.trace("Error: Trait '" + t.class_name + "' referenced in object '" + object.name + "' not found",{ fileName : "Sources/iron/Scene.hx", lineNumber : 871, className : "iron.Scene", methodName : "createTraits"});
 				continue;
 			}
 			if(t.props != null) {
@@ -4610,6 +7574,8 @@ iron_Scene.parseArg = function(str) {
 			ar.push(iron_Scene.parseArg(v));
 		}
 		return ar;
+	} else if(str.charAt(0) == "{") {
+		return JSON.parse(str);
 	} else {
 		var f = parseFloat(str);
 		var i = Std.parseInt(str);
@@ -4793,7 +7759,6 @@ iron_Scene.prototype = {
 			parent.name = sceneName;
 		}
 		iron_data_Data.getSceneRaw(sceneName,function(format) {
-			iron_Scene.createTraits(format.traits,parent);
 			_gthis.loadEmbeddedData(format.embedded_datas,function() {
 				var objectsTraversed = 0;
 				var objectsCount = _gthis.getObjectsCount(format.objects);
@@ -4824,9 +7789,11 @@ iron_Scene.prototype = {
 					}
 				};
 				if(format.objects == null || format.objects.length == 0) {
+					iron_Scene.createTraits(format.traits,parent);
 					done(parent);
 				} else {
 					traverseObjects(parent,format.objects,null,function() {
+						iron_Scene.createTraits(format.traits,parent);
 						done(parent);
 					});
 				}
@@ -7660,6 +10627,7 @@ var iron_object_BoneAnimation = function(armatureName) {
 		armatureName = "";
 	}
 	this.onUpdates = null;
+	this.relativeBoneConstraints = false;
 	this.constraintMats = null;
 	this.constraintTargetsI = null;
 	this.constraintTargets = null;
@@ -7717,6 +10685,9 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 					_gthis.play(action.name);
 				});
 			}
+		}
+		if(this.object.parent.raw.relative_bone_constraints) {
+			this.relativeBoneConstraints = true;
 		}
 	}
 	,addBoneChild: function(bone,o) {
@@ -8159,14 +11130,7 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 			f.self._33 = a30 * b0 + a31 * b1 + a32 * b2 + a33 * b3;
 		}
 	}
-	,updateConstraints: function() {
-		if(this.data == null) {
-			return;
-		}
-		var cs = this.data.raw.skin.constraints;
-		if(cs == null) {
-			return;
-		}
+	,getConstraintsFromScene: function(cs) {
 		if(this.constraintTargets == null) {
 			this.constraintTargets = [];
 			this.constraintTargetsI = [];
@@ -8178,8 +11142,25 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				this.constraintTargets.push(o);
 				var m = null;
 				if(o != null) {
-					var a = o.raw.transform.values;
-					m = new iron_math_Mat4(a.getFloat32(0,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(4,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(8,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(12,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(16,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(20,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(24,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(28,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(32,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(36,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(40,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(44,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(48,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(52,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(56,kha_arrays_ByteArray.LITTLE_ENDIAN),a.getFloat32(60,kha_arrays_ByteArray.LITTLE_ENDIAN));
+					var _this = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+					var m1 = o.transform.world;
+					_this.self._00 = m1.self._00;
+					_this.self._01 = m1.self._01;
+					_this.self._02 = m1.self._02;
+					_this.self._03 = m1.self._03;
+					_this.self._10 = m1.self._10;
+					_this.self._11 = m1.self._11;
+					_this.self._12 = m1.self._12;
+					_this.self._13 = m1.self._13;
+					_this.self._20 = m1.self._20;
+					_this.self._21 = m1.self._21;
+					_this.self._22 = m1.self._22;
+					_this.self._23 = m1.self._23;
+					_this.self._30 = m1.self._30;
+					_this.self._31 = m1.self._31;
+					_this.self._32 = m1.self._32;
+					_this.self._33 = m1.self._33;
+					m = _this;
 					var a00 = m.self._00;
 					var a01 = m.self._01;
 					var a02 = m.self._02;
@@ -8249,6 +11230,126 @@ iron_object_BoneAnimation.prototype = $extend(iron_object_Animation.prototype,{
 				this.constraintTargetsI.push(m);
 			}
 			this.constraintMats = new haxe_ds_ObjectMap();
+		}
+	}
+	,getConstraintsFromParentRelative: function(cs) {
+		if(this.constraintTargets == null) {
+			this.constraintTargets = [];
+			this.constraintTargetsI = [];
+			var conParent = this.object.parent.parent;
+			if(conParent == null) {
+				return;
+			}
+			var _g = 0;
+			while(_g < cs.length) {
+				var c = cs[_g];
+				++_g;
+				var o = conParent.getChild(c.target);
+				this.constraintTargets.push(o);
+				var m = null;
+				if(o != null) {
+					var _this = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
+					var m1 = o.transform.world;
+					_this.self._00 = m1.self._00;
+					_this.self._01 = m1.self._01;
+					_this.self._02 = m1.self._02;
+					_this.self._03 = m1.self._03;
+					_this.self._10 = m1.self._10;
+					_this.self._11 = m1.self._11;
+					_this.self._12 = m1.self._12;
+					_this.self._13 = m1.self._13;
+					_this.self._20 = m1.self._20;
+					_this.self._21 = m1.self._21;
+					_this.self._22 = m1.self._22;
+					_this.self._23 = m1.self._23;
+					_this.self._30 = m1.self._30;
+					_this.self._31 = m1.self._31;
+					_this.self._32 = m1.self._32;
+					_this.self._33 = m1.self._33;
+					m = _this;
+					var a00 = m.self._00;
+					var a01 = m.self._01;
+					var a02 = m.self._02;
+					var a03 = m.self._03;
+					var a10 = m.self._10;
+					var a11 = m.self._11;
+					var a12 = m.self._12;
+					var a13 = m.self._13;
+					var a20 = m.self._20;
+					var a21 = m.self._21;
+					var a22 = m.self._22;
+					var a23 = m.self._23;
+					var a30 = m.self._30;
+					var a31 = m.self._31;
+					var a32 = m.self._32;
+					var a33 = m.self._33;
+					var b00 = a00 * a11 - a01 * a10;
+					var b01 = a00 * a12 - a02 * a10;
+					var b02 = a00 * a13 - a03 * a10;
+					var b03 = a01 * a12 - a02 * a11;
+					var b04 = a01 * a13 - a03 * a11;
+					var b05 = a02 * a13 - a03 * a12;
+					var b06 = a20 * a31 - a21 * a30;
+					var b07 = a20 * a32 - a22 * a30;
+					var b08 = a20 * a33 - a23 * a30;
+					var b09 = a21 * a32 - a22 * a31;
+					var b10 = a21 * a33 - a23 * a31;
+					var b11 = a22 * a33 - a23 * a32;
+					var det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+					if(det == 0.0) {
+						m.self._00 = 1.0;
+						m.self._01 = 0.0;
+						m.self._02 = 0.0;
+						m.self._03 = 0.0;
+						m.self._10 = 0.0;
+						m.self._11 = 1.0;
+						m.self._12 = 0.0;
+						m.self._13 = 0.0;
+						m.self._20 = 0.0;
+						m.self._21 = 0.0;
+						m.self._22 = 1.0;
+						m.self._23 = 0.0;
+						m.self._30 = 0.0;
+						m.self._31 = 0.0;
+						m.self._32 = 0.0;
+						m.self._33 = 1.0;
+					} else {
+						det = 1.0 / det;
+						m.self._00 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+						m.self._01 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+						m.self._02 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+						m.self._03 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+						m.self._10 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+						m.self._11 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+						m.self._12 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+						m.self._13 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+						m.self._20 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+						m.self._21 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+						m.self._22 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+						m.self._23 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+						m.self._30 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+						m.self._31 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+						m.self._32 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+						m.self._33 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+					}
+				}
+				this.constraintTargetsI.push(m);
+			}
+			this.constraintMats = new haxe_ds_ObjectMap();
+		}
+	}
+	,updateConstraints: function() {
+		if(this.data == null) {
+			return;
+		}
+		var cs = this.data.raw.skin.constraints;
+		if(cs == null) {
+			return;
+		}
+		if(this.relativeBoneConstraints) {
+			this.getConstraintsFromParentRelative(cs);
+		} else {
+			this.getConstraintsFromScene(cs);
 		}
 		var _g = 0;
 		var _g1 = cs.length;
@@ -9627,7 +12728,7 @@ iron_object_CameraObject.prototype = $extend(iron_object_Object.prototype,{
 			this.P = new iron_math_Mat4(2 / rl,0,0,tx,0,2 / tb,0,ty,0,0,-2 / fn,tz,0,0,0,1);
 		} else {
 			if(screenAspect == null) {
-				screenAspect = kha_System.windowWidth() / kha_System.windowHeight();
+				screenAspect = iron_App.w() / iron_App.h();
 			}
 			var aspect = this.data.raw.aspect != null ? this.data.raw.aspect : screenAspect;
 			var zn = this.data.raw.near_plane;
@@ -10132,7 +13233,7 @@ iron_object_LightObject.prototype = $extend(iron_object_Object.prototype,{
 			this.cascadeSplit = [];
 			var ortho = camera.data.raw.ortho;
 			if(ortho == null) {
-				var aspect = camera.data.raw.aspect != null ? camera.data.raw.aspect : kha_System.windowWidth() / kha_System.windowHeight();
+				var aspect = camera.data.raw.aspect != null ? camera.data.raw.aspect : iron_App.w() / iron_App.h();
 				var fov = camera.data.raw.fov;
 				var near = camera.data.raw.near_plane;
 				var far = camera.data.raw.far_plane;
@@ -11171,7 +14272,15 @@ var iron_object_MorphTarget = function(data) {
 	this.morphImageSize = 0;
 	this.numMorphTargets = 0;
 	var _gthis = this;
-	this.morphWeights = data.morph_target_defaults;
+	var defaults = data.morph_target_defaults;
+	this.morphWeights = kha_arrays_Float32Array._new(defaults.byteLength >> 2);
+	var _g = 0;
+	var _g1 = this.morphWeights.byteLength >> 2;
+	while(_g < _g1) {
+		var i = _g++;
+		var v = defaults.getFloat32(i * 4,kha_arrays_ByteArray.LITTLE_ENDIAN);
+		this.morphWeights.setFloat32(i * 4,v,true);
+	}
 	this.scaling = data.morph_scale;
 	this.offset = data.morph_offset;
 	this.numMorphTargets = data.num_morph_targets;
@@ -11631,25 +14740,26 @@ iron_object_ParticleSystem.prototype = {
 	,setupGeomGpu: function(object,owner) {
 		var instancedData = kha_arrays_Float32Array._new(this.particles.length * 3);
 		var i = 0;
-		var x = object.transform.dim.x / 2.0 / this.r.particle_size;
-		var y = object.transform.dim.y / 2.0 / this.r.particle_size;
-		var z = object.transform.dim.z / 2.0 / this.r.particle_size;
-		if(z == null) {
-			z = 0.0;
-		}
-		if(y == null) {
-			y = 0.0;
-		}
-		if(x == null) {
-			x = 0.0;
-		}
-		var scaleFactor_x = x;
-		var scaleFactor_y = y;
-		var scaleFactor_z = z;
+		var normFactor = 3.05185094759971923e-05;
+		var scalePosOwner = owner.data.scalePos;
+		var scalePosParticle = object.data.scalePos;
+		var particleSize = this.r.particle_size;
+		var scaleFactor_x = 0.0;
+		var scaleFactor_y = 0.0;
+		var scaleFactor_z = 0.0;
+		var scaleFactor_w = 1.0;
+		var v = owner.transform.scale;
+		scaleFactor_x = v.x;
+		scaleFactor_y = v.y;
+		scaleFactor_z = v.z;
+		scaleFactor_w = v.w;
+		var f = scalePosOwner / (particleSize * scalePosParticle);
+		scaleFactor_x *= f;
+		scaleFactor_y *= f;
+		scaleFactor_z *= f;
 		switch(this.r.emit_from) {
 		case 0:
 			var pa = owner.data.geom.positions;
-			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
@@ -11669,7 +14779,6 @@ iron_object_ParticleSystem.prototype = {
 			break;
 		case 1:
 			var positions = owner.data.geom.positions.values;
-			var normFactor = 3.05185094759971923e-05;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
@@ -11761,18 +14870,31 @@ iron_object_ParticleSystem.prototype = {
 			}
 			break;
 		case 2:
+			var scaleFactorVolume_x = 0.0;
+			var scaleFactorVolume_y = 0.0;
+			var scaleFactorVolume_z = 0.0;
+			var scaleFactorVolume_w = 1.0;
+			var v = object.transform.dim;
+			scaleFactorVolume_x = v.x;
+			scaleFactorVolume_y = v.y;
+			scaleFactorVolume_z = v.z;
+			scaleFactorVolume_w = v.w;
+			var f = 0.5 / (particleSize * scalePosParticle);
+			scaleFactorVolume_x *= f;
+			scaleFactorVolume_y *= f;
+			scaleFactorVolume_z *= f;
 			var _g = 0;
 			var _g1 = this.particles;
 			while(_g < _g1.length) {
 				var p = _g1[_g];
 				++_g;
-				var v = (Math.random() * 2.0 - 1.0) * scaleFactor_x;
+				var v = (Math.random() * 2.0 - 1.0) * scaleFactorVolume_x;
 				instancedData.setFloat32(i * 4,v,true);
 				++i;
-				var v1 = (Math.random() * 2.0 - 1.0) * scaleFactor_y;
+				var v1 = (Math.random() * 2.0 - 1.0) * scaleFactorVolume_y;
 				instancedData.setFloat32(i * 4,v1,true);
 				++i;
-				var v2 = (Math.random() * 2.0 - 1.0) * scaleFactor_z;
+				var v2 = (Math.random() * 2.0 - 1.0) * scaleFactorVolume_z;
 				instancedData.setFloat32(i * 4,v2,true);
 				++i;
 			}
@@ -12503,53 +15625,6 @@ iron_object_Transform.prototype = {
 			quat.z = 0.25 * s;
 		}
 	}
-	,rotate: function(axis,f) {
-		var _this = iron_object_Transform.q;
-		var s = Math.sin(f * 0.5);
-		_this.x = axis.x * s;
-		_this.y = axis.y * s;
-		_this.z = axis.z * s;
-		_this.w = Math.cos(f * 0.5);
-		var l = Math.sqrt(_this.x * _this.x + _this.y * _this.y + _this.z * _this.z + _this.w * _this.w);
-		if(l == 0.0) {
-			_this.x = 0;
-			_this.y = 0;
-			_this.z = 0;
-			_this.w = 0;
-		} else {
-			l = 1.0 / l;
-			_this.x *= l;
-			_this.y *= l;
-			_this.z *= l;
-			_this.w *= l;
-		}
-		var _this = this.rot;
-		var q1 = iron_object_Transform.q;
-		var q2 = this.rot;
-		var q1x = q1.x;
-		var q1y = q1.y;
-		var q1z = q1.z;
-		var q1w = q1.w;
-		var q2x = q2.x;
-		var q2y = q2.y;
-		var q2z = q2.z;
-		var q2w = q2.w;
-		_this.x = q1x * q2w + q1w * q2x + q1y * q2z - q1z * q2y;
-		_this.y = q1w * q2y - q1x * q2z + q1y * q2w + q1z * q2x;
-		_this.z = q1w * q2z + q1x * q2y - q1y * q2x + q1z * q2w;
-		_this.w = q1w * q2w - q1x * q2x - q1y * q2y - q1z * q2z;
-		this.buildMatrix();
-	}
-	,move: function(axis,f) {
-		if(f == null) {
-			f = 1.0;
-		}
-		var _this = this.loc;
-		_this.x += axis.x * f;
-		_this.y += axis.y * f;
-		_this.z += axis.z * f;
-		this.buildMatrix();
-	}
 	,setRotation: function(x,y,z) {
 		var _this = this.rot;
 		var f = x / 2;
@@ -12990,6 +16065,9 @@ iron_object_Uniforms.bindRenderTarget = function(g,rt,context,samplerID,attachDe
 					paramsSet = true;
 				}
 				if(!paramsSet) {
+					if(StringTools.startsWith(rt.raw.name,"bloom")) {
+						g.setTextureParameters(context.textureUnits[j],2,2,1,1,2);
+					}
 					if(StringTools.startsWith(samplerID,"shadowMap")) {
 						if(rt.isCubeMap) {
 							g.setCubeMapCompareMode(context.textureUnits[j],true);
@@ -13903,8 +16981,8 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				break;
 			case "_windowSize":
 				v = iron_object_Uniforms.helpVec;
-				v.x = kha_System.windowWidth();
-				v.y = kha_System.windowHeight();
+				v.x = iron_App.w();
+				v.y = iron_App.h();
 				break;
 			default:
 				return false;
@@ -13927,7 +17005,7 @@ iron_object_Uniforms.setContextConstant = function(g,location,c) {
 				f = iron_RenderPath.active.currentW / iron_RenderPath.active.currentH;
 				break;
 			case "_aspectRatioWindowF":
-				f = kha_System.windowWidth() / kha_System.windowHeight();
+				f = iron_App.w() / iron_App.h();
 				break;
 			case "_envmapStrength":
 				f = iron_Scene.active.world == null ? 0.0 : iron_Scene.active.world.probe.raw.strength;
@@ -16038,663 +19116,6 @@ iron_system_Audio.play = function(sound,loop,stream) {
 		return null;
 	}
 };
-var iron_system_Input = function() { };
-$hxClasses["iron.system.Input"] = iron_system_Input;
-iron_system_Input.__name__ = true;
-iron_system_Input.reset = function() {
-	iron_system_Input.occupied = false;
-	if(iron_system_Input.mouse != null) {
-		iron_system_Input.mouse.reset();
-	}
-	if(iron_system_Input.pen != null) {
-		iron_system_Input.pen.reset();
-	}
-	if(iron_system_Input.keyboard != null) {
-		iron_system_Input.keyboard.reset();
-	}
-	var _g = 0;
-	var _g1 = iron_system_Input.gamepads;
-	while(_g < _g1.length) {
-		var gamepad = _g1[_g];
-		++_g;
-		gamepad.reset();
-	}
-};
-iron_system_Input.endFrame = function() {
-	if(iron_system_Input.mouse != null) {
-		iron_system_Input.mouse.endFrame();
-	}
-	if(iron_system_Input.pen != null) {
-		iron_system_Input.pen.endFrame();
-	}
-	if(iron_system_Input.keyboard != null) {
-		iron_system_Input.keyboard.endFrame();
-	}
-	var _g = 0;
-	var _g1 = iron_system_Input.gamepads;
-	while(_g < _g1.length) {
-		var gamepad = _g1[_g];
-		++_g;
-		gamepad.endFrame();
-	}
-	if(iron_system_Input.virtualButtons != null) {
-		var h = iron_system_Input.virtualButtons.h;
-		var vb_h = h;
-		var vb_keys = Object.keys(h);
-		var vb_length = vb_keys.length;
-		var vb_current = 0;
-		while(vb_current < vb_length) {
-			var vb = vb_h[vb_keys[vb_current++]];
-			vb.started = vb.released = false;
-		}
-	}
-};
-iron_system_Input.getMouse = function() {
-	if(!iron_system_Input.registered) {
-		iron_system_Input.registered = true;
-		iron_App.notifyOnEndFrame(iron_system_Input.endFrame);
-		iron_App.notifyOnReset(iron_system_Input.reset);
-		kha_System.notifyOnApplicationState(function() {
-			iron_system_Input.getMouse().reset();
-		},null,null,null,null);
-	}
-	if(iron_system_Input.mouse == null) {
-		iron_system_Input.mouse = new iron_system_Mouse();
-	}
-	return iron_system_Input.mouse;
-};
-iron_system_Input.getKeyboard = function() {
-	if(!iron_system_Input.registered) {
-		iron_system_Input.registered = true;
-		iron_App.notifyOnEndFrame(iron_system_Input.endFrame);
-		iron_App.notifyOnReset(iron_system_Input.reset);
-		kha_System.notifyOnApplicationState(function() {
-			iron_system_Input.getMouse().reset();
-		},null,null,null,null);
-	}
-	if(iron_system_Input.keyboard == null) {
-		iron_system_Input.keyboard = new iron_system_Keyboard();
-	}
-	return iron_system_Input.keyboard;
-};
-iron_system_Input.getGamepad = function(i) {
-	if(i == null) {
-		i = 0;
-	}
-	if(i >= 4) {
-		return null;
-	}
-	if(!iron_system_Input.registered) {
-		iron_system_Input.registered = true;
-		iron_App.notifyOnEndFrame(iron_system_Input.endFrame);
-		iron_App.notifyOnReset(iron_system_Input.reset);
-		kha_System.notifyOnApplicationState(function() {
-			iron_system_Input.getMouse().reset();
-		},null,null,null,null);
-	}
-	while(iron_system_Input.gamepads.length <= i) iron_system_Input.gamepads.push(new iron_system_Gamepad(iron_system_Input.gamepads.length));
-	if(iron_system_Input.gamepads[i].connected) {
-		return iron_system_Input.gamepads[i];
-	} else {
-		return null;
-	}
-};
-var iron_system_VirtualButton = function() {
-	this.down = false;
-	this.released = false;
-	this.started = false;
-};
-$hxClasses["iron.system.VirtualButton"] = iron_system_VirtualButton;
-iron_system_VirtualButton.__name__ = true;
-iron_system_VirtualButton.prototype = {
-	__class__: iron_system_VirtualButton
-};
-var iron_system_VirtualInput = function() {
-	this.virtualButtons = null;
-};
-$hxClasses["iron.system.VirtualInput"] = iron_system_VirtualInput;
-iron_system_VirtualInput.__name__ = true;
-iron_system_VirtualInput.prototype = {
-	downVirtual: function(button) {
-		if(this.virtualButtons != null) {
-			var vb = this.virtualButtons.h[button];
-			if(vb != null) {
-				vb.down = true;
-				vb.started = true;
-			}
-		}
-	}
-	,upVirtual: function(button) {
-		if(this.virtualButtons != null) {
-			var vb = this.virtualButtons.h[button];
-			if(vb != null) {
-				vb.down = false;
-				vb.released = true;
-			}
-		}
-	}
-	,__class__: iron_system_VirtualInput
-};
-var iron_system_Mouse = function() {
-	this.lastY = -1.0;
-	this.lastX = -1.0;
-	this.locked = false;
-	this.wheelDelta = 0;
-	this.movementY = 0.0;
-	this.movementX = 0.0;
-	this.moved = false;
-	this.y = 0.0;
-	this.x = 0.0;
-	this.buttonsReleased = [false,false,false];
-	this.buttonsStarted = [false,false,false];
-	this.buttonsDown = [false,false,false];
-	iron_system_VirtualInput.call(this);
-	kha_input_Mouse.get().notify($bind(this,this.downListener),$bind(this,this.upListener),$bind(this,this.moveListener),$bind(this,this.wheelListener));
-};
-$hxClasses["iron.system.Mouse"] = iron_system_Mouse;
-iron_system_Mouse.__name__ = true;
-iron_system_Mouse.__super__ = iron_system_VirtualInput;
-iron_system_Mouse.prototype = $extend(iron_system_VirtualInput.prototype,{
-	endFrame: function() {
-		var tmp = this.buttonsStarted[1] = this.buttonsStarted[2] = false;
-		this.buttonsStarted[0] = tmp;
-		var tmp = this.buttonsReleased[1] = this.buttonsReleased[2] = false;
-		this.buttonsReleased[0] = tmp;
-		this.moved = false;
-		this.movementX = 0;
-		this.movementY = 0;
-		this.wheelDelta = 0;
-	}
-	,reset: function() {
-		var tmp = this.buttonsDown[1] = this.buttonsDown[2] = false;
-		this.buttonsDown[0] = tmp;
-		this.endFrame();
-	}
-	,buttonIndex: function(button) {
-		if(button == "left") {
-			return 0;
-		} else if(button == "right") {
-			return 1;
-		} else {
-			return 2;
-		}
-	}
-	,down: function(button) {
-		if(button == null) {
-			button = "left";
-		}
-		return this.buttonsDown[this.buttonIndex(button)];
-	}
-	,downListener: function(index,x,y) {
-		this.buttonsDown[index] = true;
-		this.buttonsStarted[index] = true;
-		this.x = x;
-		this.y = y;
-		if(index == 0) {
-			this.lastX = x;
-			this.lastY = y;
-		}
-		this.downVirtual(iron_system_Mouse.buttons[index]);
-	}
-	,upListener: function(index,x,y) {
-		this.buttonsDown[index] = false;
-		this.buttonsReleased[index] = true;
-		this.x = x;
-		this.y = y;
-		this.upVirtual(iron_system_Mouse.buttons[index]);
-	}
-	,moveListener: function(x,y,movementX,movementY) {
-		if(this.lastX == -1.0 && this.lastY == -1.0) {
-			this.lastX = x;
-			this.lastY = y;
-		}
-		if(this.locked) {
-			this.movementX += movementX;
-			this.movementY += movementY;
-		} else {
-			this.movementX += x - this.lastX;
-			this.movementY += y - this.lastY;
-		}
-		this.lastX = x;
-		this.lastY = y;
-		this.x = x;
-		this.y = y;
-		this.moved = true;
-	}
-	,wheelListener: function(delta) {
-		this.wheelDelta = delta;
-	}
-	,__class__: iron_system_Mouse
-});
-var iron_system_Pen = function() {
-	this.lastY = -1.0;
-	this.lastX = -1.0;
-	this.connected = false;
-	this.pressure = 0.0;
-	this.movementY = 0.0;
-	this.movementX = 0.0;
-	this.moved = false;
-	this.y = 0.0;
-	this.x = 0.0;
-	this.buttonsReleased = [false];
-	this.buttonsStarted = [false];
-	this.buttonsDown = [false];
-	iron_system_VirtualInput.call(this);
-	kha_input_Pen.get().notify($bind(this,this.downListener),$bind(this,this.upListener),$bind(this,this.moveListener));
-};
-$hxClasses["iron.system.Pen"] = iron_system_Pen;
-iron_system_Pen.__name__ = true;
-iron_system_Pen.__super__ = iron_system_VirtualInput;
-iron_system_Pen.prototype = $extend(iron_system_VirtualInput.prototype,{
-	endFrame: function() {
-		this.buttonsStarted[0] = false;
-		this.buttonsReleased[0] = false;
-		this.moved = false;
-		this.movementX = 0;
-		this.movementY = 0;
-	}
-	,reset: function() {
-		this.buttonsDown[0] = false;
-		this.endFrame();
-	}
-	,downListener: function(x,y,pressure) {
-		this.buttonsDown[0] = true;
-		this.buttonsStarted[0] = true;
-		this.x = x;
-		this.y = y;
-		this.pressure = pressure;
-	}
-	,upListener: function(x,y,pressure) {
-		this.buttonsDown[0] = false;
-		this.buttonsReleased[0] = true;
-		this.x = x;
-		this.y = y;
-		this.pressure = pressure;
-	}
-	,moveListener: function(x,y,pressure) {
-		if(this.lastX == -1.0 && this.lastY == -1.0) {
-			this.lastX = x;
-			this.lastY = y;
-		}
-		this.movementX = x - this.lastX;
-		this.movementY = y - this.lastY;
-		this.lastX = x;
-		this.lastY = y;
-		this.x = x;
-		this.y = y;
-		this.moved = true;
-		this.pressure = pressure;
-		this.connected = true;
-	}
-	,__class__: iron_system_Pen
-});
-var iron_system_Keyboard = function() {
-	this.repeatTime = 0.0;
-	this.repeatKey = false;
-	this.keysFrame = [];
-	this.keysReleased = new haxe_ds_StringMap();
-	this.keysStarted = new haxe_ds_StringMap();
-	this.keysDown = new haxe_ds_StringMap();
-	iron_system_VirtualInput.call(this);
-	this.reset();
-	kha_input_Keyboard.get().notify($bind(this,this.downListener),$bind(this,this.upListener),$bind(this,this.pressListener));
-};
-$hxClasses["iron.system.Keyboard"] = iron_system_Keyboard;
-iron_system_Keyboard.__name__ = true;
-iron_system_Keyboard.keyCode = function(key) {
-	switch(key) {
-	case 1:
-		return "back";
-	case 8:
-		return "backspace";
-	case 9:
-		return "tab";
-	case 13:
-		return "enter";
-	case 16:
-		return "shift";
-	case 17:
-		return "control";
-	case 18:
-		return "alt";
-	case 27:
-		return "escape";
-	case 32:
-		return "space";
-	case 37:
-		return "left";
-	case 38:
-		return "up";
-	case 39:
-		return "right";
-	case 40:
-		return "down";
-	case 46:
-		return "delete";
-	case 48:
-		return "0";
-	case 49:
-		return "1";
-	case 50:
-		return "2";
-	case 51:
-		return "3";
-	case 52:
-		return "4";
-	case 53:
-		return "5";
-	case 54:
-		return "6";
-	case 55:
-		return "7";
-	case 56:
-		return "8";
-	case 57:
-		return "9";
-	case 58:
-		return ":";
-	case 59:
-		return ";";
-	case 60:
-		return "<";
-	case 61:
-		return "=";
-	case 62:
-		return ">";
-	case 63:
-		return "?";
-	case 64:
-		return "@";
-	case 91:
-		return "win";
-	case 96:
-		return "0";
-	case 97:
-		return "1";
-	case 98:
-		return "2";
-	case 99:
-		return "3";
-	case 100:
-		return "4";
-	case 101:
-		return "5";
-	case 102:
-		return "6";
-	case 103:
-		return "7";
-	case 104:
-		return "8";
-	case 105:
-		return "9";
-	case 106:
-		return "*";
-	case 107:
-		return "+";
-	case 109:
-		return "-";
-	case 110:
-		return ".";
-	case 111:
-		return "/";
-	case 112:
-		return "f1";
-	case 113:
-		return "f2";
-	case 114:
-		return "f3";
-	case 115:
-		return "f4";
-	case 116:
-		return "f5";
-	case 117:
-		return "f6";
-	case 118:
-		return "f7";
-	case 119:
-		return "f8";
-	case 120:
-		return "f9";
-	case 121:
-		return "f10";
-	case 122:
-		return "f11";
-	case 123:
-		return "f12";
-	case 161:
-		return "!";
-	case 162:
-		return "\"";
-	case 163:
-		return "#";
-	case 164:
-		return "$";
-	case 165:
-		return "%";
-	case 166:
-		return "&";
-	case 167:
-		return "_";
-	case 168:
-		return "(";
-	case 169:
-		return ")";
-	case 170:
-		return "*";
-	case 171:
-		return "+";
-	case 172:
-		return "|";
-	case 173:
-		return "-";
-	case 174:
-		return "{";
-	case 175:
-		return "}";
-	case 176:
-		return "~";
-	case 188:
-		return ",";
-	case 190:
-		return ".";
-	case 191:
-		return "/";
-	case 192:
-		return "`";
-	case 219:
-		return "[";
-	case 220:
-		return "\\";
-	case 221:
-		return "]";
-	default:
-		return String.fromCodePoint(key).toLowerCase();
-	}
-};
-iron_system_Keyboard.__super__ = iron_system_VirtualInput;
-iron_system_Keyboard.prototype = $extend(iron_system_VirtualInput.prototype,{
-	endFrame: function() {
-		if(this.keysFrame.length > 0) {
-			var _g = 0;
-			var _g1 = this.keysFrame;
-			while(_g < _g1.length) {
-				var s = _g1[_g];
-				++_g;
-				this.keysStarted.h[s] = false;
-				this.keysReleased.h[s] = false;
-			}
-			this.keysFrame.splice(0,this.keysFrame.length);
-		}
-		if(kha_Scheduler.time() - this.repeatTime > 0.05) {
-			this.repeatTime = kha_Scheduler.time();
-			this.repeatKey = true;
-		} else {
-			this.repeatKey = false;
-		}
-	}
-	,reset: function() {
-		var _g = 0;
-		var _g1 = iron_system_Keyboard.keys;
-		while(_g < _g1.length) {
-			var s = _g1[_g];
-			++_g;
-			this.keysDown.h[s] = false;
-			this.keysStarted.h[s] = false;
-			this.keysReleased.h[s] = false;
-		}
-		this.endFrame();
-	}
-	,down: function(key) {
-		return this.keysDown.h[key];
-	}
-	,downListener: function(code) {
-		var s = iron_system_Keyboard.keyCode(code);
-		this.keysFrame.push(s);
-		this.keysStarted.h[s] = true;
-		this.keysDown.h[s] = true;
-		this.repeatTime = kha_Scheduler.time() + 0.4;
-		this.downVirtual(s);
-	}
-	,upListener: function(code) {
-		var s = iron_system_Keyboard.keyCode(code);
-		this.keysFrame.push(s);
-		this.keysReleased.h[s] = true;
-		this.keysDown.h[s] = false;
-		this.upVirtual(s);
-	}
-	,pressListener: function(char) {
-	}
-	,__class__: iron_system_Keyboard
-});
-var iron_system_GamepadStick = function() {
-	this.movementY = 0.0;
-	this.movementX = 0.0;
-	this.moved = false;
-	this.lastY = 0.0;
-	this.lastX = 0.0;
-	this.y = 0.0;
-	this.x = 0.0;
-};
-$hxClasses["iron.system.GamepadStick"] = iron_system_GamepadStick;
-iron_system_GamepadStick.__name__ = true;
-iron_system_GamepadStick.prototype = {
-	__class__: iron_system_GamepadStick
-};
-var iron_system_Gamepad = function(i,virtual) {
-	if(virtual == null) {
-		virtual = false;
-	}
-	this.num = 0;
-	this.connected = false;
-	this.rightStick = new iron_system_GamepadStick();
-	this.leftStick = new iron_system_GamepadStick();
-	this.buttonsFrame = [];
-	this.buttonsReleased = [];
-	this.buttonsStarted = [];
-	this.buttonsDown = [];
-	iron_system_VirtualInput.call(this);
-	var _g = 0;
-	var _g1 = iron_system_Gamepad.buttons;
-	while(_g < _g1.length) {
-		var s = _g1[_g];
-		++_g;
-		this.buttonsDown.push(0.0);
-		this.buttonsStarted.push(false);
-		this.buttonsReleased.push(false);
-	}
-	this.num = i;
-	this.reset();
-	if(virtual) {
-		this.connected = true;
-	} else {
-		this.connect();
-	}
-};
-$hxClasses["iron.system.Gamepad"] = iron_system_Gamepad;
-iron_system_Gamepad.__name__ = true;
-iron_system_Gamepad.__super__ = iron_system_VirtualInput;
-iron_system_Gamepad.prototype = $extend(iron_system_VirtualInput.prototype,{
-	connect: function() {
-		var gamepad = kha_input_Gamepad.get(this.num);
-		if(gamepad == null) {
-			return;
-		}
-		this.connected = true;
-		gamepad.notify($bind(this,this.axisListener),$bind(this,this.buttonListener));
-	}
-	,endFrame: function() {
-		if(this.buttonsFrame.length > 0) {
-			var _g = 0;
-			var _g1 = this.buttonsFrame;
-			while(_g < _g1.length) {
-				var i = _g1[_g];
-				++_g;
-				this.buttonsStarted[i] = false;
-				this.buttonsReleased[i] = false;
-			}
-			this.buttonsFrame.splice(0,this.buttonsFrame.length);
-		}
-		this.leftStick.moved = false;
-		this.leftStick.movementX = 0;
-		this.leftStick.movementY = 0;
-		this.rightStick.moved = false;
-		this.rightStick.movementX = 0;
-		this.rightStick.movementY = 0;
-	}
-	,reset: function() {
-		var _g = 0;
-		var _g1 = this.buttonsDown.length;
-		while(_g < _g1) {
-			var i = _g++;
-			this.buttonsDown[i] = 0.0;
-			this.buttonsStarted[i] = false;
-			this.buttonsReleased[i] = false;
-		}
-		this.endFrame();
-	}
-	,buttonIndex: function(button) {
-		var _g = 0;
-		var _g1 = iron_system_Gamepad.buttons.length;
-		while(_g < _g1) {
-			var i = _g++;
-			if(iron_system_Gamepad.buttons[i] == button) {
-				return i;
-			}
-		}
-		return 0;
-	}
-	,down: function(button) {
-		return this.buttonsDown[this.buttonIndex(button)];
-	}
-	,axisListener: function(axis,value) {
-		var stick = axis <= 1 ? this.leftStick : this.rightStick;
-		if(axis == 0 || axis == 2) {
-			stick.lastX = stick.x;
-			stick.x = value;
-			stick.movementX = stick.x - stick.lastX;
-		} else if(axis == 1 || axis == 3) {
-			stick.lastY = stick.y;
-			stick.y = value;
-			stick.movementY = stick.y - stick.lastY;
-		}
-		stick.moved = true;
-	}
-	,buttonListener: function(button,value) {
-		this.buttonsFrame.push(button);
-		this.buttonsDown[button] = value;
-		if(value > 0) {
-			this.buttonsStarted[button] = true;
-		} else {
-			this.buttonsReleased[button] = true;
-		}
-		if(value == 0.0) {
-			this.upVirtual(iron_system_Gamepad.buttons[button]);
-		} else if(value == 1.0) {
-			this.downVirtual(iron_system_Gamepad.buttons[button]);
-		}
-	}
-	,__class__: iron_system_Gamepad
-});
 var iron_system_Time = function() { };
 $hxClasses["iron.system.Time"] = iron_system_Time;
 iron_system_Time.__name__ = true;
@@ -16901,6 +19322,9 @@ js_Boot.__downcastCheck = function(o,cl) {
 		return true;
 	}
 };
+js_Boot.__implements = function(o,iface) {
+	return js_Boot.__interfLoop(js_Boot.getClass(o),iface);
+};
 js_Boot.__cast = function(o,t) {
 	if(o == null || js_Boot.__instanceof(o,t)) {
 		return o;
@@ -16964,7 +19388,10 @@ $hxClasses["kha.Image"] = kha_Image;
 kha_Image.__name__ = true;
 kha_Image.__interfaces__ = [kha_Resource,kha_Canvas];
 kha_Image.__properties__ = {get_nonPow2Supported:"get_nonPow2Supported"};
-kha_Image.create = function(width,height,format,usage) {
+kha_Image.create = function(width,height,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
@@ -16974,16 +19401,16 @@ kha_Image.create = function(width,height,format,usage) {
 	if(kha_SystemImpl.gl == null) {
 		return new kha_CanvasImage(width,height,format,false);
 	} else {
-		return new kha_WebGLImage(width,height,format,false,0,1);
+		return new kha_WebGLImage(width,height,format,false,0,1,readable);
 	}
 };
-kha_Image.create3D = function(width,height,depth,format,usage) {
+kha_Image.create3D = function(width,height,depth,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	return null;
 };
-kha_Image.createRenderTarget = function(width,height,format,depthStencil,antiAliasingSamples,contextId) {
-	if(contextId == null) {
-		contextId = 0;
-	}
+kha_Image.createRenderTarget = function(width,height,format,depthStencil,antiAliasingSamples) {
 	if(antiAliasingSamples == null) {
 		antiAliasingSamples = 1;
 	}
@@ -16996,7 +19423,7 @@ kha_Image.createRenderTarget = function(width,height,format,depthStencil,antiAli
 	if(kha_SystemImpl.gl == null) {
 		return new kha_CanvasImage(width,height,format,true);
 	} else {
-		return new kha_WebGLImage(width,height,format,true,depthStencil,antiAliasingSamples);
+		return new kha_WebGLImage(width,height,format,true,depthStencil,antiAliasingSamples,false);
 	}
 };
 kha_Image.fromImage = function(image,readable) {
@@ -17006,13 +19433,16 @@ kha_Image.fromImage = function(image,readable) {
 		img.createTexture();
 		return img;
 	} else {
-		var img = new kha_WebGLImage(image.width,image.height,0,false,0,1);
+		var img = new kha_WebGLImage(image.width,image.height,0,false,0,1,readable);
 		img.image = image;
 		img.createTexture();
 		return img;
 	}
 };
-kha_Image.fromBytes = function(bytes,width,height,format,usage) {
+kha_Image.fromBytes = function(bytes,width,height,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
@@ -17020,7 +19450,7 @@ kha_Image.fromBytes = function(bytes,width,height,format,usage) {
 		usage = 0;
 	}
 	if(kha_SystemImpl.gl != null) {
-		var img = new kha_WebGLImage(width,height,format,false,0,1);
+		var img = new kha_WebGLImage(width,height,format,false,0,1,readable);
 		img.image = img.bytesToArray(bytes);
 		img.createTexture();
 		return img;
@@ -17032,7 +19462,10 @@ kha_Image.fromBytes = function(bytes,width,height,format,usage) {
 	canvas.putImageData(imageData,0,0);
 	return img;
 };
-kha_Image.fromBytes3D = function(bytes,width,height,depth,format,usage) {
+kha_Image.fromBytes3D = function(bytes,width,height,depth,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	return null;
 };
 kha_Image.get_nonPow2Supported = function() {
@@ -17967,23 +20400,6 @@ kha_System.start = function(options,callback) {
 kha_System.notifyOnFrames = function(listener) {
 	kha_System.renderListeners.push(listener);
 };
-kha_System.notifyOnApplicationState = function(foregroundListener,resumeListener,pauseListener,backgroundListener,shutdownListener) {
-	if(foregroundListener != null) {
-		kha_System.foregroundListeners.push(foregroundListener);
-	}
-	if(resumeListener != null) {
-		kha_System.resumeListeners.push(resumeListener);
-	}
-	if(pauseListener != null) {
-		kha_System.pauseListeners.push(pauseListener);
-	}
-	if(backgroundListener != null) {
-		kha_System.backgroundListeners.push(backgroundListener);
-	}
-	if(shutdownListener != null) {
-		kha_System.shutdownListeners.push(shutdownListener);
-	}
-};
 kha_System.render = function(framebuffers) {
 	var _g = 0;
 	var _g1 = kha_System.renderListeners;
@@ -18062,6 +20478,7 @@ kha_SystemImpl.init = function(options,callback) {
 	kha_SystemImpl.ios = kha_SystemImpl.isIOS();
 	kha_SystemImpl.chrome = kha_SystemImpl.isChrome();
 	kha_SystemImpl.firefox = kha_SystemImpl.isFirefox();
+	kha_SystemImpl.safari = kha_SystemImpl.isSafari();
 	kha_SystemImpl.ie = kha_SystemImpl.isIE();
 	kha_SystemImpl.mobileAudioPlaying = !kha_SystemImpl.mobile && !kha_SystemImpl.chrome && !kha_SystemImpl.firefox;
 	kha_SystemImpl.initSecondStep(callback);
@@ -18072,7 +20489,7 @@ kha_SystemImpl.initSecondStep = function(callback) {
 };
 kha_SystemImpl.isMobile = function() {
 	var agent = $global.navigator.userAgent;
-	if(agent.indexOf("Android") >= 0 || agent.indexOf("webOS") >= 0 || agent.indexOf("BlackBerry") >= 0 || agent.indexOf("Windows Phone") >= 0) {
+	if(agent.indexOf("Android") != -1 || agent.indexOf("webOS") != -1 || agent.indexOf("BlackBerry") != -1 || agent.indexOf("Windows Phone") != -1) {
 		return true;
 	}
 	if(kha_SystemImpl.isIOS()) {
@@ -18082,28 +20499,35 @@ kha_SystemImpl.isMobile = function() {
 };
 kha_SystemImpl.isIOS = function() {
 	var agent = $global.navigator.userAgent;
-	if(agent.indexOf("iPhone") >= 0 || agent.indexOf("iPad") >= 0 || agent.indexOf("iPod") >= 0) {
+	if(agent.indexOf("iPhone") != -1 || agent.indexOf("iPad") != -1 || agent.indexOf("iPod") != -1) {
 		return true;
 	}
 	return false;
 };
 kha_SystemImpl.isChrome = function() {
 	var agent = $global.navigator.userAgent;
-	if(agent.indexOf("Chrome") >= 0) {
+	if(agent.indexOf("Chrome") != -1) {
 		return true;
 	}
 	return false;
 };
 kha_SystemImpl.isFirefox = function() {
 	var agent = $global.navigator.userAgent;
-	if(agent.indexOf("Firefox") >= 0) {
+	if(agent.indexOf("Firefox") != -1) {
+		return true;
+	}
+	return false;
+};
+kha_SystemImpl.isSafari = function() {
+	var agent = $global.navigator.userAgent;
+	if(agent.indexOf("Safari") != -1 && agent.indexOf("Chrome") == -1) {
 		return true;
 	}
 	return false;
 };
 kha_SystemImpl.isIE = function() {
 	var agent = $global.navigator.userAgent;
-	if(agent.indexOf("MSIE ") >= 0 || agent.indexOf("Trident/") >= 0) {
+	if(agent.indexOf("MSIE ") != -1 || agent.indexOf("Trident/") != -1) {
 		return true;
 	}
 	return false;
@@ -18152,19 +20576,6 @@ kha_SystemImpl.init2 = function(defaultWidth,defaultHeight,backbufferFormat) {
 			if(pad != null) {
 				kha_SystemImpl.gamepads[pad.index].connected = true;
 			}
-		}
-	}
-	if(kha_SystemImpl.ie) {
-		kha_SystemImpl.pressedKeys = [];
-		var _g = 0;
-		while(_g < 256) {
-			var i = _g++;
-			kha_SystemImpl.pressedKeys.push(false);
-		}
-		var _g = 0;
-		while(_g < 256) {
-			var i = _g++;
-			kha_SystemImpl.pressedKeys.push(null);
 		}
 	}
 	var onCopy = function(e) {
@@ -18271,7 +20682,7 @@ kha_SystemImpl.loadFinished = function(defaultWidth,defaultHeight) {
 		kha_SystemImpl.gl2 = true;
 		kha_Shaders.init();
 	} catch( _g ) {
-		haxe_Log.trace("Could not initialize WebGL 2, falling back to WebGL.",{ fileName : "kha/SystemImpl.hx", lineNumber : 378, className : "kha.SystemImpl", methodName : "loadFinished"});
+		haxe_Log.trace("Could not initialize WebGL 2, falling back to WebGL.",{ fileName : "kha/SystemImpl.hx", lineNumber : 408, className : "kha.SystemImpl", methodName : "loadFinished"});
 	}
 	if(!kha_SystemImpl.gl2) {
 		try {
@@ -18293,7 +20704,7 @@ kha_SystemImpl.loadFinished = function(defaultWidth,defaultHeight) {
 			gl = true;
 			kha_Shaders.init();
 		} catch( _g ) {
-			haxe_Log.trace("Could not initialize WebGL, falling back to <canvas>.",{ fileName : "kha/SystemImpl.hx", lineNumber : 406, className : "kha.SystemImpl", methodName : "loadFinished"});
+			haxe_Log.trace("Could not initialize WebGL, falling back to <canvas>.",{ fileName : "kha/SystemImpl.hx", lineNumber : 436, className : "kha.SystemImpl", methodName : "loadFinished"});
 		}
 	}
 	kha_SystemImpl.setCanvas(canvas);
@@ -18330,9 +20741,8 @@ kha_SystemImpl.loadFinished = function(defaultWidth,defaultHeight) {
 	}
 	canvas.onblur = kha_SystemImpl.onBlur;
 	canvas.onfocus = kha_SystemImpl.onFocus;
-	canvas.onmousewheel = canvas.onwheel = kha_SystemImpl.mouseWheel;
 	canvas.onmouseleave = kha_SystemImpl.mouseLeave;
-	canvas.addEventListener("wheel mousewheel",kha_SystemImpl.mouseWheel,false);
+	canvas.addEventListener("wheel",kha_SystemImpl.mouseWheel,false);
 	canvas.addEventListener("touchstart",kha_SystemImpl.touchDown,false);
 	canvas.addEventListener("touchend",kha_SystemImpl.touchUp,false);
 	canvas.addEventListener("touchmove",kha_SystemImpl.touchMove,false);
@@ -18404,13 +20814,19 @@ kha_SystemImpl.initAnimate = function(callback) {
 		if(canvas.getContext != null) {
 			if(kha_SystemImpl.lastCanvasClientWidth != canvas.clientWidth || kha_SystemImpl.lastCanvasClientHeight != canvas.clientHeight) {
 				var scale = window.devicePixelRatio;
-				canvas.width = canvas.clientWidth * scale | 0;
-				canvas.height = canvas.clientHeight * scale | 0;
+				var clientWidth = canvas.clientWidth;
+				var clientHeight = canvas.clientHeight;
+				canvas.width = clientWidth;
+				canvas.height = clientHeight;
+				if(scale != 1) {
+					canvas.style.width = (clientWidth / scale | 0) + "px";
+					canvas.style.height = (clientHeight / scale | 0) + "px";
+				}
 				kha_SystemImpl.lastCanvasClientWidth = canvas.clientWidth;
 				kha_SystemImpl.lastCanvasClientHeight = canvas.clientHeight;
 			}
 			kha_System.render([kha_SystemImpl.frame]);
-			if(kha_SystemImpl.gl != null) {
+			if(kha_SystemImpl.ie && kha_SystemImpl.gl != null) {
 				kha_SystemImpl.gl.clearColor(1,1,1,1);
 				kha_SystemImpl.gl.colorMask(false,false,false,true);
 				kha_SystemImpl.gl.clear(16384);
@@ -18539,7 +20955,7 @@ kha_SystemImpl.unlockSound = function() {
 			context.resume().then(function(c) {
 				kha_SystemImpl.soundEnabled = true;
 			}).catch(function(err) {
-				haxe_Log.trace(err,{ fileName : "kha/SystemImpl.hx", lineNumber : 685, className : "kha.SystemImpl", methodName : "unlockSound"});
+				haxe_Log.trace(err,{ fileName : "kha/SystemImpl.hx", lineNumber : 730, className : "kha.SystemImpl", methodName : "unlockSound"});
 			});
 		}
 		kha_audio2_Audio.wakeChannels();
@@ -18802,31 +21218,9 @@ kha_SystemImpl.onFocus = function() {
 kha_SystemImpl.keyDown = function(event) {
 	kha_SystemImpl.insideInputEvent = true;
 	kha_SystemImpl.unlockSound();
-	var _g = kha_input_Keyboard.keyBehavior;
-	switch(_g._hx_index) {
-	case 0:
-		kha_SystemImpl.defaultKeyBlock(event);
-		break;
-	case 1:
-		event.preventDefault();
-		break;
-	case 2:
-		break;
-	case 3:
-		var func = _g.func;
-		if(func(event.keyCode)) {
-			event.preventDefault();
-		}
-		break;
-	}
+	kha_SystemImpl.preventDefaultKeyBehavior(event);
 	event.stopPropagation();
-	if(kha_SystemImpl.ie) {
-		if(kha_SystemImpl.pressedKeys[event.keyCode]) {
-			event.preventDefault();
-			return;
-		}
-		kha_SystemImpl.pressedKeys[event.keyCode] = true;
-	} else if(event.repeat) {
+	if(event.repeat) {
 		event.preventDefault();
 		return;
 	}
@@ -18846,6 +21240,25 @@ kha_SystemImpl.fixedKeyCode = function(event) {
 		return 173;
 	default:
 		return event.keyCode;
+	}
+};
+kha_SystemImpl.preventDefaultKeyBehavior = function(event) {
+	var _g = kha_input_Keyboard.keyBehavior;
+	switch(_g._hx_index) {
+	case 0:
+		kha_SystemImpl.defaultKeyBlock(event);
+		break;
+	case 1:
+		event.preventDefault();
+		break;
+	case 2:
+		break;
+	case 3:
+		var func = _g.func;
+		if(func(event.keyCode)) {
+			event.preventDefault();
+		}
+		break;
 	}
 };
 kha_SystemImpl.defaultKeyBlock = function(e) {
@@ -18870,11 +21283,8 @@ kha_SystemImpl.defaultKeyBlock = function(e) {
 kha_SystemImpl.keyUp = function(event) {
 	kha_SystemImpl.insideInputEvent = true;
 	kha_SystemImpl.unlockSound();
-	event.preventDefault();
+	kha_SystemImpl.preventDefaultKeyBehavior(event);
 	event.stopPropagation();
-	if(kha_SystemImpl.ie) {
-		kha_SystemImpl.pressedKeys[event.keyCode] = false;
-	}
 	var keyCode = kha_SystemImpl.fixedKeyCode(event);
 	kha_SystemImpl.keyboard.sendUpEvent(keyCode);
 	kha_SystemImpl.insideInputEvent = false;
@@ -18885,7 +21295,7 @@ kha_SystemImpl.keyPress = function(event) {
 	if(event.which == 0) {
 		return;
 	}
-	event.preventDefault();
+	kha_SystemImpl.preventDefaultKeyBehavior(event);
 	event.stopPropagation();
 	var code = event.which;
 	kha_SystemImpl.keyboard.sendPressEvent(String.fromCodePoint(code));
@@ -18913,10 +21323,7 @@ kha_SystemImpl.getGamepads = function() {
 		return null;
 	}
 };
-kha_SystemImpl.getPen = function(num) {
-	return null;
-};
-var kha_WebGLImage = function(width,height,format,renderTarget,depthStencilFormat,samples) {
+var kha_WebGLImage = function(width,height,format,renderTarget,depthStencilFormat,samples,readable) {
 	this.MSAAFrameBuffer = null;
 	this.depthTexture = null;
 	this.texture = null;
@@ -18927,6 +21334,7 @@ var kha_WebGLImage = function(width,height,format,renderTarget,depthStencilForma
 	this.myFormat = format;
 	this.renderTarget = renderTarget;
 	this.samples = samples;
+	this.readable = readable;
 	this.image = null;
 	this.video = null;
 	this.depthStencilFormat = depthStencilFormat;
@@ -19050,7 +21458,7 @@ kha_WebGLImage.prototype = $extend(kha_Image.prototype,{
 			this.initDepthStencilBuffer(this.depthStencilFormat);
 			var e = kha_SystemImpl.gl.checkFramebufferStatus(36160);
 			if(e != 36053) {
-				haxe_Log.trace("checkframebufferStatus error " + e,{ fileName : "kha/WebGLImage.hx", lineNumber : 270, className : "kha.WebGLImage", methodName : "createTexture"});
+				haxe_Log.trace("checkframebufferStatus error " + e,{ fileName : "kha/WebGLImage.hx", lineNumber : 283, className : "kha.WebGLImage", methodName : "createTexture"});
 			}
 			kha_SystemImpl.gl.bindRenderbuffer(36161,null);
 			kha_SystemImpl.gl.bindFramebuffer(36160,null);
@@ -19660,13 +22068,12 @@ kha_audio2_Audio1.stream = function(sound,loop) {
 	}
 };
 var kha_audio2_AudioChannel = function(looping) {
-	this.looping = false;
+	this.data = null;
+	this.looping = looping;
 	this.stopped = false;
 	this.paused = false;
 	this.myPosition = 0;
 	this.myVolume = 1;
-	this.data = null;
-	this.looping = looping;
 };
 $hxClasses["kha.audio2.AudioChannel"] = kha_audio2_AudioChannel;
 kha_audio2_AudioChannel.__name__ = true;
@@ -23961,10 +26368,7 @@ var kha_graphics4_CubeMap = function(size,format,renderTarget,depthStencilFormat
 $hxClasses["kha.graphics4.CubeMap"] = kha_graphics4_CubeMap;
 kha_graphics4_CubeMap.__name__ = true;
 kha_graphics4_CubeMap.__interfaces__ = [kha_Resource,kha_Canvas];
-kha_graphics4_CubeMap.createRenderTarget = function(size,format,depthStencil,contextId) {
-	if(contextId == null) {
-		contextId = 0;
-	}
+kha_graphics4_CubeMap.createRenderTarget = function(size,format,depthStencil) {
 	if(format == null) {
 		format = 0;
 	}
@@ -24944,10 +27348,14 @@ var kha_graphics4_PipelineStateBase = function() {
 	this.cullMode = 2;
 	this.depthWrite = false;
 	this.depthMode = 0;
-	this.stencilMode = 0;
-	this.stencilBothPass = 0;
-	this.stencilDepthFail = 0;
-	this.stencilFail = 0;
+	this.stencilFrontMode = 0;
+	this.stencilFrontBothPass = 0;
+	this.stencilFrontDepthFail = 0;
+	this.stencilFrontFail = 0;
+	this.stencilBackMode = 0;
+	this.stencilBackBothPass = 0;
+	this.stencilBackDepthFail = 0;
+	this.stencilBackFail = 0;
 	this.stencilReferenceValue = kha_graphics4_StencilValue.Static(0);
 	this.stencilReadMask = 255;
 	this.stencilWriteMask = 255;
@@ -25334,12 +27742,20 @@ kha_graphics4_VertexBuffer.prototype = {
 			this.lockEnd = this.lockStart + count;
 		}
 		kha_SystemImpl.gl.bindBuffer(34962,this.buffer);
-		var tmp = kha_SystemImpl.gl;
-		var tmp1 = this.lockStart * this.stride();
-		var this1 = this._data;
-		var start = this.lockStart * this.stride();
-		var end = this.lockEnd * this.stride();
-		tmp.bufferSubData(34962,tmp1,kha_arrays_ByteArray._new(this1.buffer,start,end != null ? end - start : null));
+		if(kha_SystemImpl.safari) {
+			var tmp = kha_SystemImpl.gl;
+			var this1 = this._data;
+			var start = 0 * this.stride();
+			var end = this.lockEnd * this.stride();
+			tmp.bufferData(34962,kha_arrays_ByteArray._new(this1.buffer,start,end != null ? end - start : null),35048);
+		} else {
+			var tmp = kha_SystemImpl.gl;
+			var tmp1 = this.lockStart * this.stride();
+			var this1 = this._data;
+			var start = this.lockStart * this.stride();
+			var end = this.lockEnd * this.stride();
+			tmp.bufferSubData(34962,tmp1,kha_arrays_ByteArray._new(this1.buffer,start,end != null ? end - start : null));
+		}
 	}
 	,stride: function() {
 		return this.myStride;
@@ -26114,46 +28530,6 @@ kha_input_MouseImpl.prototype = $extend(kha_input_Mouse.prototype,{
 	}
 	,__class__: kha_input_MouseImpl
 });
-var kha_input_Pen = function() {
-	kha_input_Pen.instance = this;
-};
-$hxClasses["kha.input.Pen"] = kha_input_Pen;
-kha_input_Pen.__name__ = true;
-kha_input_Pen.get = function(num) {
-	if(num == null) {
-		num = 0;
-	}
-	return kha_SystemImpl.getPen(num);
-};
-kha_input_Pen.prototype = {
-	notify: function(downListener,upListener,moveListener) {
-		this.notifyWindowed(0,downListener,upListener,moveListener);
-	}
-	,notifyWindowed: function(windowId,downListener,upListener,moveListener) {
-		if(downListener != null) {
-			if(this.windowDownListeners == null) {
-				this.windowDownListeners = [];
-			}
-			while(this.windowDownListeners.length <= windowId) this.windowDownListeners.push([]);
-			this.windowDownListeners[windowId].push(downListener);
-		}
-		if(upListener != null) {
-			if(this.windowUpListeners == null) {
-				this.windowUpListeners = [];
-			}
-			while(this.windowUpListeners.length <= windowId) this.windowUpListeners.push([]);
-			this.windowUpListeners[windowId].push(upListener);
-		}
-		if(moveListener != null) {
-			if(this.windowMoveListeners == null) {
-				this.windowMoveListeners = [];
-			}
-			while(this.windowMoveListeners.length <= windowId) this.windowMoveListeners.push([]);
-			this.windowMoveListeners[windowId].push(moveListener);
-		}
-	}
-	,__class__: kha_input_Pen
-};
 var kha_input_TouchDownEventBlockBehavior = $hxEnums["kha.input.TouchDownEventBlockBehavior"] = { __ename__:true,__constructs__:null
 	,Full: {_hx_name:"Full",_hx_index:0,__enum__:"kha.input.TouchDownEventBlockBehavior",toString:$estr}
 	,None: {_hx_name:"None",_hx_index:1,__enum__:"kha.input.TouchDownEventBlockBehavior",toString:$estr}
@@ -27179,7 +29555,13 @@ kha_js_graphics4_Graphics.prototype = {
 	,setPipeline: function(pipe) {
 		this.setCullMode(pipe.cullMode);
 		this.setDepthMode(pipe.depthWrite,pipe.depthMode);
-		this.setStencilParameters(pipe.stencilMode,pipe.stencilBothPass,pipe.stencilDepthFail,pipe.stencilFail,pipe.stencilReferenceValue,pipe.stencilReadMask,pipe.stencilWriteMask);
+		if(pipe.stencilFrontMode == 0 && pipe.stencilBackMode == 0 && pipe.stencilFrontBothPass == 0 && pipe.stencilBackBothPass == 0 && pipe.stencilFrontDepthFail == 0 && pipe.stencilBackDepthFail == 0 && pipe.stencilFrontFail == 0 && pipe.stencilBackFail == 0) {
+			kha_SystemImpl.gl.disable(2960);
+		} else {
+			kha_SystemImpl.gl.enable(2960);
+			this.setStencilParameters(true,pipe.stencilFrontMode,pipe.stencilFrontBothPass,pipe.stencilFrontDepthFail,pipe.stencilFrontFail,pipe.stencilReferenceValue,pipe.stencilReadMask,pipe.stencilWriteMask);
+			this.setStencilParameters(false,pipe.stencilBackMode,pipe.stencilBackBothPass,pipe.stencilBackDepthFail,pipe.stencilBackFail,pipe.stencilReferenceValue,pipe.stencilReadMask,pipe.stencilWriteMask);
+		}
 		this.setBlendingMode(pipe.blendSource,pipe.blendDestination,pipe.blendOperation,pipe.alphaBlendSource,pipe.alphaBlendDestination,pipe.alphaBlendOperation);
 		this.currentPipeline = pipe;
 		pipe.set();
@@ -27335,29 +29717,26 @@ kha_js_graphics4_Graphics.prototype = {
 			return 518;
 		}
 	}
-	,setStencilParameters: function(compareMode,bothPass,depthFail,stencilFail,referenceValue,readMask,writeMask) {
+	,setStencilParameters: function(front,compareMode,bothPass,depthFail,stencilFail,referenceValue,readMask,writeMask) {
 		if(writeMask == null) {
 			writeMask = 255;
 		}
 		if(readMask == null) {
 			readMask = 255;
 		}
-		if(compareMode == 0 && bothPass == 0 && depthFail == 0 && stencilFail == 0) {
-			kha_SystemImpl.gl.disable(2960);
-		} else {
-			kha_SystemImpl.gl.enable(2960);
-			var stencilFunc = this.convertCompareMode(compareMode);
-			kha_SystemImpl.gl.stencilMask(writeMask);
-			kha_SystemImpl.gl.stencilOp(this.convertStencilAction(stencilFail),this.convertStencilAction(depthFail),this.convertStencilAction(bothPass));
-			switch(referenceValue._hx_index) {
-			case 0:
-				kha_SystemImpl.gl.stencilFunc(stencilFunc,0,readMask);
-				break;
-			case 1:
-				var value = referenceValue.value;
-				kha_SystemImpl.gl.stencilFunc(stencilFunc,value,readMask);
-				break;
-			}
+		var stencilFunc = this.convertCompareMode(compareMode);
+		kha_SystemImpl.gl.stencilMaskSeparate(front ? 1028 : 1029,writeMask);
+		var tmp = kha_SystemImpl.gl;
+		var tmp1 = this.convertStencilAction(stencilFail);
+		tmp.stencilOpSeparate(front ? 1028 : 1029,tmp1,this.convertStencilAction(depthFail),this.convertStencilAction(bothPass));
+		switch(referenceValue._hx_index) {
+		case 0:
+			kha_SystemImpl.gl.stencilFuncSeparate(front ? 1028 : 1029,stencilFunc,0,readMask);
+			break;
+		case 1:
+			var value = referenceValue.value;
+			kha_SystemImpl.gl.stencilFuncSeparate(front ? 1028 : 1029,stencilFunc,value,readMask);
+			break;
 		}
 	}
 	,drawIndexedVerticesInstanced: function(instanceCount,start,count) {
@@ -27462,6 +29841,25 @@ kha_js_vr_VrInterface.prototype = $extend(kha_vr_VrInterface.prototype,{
 	}
 	,__class__: kha_js_vr_VrInterface
 });
+var kha_math_FastVector3 = function(x,y,z) {
+	if(z == null) {
+		z = 0;
+	}
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	this.x = x;
+	this.y = y;
+	this.z = z;
+};
+$hxClasses["kha.math.FastVector3"] = kha_math_FastVector3;
+kha_math_FastVector3.__name__ = true;
+kha_math_FastVector3.prototype = {
+	__class__: kha_math_FastVector3
+};
 var kha_netsync_ControllerBuilder = function() { };
 $hxClasses["kha.netsync.ControllerBuilder"] = kha_netsync_ControllerBuilder;
 kha_netsync_ControllerBuilder.__name__ = true;
@@ -27492,6 +29890,7 @@ kha_netsync_Session.prototype = {
 	}
 	,__class__: kha_netsync_Session
 };
+function $getIterator(o) { if( o instanceof Array ) return new haxe_iterators_ArrayIterator(o); else return o.iterator(); }
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
 if(typeof(performance) != "undefined" ? typeof(performance.now) == "function" : false) {
@@ -27513,14 +29912,22 @@ var Class = { };
 var Enum = { };
 haxe_ds_ObjectMap.count = 0;
 js_Boot.__toStr = ({ }).toString;
+armory_renderpath_HosekWilkieData.datasetRGB1 = [-1.099459e+000,-1.335146e-001,-4.083223e+000,5.919603e+000,-1.104166e-001,1.600158e+000,-1.326538e-006,4.917807e+000,5.127716e-001,-1.169858e+000,-1.832793e-001,9.694744e-001,9.495762e-002,-4.738918e-002,2.194171e-001,1.095749e-001,3.603604e+000,3.815119e-001,-9.665225e-001,-1.403888e-001,5.194457e+000,-1.107607e+000,-8.135181e-001,4.969661e+000,-2.300508e-001,-2.489350e+000,1.279158e+000,-1.292508e+000,-1.299552e-001,-2.071404e+000,-4.752482e-002,1.215598e+000,-1.904179e+000,3.027985e-001,8.707768e+000,6.332446e-002,-9.264666e-001,-1.696780e-001,4.574070e+000,-4.232936e-001,-7.575833e+000,5.079755e+000,-2.576343e-001,-4.506805e+000,6.908129e-001,-1.139072e+000,-1.796056e-001,1.923311e+000,6.788529e+000,-2.364389e+000,-1.064041e+000,1.717010e-001,1.534681e+000,5.015810e-001,-1.107257e+000,-1.384411e-001,-4.285744e+000,5.713157e+000,-1.015992e-001,1.372638e+000,6.555893e-002,5.127514e+000,6.550471e-001,-1.187337e+000,-1.969013e-001,8.551048e-001,5.289708e-002,-7.626406e-002,1.733153e-002,1.779454e-001,3.801038e+000,4.742709e-001,-9.685321e-001,-1.553308e-001,4.732492e+000,-1.178935e+000,-7.852791e-001,4.604492e+000,-2.666518e-001,-2.367663e+000,1.177527e+000,-1.252817e+000,-5.129949e-002,-2.800433e+000,-1.295992e-002,1.308964e+000,-2.204331e+000,7.276011e-001,8.699265e+000,1.188388e-001,-9.459509e-001,-2.322133e-001,4.375041e+000,-1.712018e-001,-7.451681e+000,5.078019e+000,-4.223538e-001,-4.595561e+000,1.074719e+000,-1.125092e+000,-1.796750e-001,1.626399e+000,6.989743e+000,-2.406382e+000,-9.060383e-001,2.961611e-001,1.337715e+000,5.438140e-001,-1.135338e+000,-1.716160e-001,-1.499253e+000,2.373491e+000,-1.654023e-001,9.566404e-001,1.113453e-001,4.528473e+000,6.579439e-001,-1.132780e+000,-1.456214e-001,-1.736672e+000,1.756589e+000,-1.087003e-001,3.757927e-001,2.525070e-001,7.178513e+000,5.003814e-001,-1.167176e+000,-2.927225e-001,5.727667e+000,-3.139244e+000,-6.425204e-001,2.822634e+000,-1.457812e-001,-6.787080e+000,1.017072e+000,-1.042529e+000,4.110823e-002,-4.000629e+000,4.362364e+000,1.090540e+000,-1.338674e+000,8.246964e-001,1.095249e+001,2.912211e-001,-1.061598e+000,-2.096143e-001,3.803155e+000,-7.977069e+000,-3.637880e+000,3.707671e+000,-1.903128e-001,-3.397953e+000,9.971500e-001,-1.073560e+000,-2.077964e-001,1.492052e+000,1.626322e+001,-5.015304e+000,-4.059889e-001,2.659782e-001,6.395380e-001,5.634436e-001,-1.172794e+000,-2.111186e-001,-1.360013e+000,1.604080e+000,-8.473723e-002,7.217312e-001,1.548030e-001,4.257010e+000,6.328974e-001,-1.238374e+000,-2.670827e-001,3.247678e-001,5.466311e-001,-7.425952e-001,5.276440e-001,2.678026e-002,5.484169e+000,6.814734e-001,-1.176923e+000,-2.574586e-001,2.304045e+000,-2.797678e+000,1.464405e+000,1.998552e+000,2.550559e-001,-4.199772e+000,7.544892e-001,-1.003284e+000,1.943984e-002,-2.145066e+000,1.030924e+001,-1.525413e+001,-2.023010e+000,5.448699e-001,8.159497e+000,5.539148e-001,-1.060017e+000,-2.037206e-001,2.483018e+000,-4.595459e+000,6.526991e+000,4.031804e+000,1.206513e-001,-2.586527e+000,7.875752e-001,-1.081141e+000,-2.123302e-001,1.092275e+000,2.683841e+000,-4.166938e+000,-1.396582e+000,4.371205e-001,1.030233e+000,6.664862e-001,-1.222392e+000,-2.651924e-001,-4.625037e-001,3.521964e-001,2.148855e-002,5.078494e-001,1.791590e-001,3.852516e+000,5.998216e-001,-1.424610e+000,-4.710155e-001,-1.826815e-001,1.786277e+000,-1.952442e+000,5.277612e-001,-1.773629e-002,2.415874e+000,6.701272e-001,-1.130655e+000,-1.358609e-001,9.171203e-001,-4.660394e+000,6.251162e+000,1.904529e+000,2.639668e-001,1.856130e+000,8.228440e-001,-9.739015e-001,-6.674749e-002,-4.768897e-001,1.248589e+001,-1.994688e+001,-2.353043e+000,5.885575e-001,1.287251e+000,4.830135e-001,-1.082178e+000,-1.974495e-001,1.050245e+000,-4.792855e+000,8.663406e+000,3.246969e+000,1.556731e-001,8.117442e-001,8.050376e-001,-1.063354e+000,-1.727108e-001,9.681592e-001,2.736077e+000,-4.969269e+000,-8.360570e-001,5.994612e-001,1.024039e+000,6.786935e-001,-1.261936e+000,-3.053676e-001,-4.262222e-001,4.000196e-001,-2.059388e-002,4.721802e-001,1.480028e-001,3.505343e+000,6.121337e-001,-1.681088e+000,-6.971919e-001,-1.105652e-001,7.437426e-001,-6.594399e-001,2.254221e-001,8.710195e-002,1.263913e+000,5.681865e-001,-9.453001e-001,3.460388e-002,6.067038e-001,-1.985128e+000,3.457236e+000,2.655483e+000,-1.162354e-002,3.304716e+000,1.001950e+000,-1.086609e+000,-2.029011e-001,-6.399170e-001,6.926885e+000,-1.512189e+001,-3.793051e+000,9.456120e-001,2.222222e-001,2.893725e-001,-1.041259e+000,-1.388790e-001,1.147331e+000,6.282086e+000,3.679836e+000,4.398314e+000,-1.355232e-001,1.031134e+000,9.273509e-001,-1.063473e+000,-1.916051e-001,6.556979e-001,-3.371891e-003,-3.699664e+000,-1.926783e+000,7.371154e-001,1.179975e+000,6.367068e-001,-1.336390e+000,-3.778927e-001,-7.259477e-001,2.270247e-001,4.627513e-001,1.366459e-001,2.637347e-001,3.292059e+000,4.998211e-001,-2.119878e+000,-1.055472e+000,5.422052e-001,7.826648e-001,-1.286065e+000,9.517905e-001,-1.432358e-001,-2.379816e-001,5.910513e-001,-7.761432e-001,2.124336e-001,-6.845184e-001,-9.812342e-001,4.347257e+000,9.671980e-001,3.773150e-001,5.789529e+000,9.646598e-001,-1.118734e+000,-3.513815e-001,5.500918e-001,9.449627e-001,-1.262070e+001,-1.825280e+000,4.731260e-001,-3.326892e+000,3.568768e-001,-1.026437e+000,-8.257946e-002,3.221701e-001,1.198372e+001,1.555130e+000,2.560304e+000,1.406465e-001,2.912858e+000,8.643181e-001,-1.069949e+000,-2.029607e-001,5.825042e-001,-2.398595e-003,-3.278335e+000,-1.349882e+000,7.208433e-001,8.505164e-001,6.625391e-001,-1.392309e+000,-4.454945e-001,-5.664000e-001,6.283393e-001,-3.761727e-001,6.949802e-001,7.748178e-002,3.192797e+000,5.968661e-001,-2.713405e+000,-1.395112e+000,2.029230e-001,1.877272e-001,-3.715859e-001,-1.652929e-001,2.385861e-001,-4.150768e-001,1.375467e-001,-9.588644e-001,2.433900e-002,-1.527493e+000,-9.632874e-001,5.496269e+000,1.094931e+000,2.004044e-001,6.084554e+000,1.369604e+000,-8.028546e-001,-2.473563e-001,1.617898e+000,2.073591e+000,-1.149446e+001,-8.394131e-001,2.726847e-001,-4.634538e+000,1.367293e-001,-1.198326e+000,-1.804865e-001,-3.565414e-001,4.073200e+000,1.662086e+000,1.239770e+000,3.367978e-001,2.997402e+000,9.360383e-001,-1.013531e+000,-1.859060e-001,5.799857e-001,1.331883e+001,-4.346873e+000,-1.113820e+000,5.275714e-001,8.045177e-001,6.496373e-001,-1.530103e+000,-6.107468e-001,-3.841771e-001,1.881508e+000,-1.464807e+000,6.654690e-001,-5.950797e-006,2.738912e+000,8.101012e-001,-2.415469e+000,-1.057499e+000,-4.161968e-001,-2.357548e+000,6.300296e-001,6.224915e-001,1.545048e-002,2.038561e+000,-1.339415e-001,-3.096796e+000,-1.465688e+000,-1.199232e+000,4.567061e+000,3.260980e+000,-9.794907e-001,8.950491e-001,2.049235e+000,1.331015e+000,2.713904e-001,2.852852e-001,1.202090e+000,-8.206784e+000,-5.805762e+000,1.804431e+000,-6.090648e-001,-1.990902e+000,3.288858e-001,-1.456580e+000,-3.455960e-001,-6.409257e-002,1.667697e+001,-2.311094e+000,-9.771104e-001,6.759863e-001,1.245136e+000,7.911932e-001,-9.860389e-001,-2.099564e-001,2.946650e-001,-3.547800e-003,-2.268313e+000,-6.205647e-002,4.705185e-001,8.657995e-001,6.856284e-001,-1.971736e+000,-9.414047e-001,-3.400557e-001,1.468763e+000,-1.474284e+000,5.501062e-001,-1.109750e-005,2.356370e+000,9.001702e-001,-1.589845e+000,-7.797079e-001,-5.582240e-001,-8.137376e-001,5.846617e-001,1.129459e-001,-2.658005e-002,2.707248e+000,-2.112486e-001,-6.940173e+000,-2.823963e+000,-1.620848e+000,1.090696e+000,2.391730e+000,1.370047e+000,5.890462e-001,1.728400e+000,1.331253e+000,1.293144e+000,-1.919778e-003,1.644206e+000,-8.666967e-001,-7.161953e+000,-1.385018e+000,-1.505374e-001,-1.388643e+000,2.530122e-001,-1.488880e+000,-2.495496e-001,-2.377137e-001,1.167714e+001,-8.617124e-001,1.053828e+000,1.992744e-001,3.633564e-001,8.553304e-001,-1.060891e+000,-4.035829e-001,2.823207e-001,-2.369798e-003,-1.876577e+000,-5.950265e-001,4.241017e-001,3.140802e-001,6.631669e-001,-1.101204e+000,-1.351353e-001,-4.030882e+000,6.096353e+000,-1.148599e-001,1.606507e+000,-1.555474e-006,4.436084e+000,5.973715e-001,-1.154597e+000,-1.923378e-001,8.512132e-001,2.934895e-001,-6.522777e-002,1.389077e-001,9.091469e-002,3.133307e+000,2.108541e-001,-1.031588e+000,-1.546804e-001,5.266214e+000,-9.491390e-001,-7.184867e-001,4.875626e+000,-1.911907e-001,-2.865642e+000,1.087895e+000,-1.159454e+000,-9.546699e-002,-1.508146e+000,-2.031411e-002,1.040653e+000,-2.333508e+000,2.540592e-001,8.594981e+000,9.316770e-002,-1.035940e+000,-2.021151e-001,4.719343e+000,-9.019318e-001,-7.858046e+000,3.901234e+000,-2.233137e-001,-4.344739e+000,6.550733e-001,-1.096669e+000,-1.558196e-001,2.057553e+000,6.274495e+000,-2.678352e+000,-1.814927e+000,1.550676e-001,1.903276e+000,4.998989e-001,-1.114209e+000,-1.473531e-001,-7.602914e+000,8.973685e+000,-4.980074e-002,1.289198e+000,8.366906e-002,4.557987e+000,6.118757e-001,-1.149397e+000,-1.981628e-001,4.914096e+000,-3.498986e+000,-6.257090e-002,1.667401e-001,1.048980e-001,2.284689e+000,5.935965e-001,-1.056121e+000,-1.456172e-001,4.272656e-001,2.912649e+000,-5.501745e-001,4.406542e+000,-1.387680e-001,1.245555e+000,9.733011e-001,-1.125047e+000,-4.003662e-002,1.058457e+000,-3.462236e+000,4.395278e-001,-2.395805e+000,5.177589e-001,4.866247e+000,4.253189e-001,-1.051444e+000,-2.804541e-001,3.364668e+000,3.293787e+000,-1.015741e+001,3.807407e+000,-3.592377e-001,-3.367415e+000,7.900825e-001,-1.093847e+000,-1.436965e-001,2.384780e+000,5.787070e+000,-2.445987e+000,-1.311171e+000,2.326563e-001,1.158439e+000,5.555416e-001,-1.134824e+000,-1.680468e-001,-3.325620e+000,4.458596e+000,-1.135063e-001,1.104500e+000,7.794544e-002,4.609952e+000,6.854854e-001,-1.143017e+000,-1.565926e-001,3.014687e-001,-1.763027e-001,-3.557925e-002,-2.342406e-001,2.528705e-001,5.884085e+000,4.750602e-001,-1.136801e+000,-2.907502e-001,3.682423e+000,-4.061202e-001,-8.728159e-001,4.001510e+000,-1.522202e-001,-5.528713e+000,1.044847e+000,-1.063652e+000,7.808107e-002,-1.983678e+000,3.648078e-001,2.102276e+000,-3.065050e+000,8.431951e-001,1.038830e+001,2.662834e-001,-1.061015e+000,-2.859814e-001,4.223615e+000,-2.290138e+000,-8.314010e+000,4.405718e+000,-4.613627e-001,-4.502910e+000,1.008383e+000,-1.106302e+000,-1.697123e-001,2.087196e+000,8.238929e+000,-2.992416e+000,-1.821776e+000,3.434859e-001,7.755179e-001,5.341190e-001,-1.171110e+000,-2.106304e-001,-1.614361e+000,2.378103e+000,-1.625969e-001,8.504483e-001,1.059312e-001,4.046256e+000,6.618227e-001,-1.200480e+000,-2.235733e-001,1.014390e+000,-1.174074e+000,-4.440180e-001,2.262406e-001,1.665868e-001,5.461829e+000,5.676310e-001,-1.223587e+000,-3.502622e-001,1.699106e+000,6.724266e-001,1.268567e+000,2.135102e+000,8.039374e-004,-5.221111e+000,9.445690e-001,-9.452673e-001,1.468459e-001,-1.335034e+000,4.346628e+000,-1.285652e+001,-1.807046e+000,8.175243e-001,9.301065e+000,3.656798e-001,-1.134681e+000,-3.310951e-001,3.571244e+000,-2.208948e+000,6.041580e+000,3.107577e+000,-3.112127e-001,-4.186351e+000,9.188333e-001,-1.083237e+000,-1.831394e-001,2.062654e+000,1.385424e+000,-5.004950e+000,-1.332669e+000,3.627352e-001,3.323150e-001,6.191181e-001,-1.211527e+000,-2.590617e-001,-1.660874e-001,3.627905e-001,-1.039258e-001,4.697924e-001,1.671653e-001,3.507497e+000,6.022506e-001,-1.433017e+000,-4.733592e-001,1.724445e-001,9.953236e-001,-1.874457e+000,4.432099e-001,1.715810e-002,2.339272e+000,6.441470e-001,-1.084920e+000,-1.587903e-001,8.999585e-001,-2.537516e+000,5.877859e+000,2.014554e+000,9.689141e-002,3.177242e-001,9.030399e-001,-1.008242e+000,2.793030e-003,-3.507469e-001,1.028300e+001,-2.080454e+001,-2.781026e+000,8.995090e-001,3.366951e+000,3.473867e-001,-1.103151e+000,-2.799598e-001,2.525791e+000,-4.255704e+000,9.903388e+000,3.722668e+000,-3.603941e-001,-1.303292e+000,9.369454e-001,-1.102235e+000,-2.025061e-001,2.085660e+000,1.686787e+000,-5.010957e+000,-1.656458e+000,4.584029e-001,-2.751759e-001,6.184162e-001,-1.256130e+000,-3.104904e-001,1.639350e-001,1.315502e-001,-7.297583e-001,4.778480e-001,1.259265e-001,3.012108e+000,6.202728e-001,-1.620114e+000,-6.552670e-001,-2.877157e-001,1.094371e+000,2.818914e-001,3.696830e-001,9.428521e-002,1.450951e+000,5.681308e-001,-9.686204e-001,-3.755647e-002,1.469980e+000,-3.103414e+000,2.856583e+000,1.883209e+000,-5.746099e-002,1.286383e+000,1.001751e+000,-1.089377e+000,-1.023062e-001,-1.498891e+000,1.066455e+001,-1.720184e+001,-2.759314e+000,1.061258e+000,2.910211e+000,2.624701e-001,-1.044681e+000,-2.156857e-001,3.230136e+000,-5.863862e-001,6.096640e+000,3.550019e+000,-4.255773e-001,-1.500033e+000,9.687696e-001,-1.133658e+000,-2.505101e-001,1.717840e+000,8.480428e-003,-5.011789e+000,-1.740989e+000,4.983430e-001,-2.081829e-001,6.088641e-001,-1.335366e+000,-3.863319e-001,-5.279971e-001,3.638324e-001,3.230699e-001,8.339707e-002,2.483293e-001,2.678646e+000,4.998346e-001,-2.004511e+000,-9.957121e-001,1.250807e+000,1.625025e-002,-3.410754e-001,7.858244e-001,-9.506757e-002,2.651876e-002,5.788643e-001,-8.714157e-001,1.192051e-001,-8.486879e-001,-3.702497e-001,1.818277e+000,1.103427e+000,2.454866e-001,3.841575e+000,9.847350e-001,-1.042618e+000,-2.285793e-001,3.620175e-001,2.983368e+000,-9.776844e+000,-1.971587e+000,6.691674e-001,-7.901947e-001,3.213200e-001,-1.099112e+000,-1.869868e-001,2.044065e+000,2.062964e+000,1.265668e+000,2.710130e+000,-1.099443e-001,2.179353e-001,9.024108e-001,-1.106985e+000,-2.396881e-001,1.809807e+000,8.523319e+000,-5.011788e+000,-1.590086e+000,3.248449e-001,-1.003187e-001,6.550606e-001,-1.421285e+000,-4.767024e-001,-3.885004e-001,8.274590e-001,-3.644229e-001,6.999513e-001,5.196710e-002,2.578431e+000,6.246310e-001,-2.611217e+000,-1.398846e+000,4.527425e-001,-5.932142e-001,2.224617e-001,-5.593581e-001,3.389633e-001,-7.767112e-001,6.536004e-002,-9.881543e-001,4.684782e-002,-8.616613e-001,8.799807e-001,4.003130e+000,1.739543e+000,-8.098378e-002,5.524802e+000,1.499673e+000,-7.544759e-001,-2.314808e-001,8.125770e-001,-7.724135e-001,-9.577645e+000,-1.629433e+000,6.790832e-001,-4.193895e+000,-2.526624e-002,-1.273719e+000,-2.187030e-001,1.401798e+000,5.231832e+000,7.405093e-001,1.775166e+000,-7.269476e-002,1.996087e+000,1.057450e+000,-1.046864e+000,-2.247559e-001,1.679449e+000,1.140057e+001,-4.948829e+000,-1.182664e+000,3.241038e-001,-2.470012e-001,6.115900e-001,-1.514607e+000,-5.985430e-001,-1.877610e-001,1.756930e+000,-1.314206e+000,6.115810e-001,-5.970460e-006,2.412975e+000,8.124304e-001,-2.308414e+000,-1.083797e+000,-1.179959e-001,-1.728246e+000,7.784742e-001,5.494505e-001,6.203168e-003,9.326251e-001,-1.419518e-001,-3.230837e+000,-1.438670e+000,-9.868286e-001,2.974393e+000,1.949339e+000,-6.337857e-001,8.160271e-001,3.278606e+000,1.354373e+000,5.149378e-001,2.754789e-001,1.040965e+000,-4.501186e+000,-3.399057e+000,9.661861e-001,-4.736173e-001,-4.037574e+000,2.794847e-001,-1.621870e+000,-3.192763e-001,8.786242e-001,9.785565e+000,-2.727652e+000,1.903691e-002,5.521261e-001,2.138764e+000,8.419871e-001,-9.951701e-001,-2.550607e-001,1.498952e+000,-2.737197e-003,-3.101832e+000,-5.921329e-001,2.864422e-001,-4.405218e-001,6.631410e-001,-1.902954e+000,-9.056918e-001,-2.069570e-001,1.191499e+000,-1.092577e+000,5.849556e-001,-9.649602e-006,2.048407e+000,9.001527e-001,-1.271627e+000,-7.193923e-001,-1.136606e-002,-1.167951e-001,3.286175e-003,-5.262827e-002,-2.473874e-002,1.716125e+000,-2.187133e-001,-7.647175e+000,-3.114129e+000,-1.490128e+000,-5.266488e-001,3.063090e+000,1.474262e+000,5.481458e-001,2.052174e+000,1.353089e+000,2.191403e+000,3.421120e-001,1.446510e+000,2.170943e+000,-7.768187e+000,-1.471207e+000,-1.456708e-001,-1.753574e+000,2.310576e-001,-1.932296e+000,-3.814739e-001,6.245422e-001,6.748294e+000,-3.060171e-001,1.067747e+000,2.500671e-001,-1.252596e-001,8.614611e-001,-9.471101e-001,-4.052640e-001,1.300174e+000,-3.951536e-003,-1.908284e+000,-5.385721e-001,2.133578e-001,-6.250292e-001,6.658012e-001];
+armory_renderpath_HosekWilkieData.datasetRGBRad1 = [1.962684e+000,1.159831e+000,4.450588e+000,5.079633e+000,4.437388e+000,4.324573e+000,1.946487e+000,1.287515e+000,3.703696e+000,8.782833e+000,3.440437e+000,5.160333e+000,1.882170e+000,1.335878e+000,2.648641e+000,1.358368e+001,3.105473e+000,5.907387e+000,1.738159e+000,1.624289e+000,-8.786695e-003,2.118253e+001,2.770255e+000,7.055672e+000,1.571896e+000,2.301786e+000,-4.028545e+000,2.966806e+001,1.630876e+000,8.711031e+000,1.475048e+000,2.679086e+000,-6.311315e+000,3.377896e+001,2.140975e+000,9.385283e+000,1.326174e+000,3.378759e+000,-9.831444e+000,3.942061e+001,2.852702e+000,1.082542e+001,1.153344e+000,3.967771e+000,-1.265181e+001,4.195016e+001,7.468239e+000,1.221350e+001,9.746081e-001,4.051626e+000,-1.298454e+001,3.754964e+001,1.749232e+001,1.420619e+001,8.448016e-001,3.181809e+000,-8.757338e+000,2.197962e+001,3.524033e+001,1.639549e+001,2.029623e+000,1.364434e+000,4.201529e+000,5.415099e+000,9.825839e+000,1.063328e+001,2.023126e+000,1.494728e+000,3.420413e+000,9.072178e+000,9.205157e+000,1.186639e+001,1.956307e+000,1.648665e+000,2.039712e+000,1.430239e+001,9.039526e+000,1.330453e+001,1.825053e+000,1.985022e+000,-8.036307e-001,2.202493e+001,9.415361e+000,1.517659e+001,1.650367e+000,2.593201e+000,-4.469328e+000,2.969817e+001,9.410977e+000,1.744850e+001,1.555202e+000,2.962925e+000,-6.608170e+000,3.329887e+001,1.064559e+001,1.850816e+001,1.412478e+000,3.439403e+000,-9.196616e+000,3.685077e+001,1.345341e+001,2.003128e+001,1.252990e+000,3.820805e+000,-1.115338e+001,3.721593e+001,2.014916e+001,2.182320e+001,1.091952e+000,3.663027e+000,-1.031330e+001,2.978985e+001,3.296835e+001,2.375450e+001,9.501691e-001,2.664579e+000,-5.545167e+000,1.281159e+001,5.154768e+001,2.574284e+001];
+armory_renderpath_HosekWilkieData.datasetRGB2 = [-1.140530e+000,-1.982747e-001,-7.512730e+000,8.403899e+000,-5.699038e-002,9.015907e-001,3.392161e-002,4.772522e+000,5.111184e-001,-1.165117e+000,-1.852955e-001,2.963684e+000,-2.262274e+000,-1.571683e-001,6.339974e-001,4.977879e-002,7.243307e+000,4.220053e-001,-1.169936e+000,-3.357429e-001,1.911291e+000,-2.391074e-001,-4.791643e-001,1.446113e+000,-9.178108e-002,-4.700239e+000,8.096219e-001,-1.060246e+000,-1.051633e-001,5.013829e-001,2.832309e+000,-3.707855e-001,1.523131e+000,9.163749e-002,5.604183e+000,7.208566e-001,-1.089753e+000,-2.382167e-001,2.360312e+000,-5.902562e+000,-8.799894e+000,1.377692e+000,-6.131633e-002,-1.415472e+000,6.124057e-001,-1.075481e+000,-1.242391e-001,1.425781e+000,8.810319e+000,-2.922646e+000,1.486520e+000,3.270580e-002,3.889783e+000,4.999482e-001,-1.149342e+000,-2.076337e-001,-7.446587e+000,8.014559e+000,-4.866227e-002,8.203043e-001,6.386483e-002,4.894198e+000,5.452051e-001,-1.120531e+000,-1.513311e-001,2.735504e+000,-2.417591e+000,-1.361114e-001,4.296342e-001,9.427488e-002,8.171403e+000,4.102448e-001,-1.226964e+000,-3.516378e-001,1.308298e+000,-5.097487e-002,-4.846783e-001,1.654619e+000,-1.134940e-001,-3.347854e+000,1.131147e+000,-9.664377e-001,2.767589e-002,1.658235e-001,2.407439e+000,-1.300304e-001,9.170958e-001,2.742895e-001,6.642633e+000,2.550064e-001,-1.153358e+000,-3.126223e-001,2.078934e+000,-5.857733e+000,-8.659848e+000,1.758505e+000,-9.616094e-002,-1.230863e+000,9.663832e-001,-1.053850e+000,-1.330743e-001,1.481738e+000,1.049485e+001,-3.528854e+000,9.142363e-001,1.244880e-001,2.644615e+000,5.001048e-001,-1.173687e+000,-2.360362e-001,-3.741454e+000,4.088507e+000,-7.528205e-002,6.645237e-001,7.718265e-002,4.651220e+000,5.586318e-001,-1.213757e+000,-2.589561e-001,7.132551e-001,-4.259327e-001,-1.980821e-001,3.627815e-001,4.666560e-002,5.807984e+000,5.847377e-001,-1.108794e+000,-2.259870e-001,1.574179e+000,-3.753731e-001,-5.984743e-001,1.659414e+000,-1.681021e-002,6.785219e-001,8.647325e-001,-1.060896e+000,-1.346690e-002,-7.529656e-001,1.711319e+000,-9.792435e-001,2.022433e-001,3.826487e-001,5.725157e+000,5.290714e-001,-1.085145e+000,-2.840715e-001,2.088029e+000,-4.935097e+000,-9.056542e+000,1.976149e+000,-3.912485e-002,-8.636064e-001,7.452125e-001,-1.077983e+000,-1.416633e-001,1.100848e+000,1.015875e+001,-2.943712e+000,5.255135e-001,2.164224e-001,2.941143e+000,6.699937e-001,-1.223293e+000,-2.867444e-001,-1.624136e+000,1.668299e+000,-9.537589e-002,5.015947e-001,1.130741e-001,4.244812e+000,5.082152e-001,-1.325342e+000,-4.280991e-001,4.705490e-001,6.926592e-002,-4.572587e-001,5.344144e-001,-2.554192e-002,3.093939e+000,6.639401e-001,-1.113581e+000,-1.192133e-001,4.011536e-001,7.011889e-001,2.052842e-001,9.880724e-001,1.807533e-002,4.690160e+000,8.576240e-001,-1.016063e+000,-1.038138e-001,-2.280391e-001,7.898918e-001,-1.127333e+001,2.074545e-001,5.388182e-001,1.364263e+000,4.660455e-001,-1.099582e+000,-2.228607e-001,1.332648e+000,5.135188e+000,1.653152e+000,1.417020e+000,-1.087532e-001,1.809275e+000,8.080874e-001,-1.064357e+000,-1.520775e-001,8.207368e-001,-1.323565e-003,-5.009523e+000,3.946298e-001,4.337902e-001,2.593198e+000,6.719172e-001,-1.278702e+000,-3.512866e-001,-4.511055e-001,3.895760e-001,-2.429672e-001,4.270577e-001,1.135348e-001,3.719130e+000,4.998867e-001,-1.580069e+000,-7.095475e-001,-3.198904e-001,1.715748e+000,-1.185915e+000,4.523161e-001,-1.026159e-002,7.927188e-001,5.538350e-001,-9.474023e-001,1.173703e-001,4.881381e-001,-2.618684e+000,3.251661e+000,1.213931e+000,-1.736274e-002,8.000768e+000,1.025998e+000,-1.129091e+000,-3.287694e-001,-3.524077e-001,3.352892e+000,-1.416073e+001,-8.485617e-001,6.560766e-001,-2.820937e+000,3.111303e-001,-1.030884e+000,-1.137581e-001,1.109855e+000,8.082276e+000,1.519214e+000,2.112433e+000,-1.592299e-001,3.675905e+000,8.703367e-001,-1.075192e+000,-1.627166e-001,3.514910e-001,1.168164e+000,-4.255822e+000,-6.015348e-001,6.265776e-001,2.884818e+000,6.548384e-001,-1.316017e+000,-3.889652e-001,-5.030854e-001,4.488704e-001,-3.186800e-001,4.570763e-001,8.909201e-002,3.659274e+000,5.011746e-001,-1.731876e+000,-8.493806e-001,1.194871e-001,2.002781e+000,-2.006547e+000,4.872233e-001,-2.854606e-002,2.662137e-001,4.611629e-001,-9.273680e-001,1.380954e-001,-3.302179e-001,-3.553265e+000,4.633345e+000,9.696729e-001,8.799775e-002,8.291129e+000,1.094451e+000,-1.099377e+000,-3.325392e-001,2.501063e-001,2.613712e+000,-1.328142e+001,-5.579527e-001,4.992081e-001,-3.504402e+000,3.022924e-001,-1.048420e+000,-1.227773e-001,5.845373e-001,1.105869e+001,3.813151e-002,1.330409e+000,1.978131e-002,3.959430e+000,8.396439e-001,-1.063233e+000,-1.560639e-001,2.840033e-001,8.751565e-001,-3.411820e+000,-1.436564e-001,5.846580e-001,2.899292e+000,6.799095e-001,-1.376715e+000,-4.541567e-001,-1.445491e+000,1.569898e+000,-1.390627e-001,5.558270e-001,4.109877e-002,3.349451e+000,5.516123e-001,-1.953391e+000,-1.035869e+000,1.690563e+000,-1.964690e-001,-7.787096e-001,5.799605e-001,2.945626e-002,4.217906e-002,2.451373e-001,-1.012422e+000,7.136451e-002,-1.862534e+000,-7.228653e-001,1.947997e-001,2.091805e-001,6.399233e-002,7.928994e+000,1.290733e+000,-9.706708e-001,-2.880950e-001,1.107797e+000,-2.731734e+000,-8.445995e+000,4.296774e-001,5.117648e-001,-3.824277e+000,1.761207e-001,-1.110611e+000,-1.789409e-001,2.108488e-001,2.071430e+001,-1.763174e+000,9.554695e-002,-2.943103e-002,3.422079e+000,8.815496e-001,-1.048334e+000,-1.614087e-001,2.475184e-001,2.146938e-002,-2.983901e+000,2.538224e-001,5.601370e-001,2.461925e+000,6.777394e-001,-1.393719e+000,-5.002724e-001,-2.408940e+000,2.680983e+000,-1.362825e-001,7.395067e-001,-3.300343e-006,3.260889e+000,8.132057e-001,-2.128663e+000,-1.151182e+000,2.923026e+000,-1.931838e+000,-4.426170e-001,2.309983e-001,-5.485890e-003,3.279529e-001,-2.229467e-001,-1.618022e+000,-3.766490e-001,-3.163544e+000,1.611608e+000,-3.967476e-001,3.933680e-001,3.006742e-001,6.835177e+000,1.613765e+000,-5.669064e-001,-1.481749e-001,2.071817e+000,-8.157422e+000,-5.988088e+000,2.387202e-001,1.447191e-001,-4.296385e+000,5.011258e-002,-1.241724e+000,-2.519348e-001,-1.908609e-001,2.952235e+001,-3.333660e+000,-1.837651e-002,1.022249e-001,2.929320e+000,8.867262e-001,-1.021670e+000,-1.667327e-001,1.789771e-001,-2.178108e-003,-2.641572e+000,-5.641484e-002,5.303758e-001,2.138196e+000,6.780350e-001,-1.669332e+000,-7.588708e-001,-2.993557e+000,3.178760e+000,-8.066442e-002,6.544672e-001,-8.089880e-006,2.628924e+000,9.001272e-001,-1.755806e+000,-8.735348e-001,3.258881e+000,-2.504785e+000,-3.300791e-001,1.180565e-001,-9.315982e-003,1.785154e+000,-3.205824e-001,-3.720277e+000,-1.733350e+000,-3.332272e+000,1.515869e+000,1.734218e-001,8.011956e-001,1.995440e-001,3.817666e+000,1.638502e+000,4.724641e-001,3.209828e-001,2.051443e+000,-5.105574e+000,-6.509139e+000,-4.232041e-001,2.598931e-001,-2.151756e+000,-3.493910e-003,-1.525600e+000,-4.897606e-001,-9.891121e-002,2.346818e+001,-2.278152e+000,1.681219e-001,-4.469389e-002,1.051000e+000,9.294666e-001,-9.908649e-001,-2.008182e-001,1.605143e-001,-2.463113e-003,-2.477349e+000,-1.218647e-001,4.750121e-001,1.460813e+000,6.661364e-001,-2.122119e+000,-1.125475e+000,-3.066599e+000,3.145078e+000,-5.411593e-002,5.133628e-001,-7.823408e-006,2.268448e+000,9.001416e-001,-1.528158e+000,-9.370249e-001,2.567559e+000,-1.591439e+000,-3.634460e-001,1.763256e-001,1.119624e-003,1.811848e+000,-2.637929e-001,-6.524387e+000,-2.673507e+000,-2.940472e+000,-6.025609e-001,7.852067e-001,1.073499e+000,-3.540435e-002,3.517416e+000,1.490466e+000,8.886026e-001,-9.681828e-002,1.430554e+000,4.993717e+000,-6.071355e+000,-6.053986e-001,5.092997e-001,-1.273010e+000,7.491329e-002,-1.481997e+000,-5.897282e-001,2.659264e-001,1.267239e+000,-5.741291e-001,5.983011e-002,-2.217312e-001,-3.016452e-001,9.260830e-001,-1.010943e+000,-2.075134e-001,5.066749e-002,1.470708e+001,-3.780501e+000,7.253223e-002,4.045458e-001,1.320164e+000,6.559925e-001,-1.129907e+000,-1.884011e-001,-8.047670e+000,9.035776e+000,-5.539419e-002,8.823349e-001,3.197135e-002,4.839388e+000,5.042822e-001,-1.133821e+000,-1.510781e-001,3.362822e+000,-2.453381e+000,-1.463925e-001,4.728708e-001,5.958140e-002,7.636300e+000,4.805162e-001,-1.176518e+000,-3.549902e-001,1.729044e+000,-2.160966e-001,-5.075865e-001,1.675584e+000,-8.906902e-002,-5.386842e+000,5.452218e-001,-1.043563e+000,-7.520975e-002,8.750644e-001,2.510518e+000,7.584882e-003,9.361250e-001,7.889083e-002,6.066644e+000,5.813108e-001,-1.081304e+000,-2.222253e-001,2.517638e+000,-4.453820e+000,-8.663691e+000,8.662558e-001,-4.802657e-002,-8.965449e-001,4.886656e-001,-1.083774e+000,-1.375469e-001,1.685818e+000,5.631120e+000,-3.100752e+000,4.045941e-001,2.346895e-002,3.390321e+000,5.008309e-001,-1.143158e+000,-2.058334e-001,-9.660198e+000,1.062394e+001,-4.434119e-002,8.607615e-001,3.177325e-002,4.416481e+000,5.918162e-001,-1.146773e+000,-1.727385e-001,4.626048e+000,-4.684602e+000,-8.307137e-002,1.619616e-001,1.484866e-001,7.572868e+000,2.681126e-001,-1.151324e+000,-3.099303e-001,4.125596e-001,2.340752e+000,-4.214444e-001,1.987375e+000,-1.913410e-001,-3.845978e+000,1.337311e+000,-1.034258e+000,-7.778759e-003,7.050094e-001,-8.036369e-001,3.138570e-001,2.469452e-001,3.559970e-001,7.485917e+000,4.790329e-002,-1.096568e+000,-2.673169e-001,2.575654e+000,-8.057121e-001,-8.884928e+000,1.416170e+000,-2.091315e-001,-1.543494e+000,1.065445e+000,-1.083304e+000,-1.528265e-001,1.697727e+000,2.503702e+000,-2.885296e+000,-1.298500e-001,1.548870e-001,2.479652e+000,5.066496e-001,-1.165736e+000,-2.329945e-001,-5.967964e+000,6.705959e+000,-5.931355e-002,7.485638e-001,3.913878e-002,4.221591e+000,6.183926e-001,-1.212422e+000,-2.545910e-001,2.418626e+000,-2.266104e+000,-1.102014e-001,1.363887e-002,1.055411e-001,5.648062e+000,4.557412e-001,-1.070436e+000,-2.163341e-001,7.098718e-001,7.843075e-001,-4.323930e-001,2.109823e+000,-9.589700e-002,-1.985193e-001,1.060428e+000,-1.104879e+000,-3.013622e-002,2.976276e-002,1.069707e+000,1.410000e-001,-4.880020e-001,4.452288e-001,6.418590e+000,3.195986e-001,-1.048969e+000,-2.655317e-001,2.689426e+000,-3.941038e+000,-9.506461e+000,1.837119e+000,-1.892124e-001,-1.562146e+000,9.043414e-001,-1.106145e+000,-1.601642e-001,1.544544e+000,7.388492e+000,-2.924600e+000,-4.328453e-001,1.763161e-001,2.523111e+000,5.851902e-001,-1.203666e+000,-2.776587e-001,-2.084286e+000,2.450840e+000,-8.746613e-002,5.258507e-001,7.983316e-002,3.860055e+000,5.486167e-001,-1.340448e+000,-4.230590e-001,3.462849e-001,4.707607e-001,-2.512626e-001,1.530746e-001,2.724218e-002,3.035216e+000,5.876133e-001,-1.014554e+000,-1.168790e-001,9.477794e-001,-1.061218e+000,-4.196730e-001,2.058832e+000,-5.989624e-002,3.058168e+000,9.763861e-001,-1.137388e+000,-9.854030e-002,-2.984893e-001,3.647820e+000,-6.585571e-001,-1.479180e+000,6.102932e-001,3.265914e+000,3.480333e-001,-1.021816e+000,-2.344957e-001,2.463671e+000,-7.240685e+000,-8.862697e+000,2.514058e+000,-2.122768e-001,-3.313968e-002,9.028136e-001,-1.126581e+000,-1.874347e-001,1.454154e+000,1.034398e+001,-3.237393e+000,-8.654927e-001,2.457248e-001,1.845769e+000,6.002482e-001,-1.263727e+000,-3.439354e-001,-1.786388e-001,3.980166e-001,-3.349517e-001,3.825166e-001,1.029225e-001,3.331096e+000,4.998955e-001,-1.530010e+000,-6.879698e-001,2.380415e-001,1.608216e+000,-1.682679e+000,3.546360e-001,-3.915220e-003,4.517655e-001,5.128605e-001,-9.685659e-001,9.480403e-002,6.076844e-002,-3.217561e+000,4.568074e+000,1.069299e+000,2.083638e-002,7.301088e+000,1.072165e+000,-1.113925e+000,-3.112382e-001,3.954133e-001,5.105907e+000,-1.456866e+001,-4.917378e-001,5.289909e-001,-2.678374e+000,3.014709e-001,-1.046864e+000,-1.215754e-001,1.778308e+000,4.661489e+000,2.565583e-001,1.353680e+000,-1.175767e-001,3.415972e+000,8.457746e-001,-1.104480e+000,-1.940913e-001,1.343668e+000,-1.759206e-003,-5.009204e+000,-4.186951e-001,3.125710e-001,1.628183e+000,6.720408e-001,-1.286902e+000,-3.781238e-001,-8.977253e-002,3.545393e-001,-4.866515e-001,3.843664e-001,8.281675e-002,3.122231e+000,5.046991e-001,-1.712597e+000,-8.549112e-001,4.809286e-001,1.515398e+000,-2.212211e+000,2.539029e-001,2.335997e-002,-6.089466e-002,4.268444e-001,-8.807283e-001,1.646097e-001,-4.437898e-001,-3.188247e+000,5.984417e+000,1.334779e+000,-4.026975e-002,7.546431e+000,1.175751e+000,-1.147253e+000,-3.538199e-001,6.101836e-001,4.437780e+000,-1.559813e+001,-1.103222e+000,6.242039e-001,-3.091472e+000,2.174290e-001,-1.038230e+000,-1.213475e-001,1.547505e+000,5.893176e+000,1.368738e+000,1.663127e+000,-1.377130e-001,3.185279e+000,8.736453e-001,-1.101026e+000,-1.874907e-001,1.272667e+000,3.596524e+000,-5.007243e+000,-6.352483e-001,3.048985e-001,1.931613e+000,6.788844e-001,-1.342753e+000,-4.384971e-001,-1.213491e+000,1.621399e+000,-1.551441e-001,5.614218e-001,2.591739e-002,2.958967e+000,5.782132e-001,-1.937684e+000,-1.066019e+000,1.913336e+000,-7.347719e-001,-5.916167e-001,1.587590e-001,1.092568e-001,-6.275002e-001,1.599071e-001,-9.302391e-001,1.486187e-001,-1.603835e+000,1.783713e-001,1.100461e+000,1.174181e+000,-1.602361e-001,7.868331e+000,1.468971e+000,-1.053631e+000,-3.727050e-001,1.114117e+000,-9.603286e-001,-1.062469e+001,-1.162140e+000,7.952797e-001,-4.478765e+000,-4.440862e-002,-1.083629e+000,-1.261405e-001,1.229344e+000,1.127825e+001,1.319010e-001,1.624729e+000,-2.825898e-001,3.661082e+000,1.036911e+000,-1.093950e+000,-2.067455e-001,1.258035e+000,7.548645e+000,-4.598387e+000,-8.944932e-001,3.292634e-001,1.311304e+000,6.291871e-001,-1.385867e+000,-5.068139e-001,-1.486490e+000,1.969049e+000,-1.698025e-001,6.629167e-001,-5.289365e-006,2.760315e+000,8.644368e-001,-2.107367e+000,-1.175639e+000,2.313241e+000,-1.001653e+000,-4.843139e-001,1.124485e-001,3.901494e-005,-3.502469e-001,-3.204780e-001,-1.475244e+000,-2.833055e-001,-2.085824e+000,1.192563e+000,-7.645200e-001,8.380081e-001,2.203580e-001,7.157885e+000,1.753702e+000,-6.644372e-001,-2.549735e-001,1.600273e+000,-8.589034e+000,-6.144718e+000,-7.599731e-001,2.898370e-001,-5.770923e+000,-9.656242e-002,-1.211687e+000,-1.653494e-001,8.393400e-001,2.792988e+001,-3.395461e+000,9.933752e-001,-3.976877e-002,3.776659e+000,9.546526e-001,-1.063757e+000,-2.037563e-001,1.117207e+000,-1.252806e-003,-3.332330e+000,-6.971409e-001,3.388719e-001,1.311398e+000,6.635171e-001,-1.678889e+000,-7.992295e-001,-2.421687e+000,2.871029e+000,-7.662842e-002,6.046208e-001,-7.598099e-006,2.002314e+000,9.001307e-001,-1.692144e+000,-8.804250e-001,3.060895e+000,-2.000009e+000,-3.183563e-001,8.385862e-002,-6.326713e-003,1.206639e+000,-3.369967e-001,-3.676795e+000,-1.719207e+000,-2.534697e+000,1.005285e+000,1.550407e-001,1.072910e+000,1.318094e-001,3.717018e+000,1.689191e+000,5.424542e-001,3.263528e-001,1.551055e+000,-3.841058e+000,-6.598996e+000,-1.201779e+000,3.530669e-001,-2.542945e+000,-6.482523e-002,-1.553849e+000,-4.576860e-001,9.324676e-001,1.950982e+001,-2.344516e+000,1.121020e+000,-1.221537e-001,7.285496e-001,9.582816e-001,-1.020650e+000,-2.215797e-001,1.009774e+000,-2.056855e-003,-2.740338e+000,-8.122355e-001,3.328967e-001,8.982766e-001,6.594676e-001,-2.247360e+000,-1.221267e+000,-3.072346e+000,3.385139e+000,-4.387559e-002,5.084887e-001,-7.418833e-006,1.750107e+000,9.001401e-001,-1.248499e+000,-8.442718e-001,3.062611e+000,-2.020314e+000,-2.815341e-001,5.254745e-002,3.345008e-003,1.433225e+000,-2.835911e-001,-7.004119e+000,-2.927978e+000,-2.649852e+000,7.971894e-001,5.466893e-001,1.442667e+000,-6.063912e-002,2.806194e+000,1.547429e+000,1.434882e+000,9.114639e-002,1.170089e+000,3.512808e-002,-5.861915e+000,-1.411843e+000,5.400486e-001,-7.746522e-001,2.386984e-002,-1.559053e+000,-5.502302e-001,1.200396e+000,1.347741e+001,-2.344397e+000,8.868907e-001,-3.292661e-001,-1.362105e+000,9.217826e-001,-1.044436e+000,-2.360719e-001,7.054471e-001,-2.904518e-003,-2.092829e+000,-5.119668e-001,4.174861e-001,9.687435e-001,6.588427e-001];
+armory_renderpath_HosekWilkieData.datasetRGBRad2 = [1.590330e+000,1.355401e+000,1.151412e+000,1.359116e+001,5.857714e+000,8.090833e+000,1.552540e+000,1.510040e+000,1.276413e-001,1.604643e+001,5.912162e+000,8.350009e+000,1.470871e+000,1.880464e+000,-1.865398e+000,2.030808e+001,5.471461e+000,9.109834e+000,1.356563e+000,2.373866e+000,-4.653245e+000,2.570922e+001,5.686009e+000,1.009480e+001,1.244232e+000,2.851519e+000,-7.130942e+000,2.993449e+001,6.382120e+000,1.114578e+001,1.173693e+000,3.120604e+000,-8.491886e+000,3.187393e+001,7.290615e+000,1.180066e+001,1.091845e+000,3.368888e+000,-9.722083e+000,3.268508e+001,1.032424e+001,1.236508e+001,9.858985e-001,3.500541e+000,-1.026328e+001,3.092956e+001,1.610881e+001,1.331222e+001,8.864993e-001,3.172888e+000,-8.687550e+000,2.362161e+001,2.621851e+001,1.474967e+001,7.946973e-001,2.189355e+000,-4.207953e+000,9.399091e+000,4.062849e+001,1.681753e+001,1.711696e+000,1.657311e+000,9.328021e-001,1.317880e+001,1.506751e+001,1.863556e+001,1.666968e+000,1.849993e+000,-2.088601e-001,1.586653e+001,1.486880e+001,1.940719e+001,1.584846e+000,2.170022e+000,-2.019597e+000,1.970826e+001,1.490684e+001,2.045055e+001,1.469412e+000,2.524017e+000,-4.197267e+000,2.365249e+001,1.664588e+001,2.134477e+001,1.369714e+000,2.843548e+000,-6.059031e+000,2.634993e+001,1.881361e+001,2.232186e+001,1.310477e+000,2.984444e+000,-6.831686e+000,2.682340e+001,2.123267e+001,2.259755e+001,1.222552e+000,3.176523e+000,-7.731496e+000,2.671760e+001,2.484358e+001,2.336863e+001,1.115781e+000,3.130635e+000,-7.581744e+000,2.336531e+001,3.171048e+001,2.413859e+001,1.013181e+000,2.699342e+000,-5.602709e+000,1.500158e+001,4.217613e+001,2.515957e+001,8.976323e-001,1.726948e+000,-1.296120e+000,1.183675e+000,5.503215e+001,2.643066e+001];
+armory_renderpath_HosekWilkieData.datasetRGB3 = [-1.372629e+000,-4.905585e-001,-4.100789e+001,4.122169e+001,-7.389360e-003,4.839359e-001,6.474757e-003,3.471755e+000,5.092936e-001,-1.523025e+000,-6.497084e-001,6.249857e+000,-5.662543e+000,-1.908402e-002,5.512810e-001,-2.181049e-005,2.507663e+000,4.339598e-001,-1.035567e+000,-7.478740e-002,9.221030e-001,-2.140047e+000,-2.374146e-002,3.795517e-001,-1.769134e-002,7.479831e+000,7.729303e-001,-1.271086e+000,-5.588190e-001,6.908023e-001,2.096832e+000,-2.453967e-001,1.410648e+000,4.475036e-002,-4.719115e+000,5.741186e-001,-9.712598e-001,-7.033926e-002,9.167274e-001,-9.502097e-001,3.004684e-001,4.547054e-001,-5.929017e-002,5.266196e+000,7.204135e-001,-1.087457e+000,-1.888896e-001,8.156686e-001,3.101712e-001,-2.155419e+000,1.422205e+000,9.692261e-002,3.122404e+000,4.999430e-001,-1.425280e+000,-5.413508e-001,-3.454883e+001,3.481142e+001,-8.686975e-003,4.914268e-001,-2.479243e-006,3.239879e+000,6.094201e-001,-1.688557e+000,-8.070865e-001,7.018459e+000,-6.244574e+000,-2.149341e-002,3.993971e-001,1.252502e-002,1.630662e+000,1.097860e-001,-8.664152e-001,7.869125e-002,-5.236535e-001,-1.218960e+000,-2.059093e-002,6.684898e-001,-5.584112e-002,8.602299e+000,1.410496e+000,-1.319763e+000,-5.985323e-001,1.253918e+000,1.914706e+000,-3.216739e-001,9.011213e-001,1.324845e-001,-5.252749e+000,6.231252e-002,-9.706008e-001,-5.914059e-002,5.693150e-001,-1.175362e+000,5.221644e-001,7.518213e-001,-8.247655e-002,5.875635e+000,9.850863e-001,-1.085330e+000,-1.956105e-001,8.019605e-001,5.338101e-001,-3.423464e+000,1.110444e+000,1.507923e-001,2.864942e+000,4.999481e-001,-1.431967e+000,-5.478935e-001,-3.286288e+001,3.305288e+001,-8.380797e-003,4.772050e-001,-3.044274e-006,3.289973e+000,5.976303e-001,-1.801361e+000,-9.315889e-001,5.391756e+000,-4.588592e+000,-2.040076e-002,4.144684e-001,1.814534e-002,1.051795e+000,1.145651e-001,-7.905357e-001,1.451332e-001,-1.605661e-001,-1.592174e+000,4.561348e-004,3.380323e-001,-7.770275e-002,8.775384e+000,1.489512e+000,-1.308575e+000,-5.539232e-001,9.184133e-001,2.011479e+000,-3.842472e-001,1.432274e+000,1.637153e-001,-4.408856e+000,5.272957e-002,-9.829872e-001,-8.183048e-002,4.464556e-001,-1.442716e+000,1.029641e+000,-6.991617e-002,8.702356e-003,5.706417e+000,9.116452e-001,-1.087130e+000,-2.038013e-001,7.260801e-001,9.164376e-001,-5.006183e+000,1.511271e+000,1.257134e-001,2.715439e+000,6.201652e-001,-1.448662e+000,-5.799075e-001,-2.833268e+001,2.858023e+001,-9.134061e-003,4.404783e-001,-2.709026e-006,3.029357e+000,5.540071e-001,-2.061772e+000,-1.145190e+000,7.918478e+000,-7.212525e+000,-2.020760e-002,2.962715e-001,4.689670e-002,8.517209e-001,2.334587e-001,-6.413755e-001,1.780425e-001,-2.412919e+000,1.064484e+000,-1.949986e-002,6.769741e-001,-1.752760e-001,7.262714e+000,1.325869e+000,-1.304871e+000,-3.975581e-001,1.219002e+000,7.285178e-001,-2.710105e-001,7.779727e-001,3.247139e-001,-8.818168e-001,1.839517e-001,-1.001104e+000,-1.994801e-001,3.676742e-001,-1.409737e+000,2.901555e-001,2.506940e-001,2.468899e-003,3.398923e+000,8.584645e-001,-1.111552e+000,-2.487204e-001,7.410842e-001,1.703749e+000,-5.007855e+000,1.057763e+000,1.354511e-001,2.088715e+000,6.600013e-001,-1.547227e+000,-6.679466e-001,-1.861465e+001,1.884045e+001,-1.242210e-002,4.157339e-001,-2.432805e-006,2.812423e+000,5.446957e-001,-2.043890e+000,-1.149081e+000,2.304118e+000,-1.715757e+000,-2.433628e-002,2.816836e-001,7.185458e-002,1.064860e+000,2.706789e-001,-9.040720e-001,-8.274472e-002,-2.555676e-001,-6.326215e-001,-2.770880e-002,6.676024e-001,-2.513532e-001,5.903839e+000,1.241452e+000,-1.000013e+000,-1.010774e-001,3.699166e-001,8.774526e-001,-3.042007e-001,6.951053e-001,4.361813e-001,6.793421e-001,2.573892e-001,-1.171332e+000,-3.768188e-001,3.701377e-001,-1.470757e+000,5.525942e-001,2.991456e-002,1.581823e-002,2.365233e+000,8.214514e-001,-1.068667e+000,-2.326330e-001,6.725059e-001,2.243733e+000,-4.614370e+000,1.033677e+000,1.376291e-001,2.013334e+000,6.865304e-001,-1.592991e+000,-7.246948e-001,-2.598204e+001,2.621960e+001,-8.365176e-003,4.207571e-001,-2.742772e-006,2.623735e+000,5.873190e-001,-2.271349e+000,-1.280884e+000,6.308739e+000,-5.758350e+000,-1.977049e-002,3.671835e-001,6.698038e-002,1.150597e+000,1.759218e-001,-6.368620e-001,-7.436052e-003,-2.230026e+000,1.640997e+000,-1.548497e-002,3.145331e-001,-2.492644e-001,5.083843e+000,1.260215e+000,-1.177925e+000,-9.628114e-002,3.051152e-001,-3.749544e-002,-2.713209e-001,1.164226e+000,4.559969e-001,2.175429e+000,2.874284e-001,-1.078500e+000,-3.801779e-001,4.788906e-001,-4.795969e-001,5.977621e-001,-4.488535e-001,3.386874e-002,1.538143e+000,8.062054e-001,-1.108028e+000,-2.596892e-001,5.162202e-001,1.557081e+000,-4.265039e+000,1.182535e+000,1.563762e-001,2.095084e+000,6.883383e-001,-1.668427e+000,-7.908511e-001,-2.779690e+001,2.799746e+001,-7.186935e-003,3.757766e-001,-3.326858e-006,2.563421e+000,5.439687e-001,-2.156175e+000,-1.220004e+000,3.585732e+000,-3.235988e+000,-1.086239e-002,1.846143e-001,1.046017e-001,1.234427e+000,2.842191e-001,-1.117051e+000,-4.101627e-001,-8.463730e-001,7.671472e-001,-2.226609e-002,8.574943e-001,-3.434124e-001,4.475715e+000,1.154824e+000,-7.444840e-001,2.312078e-001,-5.393724e-001,1.574213e-001,-1.763914e-001,2.751692e-001,5.564200e-001,2.217672e+000,3.483932e-001,-1.273036e+000,-5.275562e-001,4.902512e-001,-4.498436e-002,4.339366e-001,2.386682e-001,2.380879e-002,1.413444e+000,7.855923e-001,-1.084192e+000,-2.936753e-001,4.719432e-001,1.384436e+000,-3.257789e+000,6.119543e-001,1.681884e-001,1.650441e+000,6.936631e-001,-1.848490e+000,-9.512670e-001,-3.005251e+001,3.024315e+001,-5.635304e-003,3.447780e-001,-2.782999e-006,2.309422e+000,5.643559e-001,-2.300008e+000,-1.252335e+000,-1.218876e+000,1.493730e+000,-6.107100e-003,7.974860e-002,1.023449e-001,1.505934e+000,2.360948e-001,-1.483705e+000,-8.547575e-001,-7.797146e-001,6.447971e-001,-2.678052e-002,1.091263e+000,-3.344889e-001,3.830416e+000,1.189425e+000,-5.348005e-001,3.982733e-001,-4.071573e-001,3.265569e-001,-8.658789e-002,-2.370892e-001,5.369097e-001,1.478279e+000,3.143303e-001,-1.320401e+000,-6.043247e-001,3.019196e-001,-7.732911e-002,4.768381e-001,6.745764e-001,3.694098e-002,1.158234e+000,8.169056e-001,-1.101040e+000,-3.420019e-001,3.775661e-001,1.769338e+000,-2.990515e+000,1.649529e-001,1.970125e-001,1.453355e+000,6.759757e-001,-2.251946e+000,-1.229349e+000,-3.271808e+001,3.283114e+001,-4.252027e-003,3.372289e-001,-3.001937e-006,2.154046e+000,5.842674e-001,-1.867834e+000,-9.531252e-001,-1.229365e+001,1.269149e+001,-6.844772e-003,1.185107e-001,7.539587e-002,1.846381e+000,1.899412e-001,-3.398629e+000,-2.180862e+000,2.335213e+000,-3.382823e+000,-8.613985e-003,8.431602e-001,-2.393567e-001,3.112460e+000,1.218556e+000,5.708381e-001,9.406030e-001,-6.890113e-001,2.746233e+000,-5.772068e-002,1.096005e-001,3.491978e-001,7.281453e-001,3.212049e-001,-1.705909e+000,-8.517224e-001,1.131160e-001,-2.141434e+000,4.274043e-001,3.397600e-001,1.786490e-001,9.026101e-001,7.882800e-001,-1.012865e+000,-3.495551e-001,3.369038e-001,3.724205e+000,-3.089586e+000,1.266964e-001,1.461790e-001,1.170199e+000,6.931052e-001,-2.890318e+000,-1.665573e+000,-3.493756e+001,3.500369e+001,-2.984251e-003,2.622419e-001,-4.259360e-006,1.947681e+000,6.905752e-001,-1.956022e+000,-1.062900e+000,-1.919714e+001,1.975164e+001,-8.865396e-003,2.165540e-001,5.475637e-002,1.761134e+000,3.164249e-003,-5.612198e+000,-3.101371e+000,4.098034e+000,-6.144001e+000,9.944958e-003,2.905472e-001,-1.707110e-001,3.199107e+000,1.337660e+000,8.353756e-001,4.855943e-001,-1.243589e+000,5.147385e+000,-7.013963e-002,9.380410e-001,2.335714e-001,1.727744e-001,2.802696e-001,-1.524329e+000,-7.388547e-001,3.259025e-001,-4.050634e+000,4.058549e-001,-2.591384e-001,1.898299e-001,3.556071e-001,7.884126e-001,-1.070371e+000,-4.207858e-001,1.739862e-001,5.293410e+000,-3.136757e+000,2.323856e-001,1.673706e-001,1.007227e+000,6.844287e-001,-1.341720e+000,-4.834889e-001,-4.633447e+001,4.682148e+001,-6.137296e-003,4.599216e-001,7.047323e-003,2.895798e+000,4.999398e-001,-1.529104e+000,-6.498631e-001,1.534103e+001,-1.450675e+001,-1.531439e-002,3.280082e-001,1.682926e-002,1.901587e+000,5.013227e-001,-1.014776e+000,-1.454495e-001,-4.071085e+000,2.954982e+000,-2.630348e-002,5.681531e-001,-3.016505e-002,6.773854e+000,5.003504e-001,-1.172413e+000,-4.026320e-001,2.960428e+000,2.020710e-001,-2.004947e-001,9.375572e-001,5.998168e-002,-4.945934e+000,4.502898e-001,-9.898161e-001,-5.772814e-002,4.470024e-001,-5.786656e-001,1.158168e-001,3.468040e-001,-5.043360e-002,6.867947e+000,8.012363e-001,-1.085111e+000,-1.882675e-001,1.223748e+000,3.565495e-001,-3.688357e+000,5.653723e-001,6.727646e-002,2.690130e+000,4.999400e-001,-1.389119e+000,-5.290250e-001,-4.055774e+001,4.105972e+001,-7.062577e-003,4.560060e-001,-1.736334e-006,2.775512e+000,6.671455e-001,-1.584641e+000,-7.200619e-001,1.248067e+001,-1.156028e+001,-1.659568e-002,3.050029e-001,1.099895e-002,1.438927e+000,-2.138015e-002,-9.826068e-001,-8.887254e-002,-2.960031e+000,1.808816e+000,-2.478159e-002,6.035733e-001,-4.868441e-002,7.347705e+000,1.584739e+000,-1.150423e+000,-4.073793e-001,2.412991e+000,4.870840e-001,-2.337902e-001,8.295114e-001,1.129914e-001,-5.150045e+000,-9.016643e-002,-1.016933e+000,-6.311501e-002,5.218937e-001,-5.716430e-001,1.250993e-001,3.601524e-001,-5.497586e-002,7.060139e+000,1.018333e+000,-1.073151e+000,-1.845444e-001,1.155394e+000,3.004486e-001,-3.431711e+000,4.657031e-001,9.401223e-002,2.688620e+000,4.999544e-001,-1.391257e+000,-5.365815e-001,-4.255881e+001,4.299132e+001,-5.838466e-003,4.229134e-001,-2.760038e-006,2.775531e+000,6.234597e-001,-1.780062e+000,-9.228880e-001,1.376172e+001,-1.260946e+001,-1.507526e-002,3.117435e-001,2.205045e-002,6.093731e-001,3.463446e-002,-7.388169e-001,1.275670e-001,-3.999528e+000,2.223993e+000,-1.856853e-002,5.439310e-001,-8.834054e-002,8.037139e+000,1.645951e+000,-1.322387e+000,-5.320143e-001,2.659359e+000,1.086712e+000,-2.129712e-001,8.704649e-001,1.800315e-001,-4.967241e+000,-1.383720e-001,-9.378288e-001,-1.599895e-002,3.607555e-001,-1.980561e+000,3.791456e-001,1.212268e-001,-2.845992e-002,6.825542e+000,1.059139e+000,-1.100832e+000,-2.172313e-001,1.211561e+000,2.002721e+000,-5.010011e+000,5.717583e-001,6.777702e-002,2.160006e+000,5.676392e-001,-1.409373e+000,-5.708751e-001,-3.034974e+001,3.079809e+001,-7.280715e-003,3.723304e-001,-2.436279e-006,2.577348e+000,5.913377e-001,-1.954312e+000,-1.116510e+000,5.399148e+000,-4.299553e+000,-1.724739e-002,3.742824e-001,4.187077e-002,1.044883e-001,1.232727e-001,-6.772215e-001,2.001396e-001,-3.670523e-001,-1.014628e+000,-3.497152e-003,4.099858e-001,-1.584633e-001,7.750400e+000,1.514559e+000,-1.291600e+000,-4.977437e-001,9.641914e-001,1.562420e+000,-3.227782e-001,9.055427e-001,3.046444e-001,-3.385619e+000,9.546291e-003,-9.750857e-001,-8.770560e-002,9.054256e-001,-1.429236e+000,8.974777e-001,-1.217961e-001,-5.194608e-002,4.909409e+000,9.589153e-001,-1.088007e+000,-1.959301e-001,9.745799e-001,1.260761e+000,-5.008864e+000,7.271248e-001,1.096661e-001,2.717295e+000,6.340731e-001,-1.456050e+000,-6.223072e-001,-2.228088e+001,2.269604e+001,-9.340812e-003,4.118308e-001,-2.418083e-006,2.442117e+000,5.589638e-001,-2.176449e+000,-1.302416e+000,2.222836e+000,-1.222730e+000,-1.728051e-002,1.323513e-001,7.027731e-002,4.835745e-002,2.093351e-001,-5.789641e-001,2.215407e-001,2.142291e-001,-1.201725e+000,-1.185728e-002,8.122982e-001,-2.380420e-001,6.706841e+000,1.404146e+000,-1.307463e+000,-4.515174e-001,6.447827e-001,1.223841e+000,-2.902391e-001,4.986588e-001,4.073652e-001,-1.706696e+000,1.060885e-001,-9.698678e-001,-1.307094e-001,9.389347e-001,-1.522852e+000,7.768797e-001,-1.368595e-001,-3.857426e-002,3.676935e+000,8.980966e-001,-1.104349e+000,-2.380323e-001,1.047043e+000,1.865421e+000,-5.011664e+000,7.014954e-001,9.622701e-002,1.891360e+000,6.687354e-001,-1.502249e+000,-6.724523e-001,-2.888092e+001,2.930360e+001,-6.685766e-003,3.685464e-001,-2.469442e-006,2.310797e+000,5.566754e-001,-2.217125e+000,-1.364924e+000,4.048243e+000,-3.111333e+000,-1.317747e-002,1.921948e-001,8.627702e-002,1.981769e-003,2.213689e-001,-6.215757e-001,1.687995e-001,-5.949131e-001,-1.551293e-001,3.356129e-004,6.897657e-001,-2.855053e-001,6.271042e+000,1.363084e+000,-1.216317e+000,-3.489429e-001,7.566226e-001,5.409809e-001,-2.830843e-001,6.191825e-001,4.755163e-001,-9.131387e-001,1.383909e-001,-1.030437e+000,-2.034064e-001,8.335995e-001,-1.050947e+000,8.689093e-001,-3.672310e-001,-4.056183e-002,3.111269e+000,8.856842e-001,-1.078984e+000,-2.070549e-001,9.683145e-001,1.497022e+000,-5.007653e+000,7.702541e-001,1.285822e-001,2.225188e+000,6.587911e-001,-1.559291e+000,-7.374039e-001,-3.596311e+001,3.634470e+001,-4.667132e-003,3.277964e-001,-2.487945e-006,2.215652e+000,5.764681e-001,-2.356929e+000,-1.444755e+000,6.244526e+000,-5.540162e+000,-8.794510e-003,1.792100e-001,9.578517e-002,3.737676e-001,1.922194e-001,-6.589752e-001,-2.926910e-002,-1.831779e+000,1.869962e+000,-2.030095e-003,7.552089e-001,-3.168157e-001,4.632196e+000,1.294054e+000,-1.161046e+000,-1.472506e-001,6.494138e-001,-8.327174e-001,-2.320724e-001,3.391212e-001,5.269637e-001,9.376341e-001,2.458573e-001,-1.034427e+000,-3.062504e-001,8.975634e-001,3.203531e-001,8.565142e-001,-1.250162e-001,-4.094017e-002,1.861304e+000,8.223468e-001,-1.109954e+000,-2.740277e-001,1.063811e+000,7.077398e-001,-4.695734e+000,5.621696e-001,1.248956e-001,1.297723e+000,6.789720e-001,-1.788293e+000,-9.368751e-001,-4.382980e+001,4.424963e+001,-3.652530e-003,3.094331e-001,-2.810503e-006,1.904402e+000,5.861599e-001,-2.268206e+000,-1.312676e+000,2.863082e+000,-2.373727e+000,-5.144980e-003,1.711072e-001,9.316041e-002,9.309598e-001,1.791683e-001,-1.376966e+000,-7.418582e-001,-1.349589e+000,1.563419e+000,-3.124219e-003,6.967139e-001,-3.061887e-001,3.602731e+000,1.255669e+000,-6.017540e-001,2.815928e-001,5.424052e-001,-6.885450e-001,-1.620001e-001,2.980046e-001,4.995571e-001,7.371203e-001,2.812466e-001,-1.278853e+000,-5.245326e-001,7.870520e-001,3.125067e-001,7.748105e-001,-7.788581e-002,3.490956e-003,1.283748e+000,8.130190e-001,-1.050930e+000,-2.786331e-001,1.056344e+000,1.053002e+000,-4.047789e+000,4.432174e-001,1.169077e-001,9.532621e-001,6.806764e-001,-2.084927e+000,-1.203954e+000,-4.881638e+001,4.920160e+001,-2.896045e-003,2.882977e-001,-3.073517e-006,1.702211e+000,6.374180e-001,-2.328567e+000,-1.238023e+000,-1.891019e+000,2.451520e+000,-5.847581e-003,2.084702e-001,7.848130e-002,1.211048e+000,8.095008e-002,-2.634632e+000,-1.789460e+000,-1.370558e-001,-3.326435e-001,2.783737e-003,5.239451e-001,-2.548881e-001,2.896327e+000,1.324116e+000,6.882616e-002,5.997821e-001,1.535398e-001,1.375209e+000,-1.267285e-001,4.239743e-001,4.013122e-001,1.794675e-001,2.395382e-001,-1.430918e+000,-6.439041e-001,8.325980e-001,-1.705612e+000,7.236426e-001,-5.567593e-002,6.408718e-002,6.836524e-001,8.388887e-001,-1.037956e+000,-3.215402e-001,9.457349e-001,3.178114e+000,-4.152156e+000,2.230992e-001,1.156198e-001,7.606223e-001,6.656923e-001,-2.967314e+000,-1.728778e+000,-3.730988e+001,3.755578e+001,-2.588835e-003,2.927966e-001,-3.935038e-006,1.592161e+000,6.868694e-001,-2.123311e+000,-1.175148e+000,-1.314988e+001,1.386882e+001,-7.828537e-003,1.852026e-001,5.481038e-002,1.294309e+000,2.428177e-002,-5.443597e+000,-3.156344e+000,2.110838e+000,-3.421556e+000,1.181890e-002,1.196951e-001,-1.742902e-001,2.404353e+000,1.272805e+000,1.029898e+000,5.912521e-001,-3.983531e-001,3.286069e+000,-9.252065e-002,1.331381e+000,2.560642e-001,8.001754e-001,3.624178e-001,-1.547574e+000,-7.881604e-001,1.020902e+000,-2.897069e+000,5.213470e-001,-9.242315e-001,1.185594e-001,-1.150721e+000,7.317211e-001,-9.621043e-001,-1.991406e-001,6.531287e-001,3.925839e+000,-3.596904e+000,6.317332e-001,1.531334e-001,1.457846e+000,6.966285e-001];
+armory_renderpath_HosekWilkieData.datasetRGBRad3 = [9.926518e-001,1.999494e+000,-4.136109e+000,1.856270e+001,1.351028e+001,1.390238e+001,9.634366e-001,2.119694e+000,-4.614523e+000,1.919701e+001,1.376644e+001,1.418731e+001,9.446537e-001,2.171610e+000,-4.915556e+000,1.918240e+001,1.537135e+001,1.400530e+001,9.073074e-001,2.330536e+000,-5.577596e+000,1.961615e+001,1.688365e+001,1.446955e+001,8.739124e-001,2.388682e+000,-5.842995e+000,1.923265e+001,1.887735e+001,1.485698e+001,8.563688e-001,2.391534e+000,-5.769133e+000,1.828709e+001,2.097209e+001,1.469587e+001,8.270533e-001,2.342790e+000,-5.558071e+000,1.684993e+001,2.356498e+001,1.505975e+001,7.908339e-001,2.190341e+000,-4.852571e+000,1.374862e+001,2.806846e+001,1.548444e+001,7.403619e-001,1.783998e+000,-2.983854e+000,7.622563e+000,3.507610e+001,1.615805e+001,6.840111e-001,1.154457e+000,-2.393830e-001,-7.896893e-001,4.282765e+001,1.779469e+001,1.168300e+000,1.860993e+000,-2.129074e+000,1.251952e+001,3.032499e+001,2.938716e+001,1.150338e+000,1.918813e+000,-2.413527e+000,1.274862e+001,3.087134e+001,2.951432e+001,1.114719e+000,1.964689e+000,-2.625423e+000,1.247837e+001,3.237949e+001,2.943596e+001,1.077948e+000,2.006292e+000,-2.846934e+000,1.190195e+001,3.459293e+001,2.937492e+001,1.035143e+000,1.986681e+000,-2.752584e+000,1.060972e+001,3.722185e+001,2.918594e+001,1.015992e+000,1.992054e+000,-2.812626e+000,1.001416e+001,3.847300e+001,2.924624e+001,9.756887e-001,1.939897e+000,-2.533281e+000,8.319176e+000,4.083907e+001,2.925586e+001,9.264164e-001,1.716454e+000,-1.597044e+000,4.739725e+000,4.507683e+001,2.878915e+001,8.595191e-001,1.346034e+000,-2.801895e-002,-6.582906e-001,5.017523e+001,2.852953e+001,7.754116e-001,7.709245e-001,2.200201e+000,-7.487661e+000,5.436622e+001,2.893432e+001];
+armory_renderpath_HosekWilkieData.datasetsRGB = [armory_renderpath_HosekWilkieData.datasetRGB1,armory_renderpath_HosekWilkieData.datasetRGB2,armory_renderpath_HosekWilkieData.datasetRGB3];
+armory_renderpath_HosekWilkieData.datasetsRGBRad = [armory_renderpath_HosekWilkieData.datasetRGBRad1,armory_renderpath_HosekWilkieData.datasetRGBRad2,armory_renderpath_HosekWilkieData.datasetRGBRad3];
 armory_renderpath_Inc.superSample = 1.0;
 armory_renderpath_Inc.pointIndex = 0;
 armory_renderpath_Inc.spotIndex = 0;
 armory_renderpath_NishitaData.lutHeightSteps = 128;
 armory_renderpath_NishitaData.lutAngleSteps = 128;
 armory_renderpath_NishitaData.jSteps = 8;
-armory_renderpath_NishitaData.radiusAtmo = 6420000;
-armory_renderpath_NishitaData.radiusPlanet = 6360000;
+armory_renderpath_NishitaData.radiusAtmo = 6420.0;
+armory_renderpath_NishitaData.radiusPlanet = 6360.0;
 armory_renderpath_NishitaData.rayleighCoeff = new iron_math_Vec3(5.5e-6,13.0e-6,22.4e-6);
 armory_renderpath_NishitaData.rayleighScale = 8e3;
 armory_renderpath_NishitaData.mieCoeff = 2e-5;
@@ -27528,13 +29935,6 @@ armory_renderpath_NishitaData.mieScale = 1.2e3;
 armory_renderpath_NishitaData.ozoneCoeff = new iron_math_Vec3(1.59051840791988e-6,0.00000096707041180970,0.00000007309568762914);
 armory_renderpath_RenderPathCreator.setTargetMeshes = armory_renderpath_RenderPathDeferred.setTargetMeshes;
 armory_renderpath_RenderPathCreator.drawMeshes = armory_renderpath_RenderPathDeferred.drawMeshes;
-armory_trait_WalkNavigation.enabled = true;
-armory_trait_WalkNavigation.keyUp = "w";
-armory_trait_WalkNavigation.keyDown = "s";
-armory_trait_WalkNavigation.keyLeft = "a";
-armory_trait_WalkNavigation.keyRight = "d";
-armory_trait_WalkNavigation.keyStrafeUp = "e";
-armory_trait_WalkNavigation.keyStrafeDown = "q";
 armory_trait_internal_UniformsManager.floatsRegistered = false;
 armory_trait_internal_UniformsManager.floatsMap = new haxe_ds_ObjectMap();
 armory_trait_internal_UniformsManager.vectorsRegistered = false;
@@ -27621,7 +30021,6 @@ iron_object_LightObject.cascadeBounds = 1.0;
 iron_object_LightObject.m = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
 iron_object_LightObject.eye = new iron_math_Vec4();
 iron_object_Transform.temp = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
-iron_object_Transform.q = new iron_math_Quat();
 iron_object_Uniforms.biasMat = new iron_math_Mat4(0.5,0.0,0.0,0.5,0.0,0.5,0.0,0.5,0.0,0.0,0.5,0.5,0.0,0.0,0.0,1.0);
 iron_object_Uniforms.helpMat = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
 iron_object_Uniforms.helpMat2 = new iron_math_Mat4(1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0);
@@ -27630,13 +30029,6 @@ iron_object_Uniforms.helpVec = new iron_math_Vec4();
 iron_object_Uniforms.helpVec2 = new iron_math_Vec4();
 iron_object_Uniforms.helpQuat = new iron_math_Quat();
 iron_object_Uniforms.defaultFilter = 1;
-iron_system_Input.occupied = false;
-iron_system_Input.gamepads = [];
-iron_system_Input.registered = false;
-iron_system_Mouse.buttons = ["left","right","middle"];
-iron_system_Keyboard.keys = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","0","1","2","3","4","5","6","7","8","9","space","backspace","tab","enter","shift","control","alt","win","escape","delete","up","down","left","right","back",",",".",":",";","<","=",">","?","!","\"","#","$","%","&","_","(",")","*","|","{","}","[","]","~","`","/","\\","@","+","-","f1","f2","f3","f4","f5","f6","f7","f8","f9","f10","f11","f12"];
-iron_system_Gamepad.buttonsPS = ["cross","circle","square","triangle","l1","r1","l2","r2","share","options","l3","r3","up","down","left","right","home","touchpad"];
-iron_system_Gamepad.buttons = iron_system_Gamepad.buttonsPS;
 iron_system_Time.scale = 1.0;
 iron_system_Time.last = 0.0;
 iron_system_Time.realDelta = 0.0;
@@ -27645,16 +30037,16 @@ kha_LoaderImpl.dropFiles = new haxe_ds_StringMap();
 kha_Scheduler.DIF_COUNT = 3;
 kha_Scheduler.maxframetime = 0.5;
 kha_Scheduler.startTime = 0;
-kha_Shaders.Material_mesh_fragData0 = "s1490:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKaW4gaGlnaHAgdmVjMyB3bm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3JbMl07CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCmhpZ2hwIGZsb2F0IHBhY2tGbG9hdEludDE2KGhpZ2hwIGZsb2F0IGYsIHVpbnQgaSkKewogICAgcmV0dXJuICgwLjA2MjQ4NTY5NDg4NTI1MzkwNjI1ICogZikgKyAoMC4wNjI1MDA5NTM2NzQzMTY0MDYyNSAqIGZsb2F0KGkpKTsKfQoKaGlnaHAgZmxvYXQgcGFja0Zsb2F0MihoaWdocCBmbG9hdCBmMSwgaGlnaHAgZmxvYXQgZjIpCnsKICAgIHJldHVybiBmbG9vcihmMSAqIDI1NS4wKSArIG1pbihmMiwgMC45OTAwMDAwMDk1MzY3NDMxNjQwNjI1KTsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjMyBuID0gbm9ybWFsaXplKHdub3JtYWwpOwogICAgaGlnaHAgdmVjMyBiYXNlY29sID0gdmVjMygwLjgwMDAwMDAxMTkyMDkyODk1NTA3ODEyNSk7CiAgICBoaWdocCBmbG9hdCByb3VnaG5lc3MgPSAwLjA7CiAgICBoaWdocCBmbG9hdCBtZXRhbGxpYyA9IDAuMDsKICAgIGhpZ2hwIGZsb2F0IG9jY2x1c2lvbiA9IDEuMDsKICAgIGhpZ2hwIGZsb2F0IHNwZWN1bGFyID0gMC4wOwogICAgbiAvPSB2ZWMzKChhYnMobi54KSArIGFicyhuLnkpKSArIGFicyhuLnopKTsKICAgIGhpZ2hwIHZlYzIgXzkzOwogICAgaWYgKG4ueiA%PSAwLjApCiAgICB7CiAgICAgICAgXzkzID0gbi54eTsKICAgIH0KICAgIGVsc2UKICAgIHsKICAgICAgICBfOTMgPSBvY3RhaGVkcm9uV3JhcChuLnh5KTsKICAgIH0KICAgIG4gPSB2ZWMzKF85My54LCBfOTMueSwgbi56KTsKICAgIGZyYWdDb2xvclswXSA9IHZlYzQobi54eSwgcm91Z2huZXNzLCBwYWNrRmxvYXRJbnQxNihtZXRhbGxpYywgMHUpKTsKICAgIGZyYWdDb2xvclsxXSA9IHZlYzQoYmFzZWNvbCwgcGFja0Zsb2F0MihvY2NsdXNpb24sIHNwZWN1bGFyKSk7Cn0KCg";
+kha_Shaders.Material_mesh_fragData0 = "s1587:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKaW4gaGlnaHAgdmVjMyB3bm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3JbMl07CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCmhpZ2hwIGZsb2F0IHBhY2tGbG9hdEludDE2KGhpZ2hwIGZsb2F0IGYsIHVpbnQgaSkKewogICAgdWludCBiaXRzSW50ID0gaSA8PCAxMnU7CiAgICB1aW50IGJpdHNGbG9hdCA9IHVpbnQoZiAqIDQwOTUuMCk7CiAgICByZXR1cm4gZmxvYXQoYml0c0ludCB8IGJpdHNGbG9hdCk7Cn0KCmhpZ2hwIGZsb2F0IHBhY2tGbG9hdDIoaGlnaHAgZmxvYXQgZjEsIGhpZ2hwIGZsb2F0IGYyKQp7CiAgICByZXR1cm4gZmxvb3IoZjEgKiAyNTUuMCkgKyBtaW4oZjIsIDAuOTkwMDAwMDA5NTM2NzQzMTY0MDYyNSk7Cn0KCnZvaWQgbWFpbigpCnsKICAgIGhpZ2hwIHZlYzMgbiA9IG5vcm1hbGl6ZSh3bm9ybWFsKTsKICAgIGhpZ2hwIHZlYzMgYmFzZWNvbCA9IHZlYzMoMC44MDAwMDAwMTE5MjA5Mjg5NTUwNzgxMjUpOwogICAgaGlnaHAgZmxvYXQgcm91Z2huZXNzID0gMC4wOwogICAgaGlnaHAgZmxvYXQgbWV0YWxsaWMgPSAwLjA7CiAgICBoaWdocCBmbG9hdCBvY2NsdXNpb24gPSAxLjA7CiAgICBoaWdocCBmbG9hdCBzcGVjdWxhciA9IDAuMDsKICAgIGhpZ2hwIHZlYzMgZW1pc3Npb25Db2wgPSB2ZWMzKDAuMCk7CiAgICBuIC89IHZlYzMoKGFicyhuLngpICsgYWJzKG4ueSkpICsgYWJzKG4ueikpOwogICAgaGlnaHAgdmVjMiBfMTAxOwogICAgaWYgKG4ueiA%PSAwLjApCiAgICB7CiAgICAgICAgXzEwMSA9IG4ueHk7CiAgICB9CiAgICBlbHNlCiAgICB7CiAgICAgICAgXzEwMSA9IG9jdGFoZWRyb25XcmFwKG4ueHkpOwogICAgfQogICAgbiA9IHZlYzMoXzEwMS54LCBfMTAxLnksIG4ueik7CiAgICBmcmFnQ29sb3JbMF0gPSB2ZWM0KG4ueHksIHJvdWdobmVzcywgcGFja0Zsb2F0SW50MTYobWV0YWxsaWMsIDB1KSk7CiAgICBmcmFnQ29sb3JbMV0gPSB2ZWM0KGJhc2Vjb2wsIHBhY2tGbG9hdDIob2NjbHVzaW9uLCBzcGVjdWxhcikpOwp9Cgo";
 kha_Shaders.Material_mesh_vertData0 = "s303:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDMgTjsKdW5pZm9ybSBtYXQ0IFdWUDsKCmluIHZlYzQgcG9zOwpvdXQgdmVjMyB3bm9ybWFsOwppbiB2ZWMyIG5vcjsKCnZvaWQgbWFpbigpCnsKICAgIHZlYzQgc3BvcyA9IHZlYzQocG9zLnh5eiwgMS4wKTsKICAgIHdub3JtYWwgPSBub3JtYWxpemUoTiAqIHZlYzMobm9yLCBwb3MudykpOwogICAgZ2xfUG9zaXRpb24gPSBXVlAgKiBzcG9zOwp9Cgo";
 kha_Shaders.Material_shadowmap_fragData0 = "s107:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdm9pZCBtYWluKCkKewp9Cgo";
 kha_Shaders.Material_shadowmap_vertData0 = "s180:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgTFdWUDsKCmluIHZlYzQgcG9zOwoKdm9pZCBtYWluKCkKewogICAgdmVjNCBzcG9zID0gdmVjNChwb3MueHl6LCAxLjApOwogICAgZ2xfUG9zaXRpb24gPSBMV1ZQICogc3BvczsKfQoK";
-kha_Shaders.World_World_fragData0 = "s448:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKaW4gaGlnaHAgdmVjMyBub3JtYWw7Cm91dCBoaWdocCB2ZWM0IGZyYWdDb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIGhpZ2hwIHZlYzMgbiA9IG5vcm1hbGl6ZShub3JtYWwpOwogICAgZnJhZ0NvbG9yID0gdmVjNCh2ZWMzKDAuMDk0NjI1NTAyODI0NzgzMzI1MTk1MzEyNSkueCwgdmVjMygwLjA5NDYyNTUwMjgyNDc4MzMyNTE5NTMxMjUpLnksIHZlYzMoMC4wOTQ2MjU1MDI4MjQ3ODMzMjUxOTUzMTI1KS56LCBmcmFnQ29sb3Iudyk7CiAgICBmcmFnQ29sb3IudyA9IDAuMDsKfQoK";
+kha_Shaders.World_World_fragData0 = "s1854:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCB2ZWMzIEg7CnVuaWZvcm0gaGlnaHAgdmVjMyBBOwp1bmlmb3JtIGhpZ2hwIHZlYzMgQjsKdW5pZm9ybSBoaWdocCB2ZWMzIEM7CnVuaWZvcm0gaGlnaHAgdmVjMyBEOwp1bmlmb3JtIGhpZ2hwIHZlYzMgRTsKdW5pZm9ybSBoaWdocCB2ZWMzIEY7CnVuaWZvcm0gaGlnaHAgdmVjMyBHOwp1bmlmb3JtIGhpZ2hwIHZlYzMgSTsKdW5pZm9ybSBoaWdocCB2ZWMzIGhvc2VrU3VuRGlyZWN0aW9uOwp1bmlmb3JtIGhpZ2hwIHZlYzMgWjsKdW5pZm9ybSBoaWdocCBmbG9hdCBlbnZtYXBTdHJlbmd0aDsKCmluIGhpZ2hwIHZlYzMgbm9ybWFsOwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMzIGhvc2VrV2lsa2llKGhpZ2hwIGZsb2F0IGNvc190aGV0YSwgaGlnaHAgZmxvYXQgZ2FtbWEsIGhpZ2hwIGZsb2F0IGNvc19nYW1tYSkKewogICAgaGlnaHAgdmVjMyBjaGkgPSB2ZWMzKDEuMCArIChjb3NfZ2FtbWEgKiBjb3NfZ2FtbWEpKSAvIHBvdygodmVjMygxLjApICsgKEggKiBIKSkgLSAoSCAqICgyLjAgKiBjb3NfZ2FtbWEpKSwgdmVjMygxLjUpKTsKICAgIHJldHVybiAodmVjMygxLjApICsgKEEgKiBleHAoQiAvIHZlYzMoY29zX3RoZXRhICsgMC4wMDk5OTk5OTk3NzY0ODI1ODIwOTIyODUxNTYyNSkpKSkgKiAoKCgoQyArIChEICogZXhwKEUgKiBnYW1tYSkpKSArIChGICogKGNvc19nYW1tYSAqIGNvc19nYW1tYSkpKSArIChHICogY2hpKSkgKyAoSSAqIHNxcnQoY29zX3RoZXRhKSkpOwp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWMzIG4gPSBub3JtYWxpemUobm9ybWFsKTsKICAgIGhpZ2hwIHZlYzMgcG9zID0gLW47CiAgICBoaWdocCBmbG9hdCBjb3NfdGhldGEgPSBjbGFtcChwb3MueiwgMC4wLCAxLjApOwogICAgaGlnaHAgZmxvYXQgY29zX2dhbW1hID0gZG90KHBvcywgaG9zZWtTdW5EaXJlY3Rpb24pOwogICAgaGlnaHAgZmxvYXQgZ2FtbWFfdmFsID0gYWNvcyhjb3NfZ2FtbWEpOwogICAgaGlnaHAgZmxvYXQgcGFyYW0gPSBjb3NfdGhldGE7CiAgICBoaWdocCBmbG9hdCBwYXJhbV8xID0gZ2FtbWFfdmFsOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMiA9IGNvc19nYW1tYTsKICAgIGhpZ2hwIHZlYzMgU2t5VGV4dHVyZV9Db2xvcl9yZXMgPSAoWiAqIGhvc2VrV2lsa2llKHBhcmFtLCBwYXJhbV8xLCBwYXJhbV8yKSkgKiBlbnZtYXBTdHJlbmd0aDsKICAgIGZyYWdDb2xvciA9IHZlYzQoU2t5VGV4dHVyZV9Db2xvcl9yZXMueCwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueSwgU2t5VGV4dHVyZV9Db2xvcl9yZXMueiwgZnJhZ0NvbG9yLncpOwogICAgZnJhZ0NvbG9yLncgPSAwLjA7Cn0KCg";
 kha_Shaders.World_World_vertData0 = "s258:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgU01WUDsKCm91dCB2ZWMzIG5vcm1hbDsKaW4gdmVjMyBub3I7CmluIHZlYzMgcG9zOwoKdm9pZCBtYWluKCkKewogICAgbm9ybWFsID0gbm9yOwogICAgdmVjNCBwb3NpdGlvbiA9IFNNVlAgKiB2ZWM0KHBvcywgMS4wKTsKICAgIGdsX1Bvc2l0aW9uID0gdmVjNChwb3NpdGlvbik7Cn0KCg";
 kha_Shaders.blur_edge_pass_fragData0 = "s2671:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKY29uc3QgZmxvYXQgXzE0NFsxMF0gPSBmbG9hdFtdKDAuMTMyNTcxOTk1MjU4MzMxMjk4ODI4MTI1LCAwLjEyNTQ3MTk5NDI4MDgxNTEyNDUxMTcxODc1LCAwLjEwNjM3Mjk5NzE2NDcyNjI1NzMyNDIxODc1LCAwLjA4MDc3OTk5OTQ5NDU1MjYxMjMwNDY4NzUsIDAuMDU0OTQ5OTk4ODU1NTkwODIwMzEyNSwgMC4wMzM0ODIwMDAyMzE3NDI4NTg4ODY3MTg3NSwgMC4wMTgyNzUwMDAxNTQ5NzIwNzY0MTYwMTU2MjUsIDAuMDA4OTMzOTk5NTc1Njc0NTMzODQzOTk0MTQwNjI1LCAwLjAwMzkxMTk5OTk4NTU3NTY3NTk2NDM1NTQ2ODc1LCAwLjAwMTUzNTAwMDA0NjcxNTE0MDM0MjcxMjQwMjM0Mzc1KTsKCnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIGdidWZmZXIwOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCB0ZXg7CnVuaWZvcm0gaGlnaHAgdmVjMiBkaXJJbnY7CgppbiBoaWdocCB2ZWMyIHRleENvb3JkOwpvdXQgaGlnaHAgZmxvYXQgZnJhZ0NvbG9yOwoKaGlnaHAgdmVjMiBvY3RhaGVkcm9uV3JhcChoaWdocCB2ZWMyIHYpCnsKICAgIHJldHVybiAodmVjMigxLjApIC0gYWJzKHYueXgpKSAqIHZlYzIoKHYueCA%PSAwLjApID8gMS4wIDogKC0xLjApLCAodi55ID49IDAuMCkgPyAxLjAgOiAoLTEuMCkpOwp9CgpoaWdocCB2ZWMzIGdldE5vcihoaWdocCB2ZWMyIGVuYykKewogICAgaGlnaHAgdmVjMyBuOwogICAgbi56ID0gKDEuMCAtIGFicyhlbmMueCkpIC0gYWJzKGVuYy55KTsKICAgIGhpZ2hwIHZlYzIgXzUzOwogICAgaWYgKG4ueiA%PSAwLjApCiAgICB7CiAgICAgICAgXzUzID0gZW5jOwogICAgfQogICAgZWxzZQogICAgewogICAgICAgIF81MyA9IG9jdGFoZWRyb25XcmFwKGVuYyk7CiAgICB9CiAgICBuID0gdmVjMyhfNTMueCwgXzUzLnksIG4ueik7CiAgICBuID0gbm9ybWFsaXplKG4pOwogICAgcmV0dXJuIG47Cn0KCnZvaWQgbWFpbigpCnsKICAgIGhpZ2hwIHZlYzMgbm9yID0gZ2V0Tm9yKHRleHR1cmVMb2QoZ2J1ZmZlcjAsIHRleENvb3JkLCAwLjApLnh5KTsKICAgIGZyYWdDb2xvciA9IHRleHR1cmVMb2QodGV4LCB0ZXhDb29yZCwgMC4wKS54ICogMC4xMzI1NzE5OTUyNTgzMzEyOTg4MjgxMjU7CiAgICBoaWdocCBmbG9hdCB3ZWlnaHQgPSAwLjEzMjU3MTk5NTI1ODMzMTI5ODgyODEyNTsKICAgIGZvciAoaW50IGkgPSAxOyBpIDwgODsgaSsrKQogICAgewogICAgICAgIGhpZ2hwIGZsb2F0IHBvc2FkZCA9IGZsb2F0KGkpOwogICAgICAgIGhpZ2hwIHZlYzMgbm9yMiA9IGdldE5vcih0ZXh0dXJlTG9kKGdidWZmZXIwLCB0ZXhDb29yZCArIChkaXJJbnYgKiBmbG9hdChpKSksIDAuMCkueHkpOwogICAgICAgIGhpZ2hwIGZsb2F0IGluZmx1ZW5jZUZhY3RvciA9IHN0ZXAoMC45NDk5OTk5ODgwNzkwNzEwNDQ5MjE4NzUsIGRvdChub3IyLCBub3IpKTsKICAgICAgICBoaWdocCBmbG9hdCBjb2wgPSB0ZXh0dXJlTG9kKHRleCwgdGV4Q29vcmQgKyAoZGlySW52ICogcG9zYWRkKSwgMC4wKS54OwogICAgICAgIGhpZ2hwIGZsb2F0IHcgPSBfMTQ0W2ldICogaW5mbHVlbmNlRmFjdG9yOwogICAgICAgIGZyYWdDb2xvciArPSAoY29sICogdyk7CiAgICAgICAgd2VpZ2h0ICs9IHc7CiAgICAgICAgbm9yMiA9IGdldE5vcih0ZXh0dXJlTG9kKGdidWZmZXIwLCB0ZXhDb29yZCAtIChkaXJJbnYgKiBmbG9hdChpKSksIDAuMCkueHkpOwogICAgICAgIGluZmx1ZW5jZUZhY3RvciA9IHN0ZXAoMC45NDk5OTk5ODgwNzkwNzEwNDQ5MjE4NzUsIGRvdChub3IyLCBub3IpKTsKICAgICAgICBjb2wgPSB0ZXh0dXJlTG9kKHRleCwgdGV4Q29vcmQgLSAoZGlySW52ICogcG9zYWRkKSwgMC4wKS54OwogICAgICAgIHcgPSBfMTQ0W2ldICogaW5mbHVlbmNlRmFjdG9yOwogICAgICAgIGZyYWdDb2xvciArPSAoY29sICogdyk7CiAgICAgICAgd2VpZ2h0ICs9IHc7CiAgICB9CiAgICBmcmFnQ29sb3IgLz0gd2VpZ2h0Owp9Cgo";
-kha_Shaders.compositor_pass_fragData0 = "s870:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKb3V0IGhpZ2hwIHZlYzQgZnJhZ0NvbG9yOwoKaGlnaHAgdmVjMyB0b25lbWFwRmlsbWljKGhpZ2hwIHZlYzMgY29sb3IpCnsKICAgIGhpZ2hwIHZlYzMgeCA9IG1heCh2ZWMzKDAuMCksIGNvbG9yIC0gdmVjMygwLjAwNDAwMDAwMDE4OTk4OTgwNTIyMTU1NzYxNzE4NzUpKTsKICAgIHJldHVybiAoeCAqICgoeCAqIDYuMTk5OTk5ODA5MjY1MTM2NzE4NzUpICsgdmVjMygwLjUpKSkgLyAoKHggKiAoKHggKiA2LjE5OTk5OTgwOTI2NTEzNjcxODc1KSArIHZlYzMoMS43MDAwMDAwNDc2ODM3MTU4MjAzMTI1KSkpICsgdmVjMygwLjA1OTk5OTk5ODY1ODg5NTQ5MjU1MzcxMDkzNzUpKTsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjMiB0ZXhDbyA9IHRleENvb3JkOwogICAgZnJhZ0NvbG9yID0gdGV4dHVyZUxvZCh0ZXgsIHRleENvLCAwLjApOwogICAgaGlnaHAgdmVjMyBfNTkgPSB0b25lbWFwRmlsbWljKGZyYWdDb2xvci54eXopOwogICAgZnJhZ0NvbG9yID0gdmVjNChfNTkueCwgXzU5LnksIF81OS56LCBmcmFnQ29sb3Iudyk7Cn0KCg";
+kha_Shaders.compositor_pass_fragData0 = "s1019:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKb3V0IGhpZ2hwIHZlYzQgZnJhZ0NvbG9yOwoKaGlnaHAgdmVjMyB0b25lbWFwRmlsbWljKGhpZ2hwIHZlYzMgY29sb3IpCnsKICAgIGhpZ2hwIHZlYzMgeCA9IG1heCh2ZWMzKDAuMCksIGNvbG9yIC0gdmVjMygwLjAwNDAwMDAwMDE4OTk4OTgwNTIyMTU1NzYxNzE4NzUpKTsKICAgIHJldHVybiAoeCAqICgoeCAqIDYuMTk5OTk5ODA5MjY1MTM2NzE4NzUpICsgdmVjMygwLjUpKSkgLyAoKHggKiAoKHggKiA2LjE5OTk5OTgwOTI2NTEzNjcxODc1KSArIHZlYzMoMS43MDAwMDAwNDc2ODM3MTU4MjAzMTI1KSkpICsgdmVjMygwLjA1OTk5OTk5ODY1ODg5NTQ5MjU1MzcxMDkzNzUpKTsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjMiB0ZXhDbyA9IHRleENvb3JkOwogICAgZnJhZ0NvbG9yID0gdGV4dHVyZUxvZCh0ZXgsIHRleENvLCAwLjApOwogICAgaGlnaHAgdmVjMyBfNjEgPSBtaW4oZnJhZ0NvbG9yLnh5eiwgdmVjMygzMjc1Mi4wKSk7CiAgICBmcmFnQ29sb3IgPSB2ZWM0KF82MS54LCBfNjEueSwgXzYxLnosIGZyYWdDb2xvci53KTsKICAgIGhpZ2hwIHZlYzMgXzY2ID0gdG9uZW1hcEZpbG1pYyhmcmFnQ29sb3IueHl6KTsKICAgIGZyYWdDb2xvciA9IHZlYzQoXzY2LngsIF82Ni55LCBfNjYueiwgZnJhZ0NvbG9yLncpOwp9Cgo";
 kha_Shaders.compositor_pass_vertData0 = "s203:I3ZlcnNpb24gMzAwIGVzCgpvdXQgdmVjMiB0ZXhDb29yZDsKaW4gdmVjMiBwb3M7Cgp2b2lkIG1haW4oKQp7CiAgICB0ZXhDb29yZCA9IChwb3MgKiB2ZWMyKDAuNSkpICsgdmVjMigwLjUpOwogICAgZ2xfUG9zaXRpb24gPSB2ZWM0KHBvcywgMC4wLCAxLjApOwp9Cgo";
-kha_Shaders.deferred_light_fragData0 = "s12824:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyQ3ViZVNoYWRvdyBzaGFkb3dNYXBQb2ludFsxXTsKdW5pZm9ybSBoaWdocCB2ZWMyIGxpZ2h0UHJvajsKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgZ2J1ZmZlcjA7CnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIGdidWZmZXIxOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBnYnVmZmVyRDsKdW5pZm9ybSBoaWdocCB2ZWMzIGV5ZTsKdW5pZm9ybSBoaWdocCB2ZWMzIGV5ZUxvb2s7CnVuaWZvcm0gaGlnaHAgdmVjMiBjYW1lcmFQcm9qOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBzZW52bWFwQnJkZjsKdW5pZm9ybSBoaWdocCB2ZWM0IHNoaXJyWzddOwp1bmlmb3JtIGludCBlbnZtYXBOdW1NaXBtYXBzOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBzZW52bWFwUmFkaWFuY2U7CnVuaWZvcm0gaGlnaHAgZmxvYXQgZW52bWFwU3RyZW5ndGg7CnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIHNzYW90ZXg7CnVuaWZvcm0gaGlnaHAgdmVjMyBwb2ludFBvczsKdW5pZm9ybSBoaWdocCB2ZWMzIHBvaW50Q29sOwp1bmlmb3JtIGhpZ2hwIGZsb2F0IHBvaW50QmlhczsKdW5pZm9ybSBoaWdocCB2ZWM0IGNhc0RhdGFbMjBdOwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKaW4gaGlnaHAgdmVjMyB2aWV3UmF5OwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCnZvaWQgdW5wYWNrRmxvYXRJbnQxNihoaWdocCBmbG9hdCB2YWwsIG91dCBoaWdocCBmbG9hdCBmLCBpbm91dCB1aW50IGkpCnsKICAgIGkgPSB1aW50KGludCgodmFsIC8gMC4wNjI1MDA5NTM2NzQzMTY0MDYyNSkgKyAxLjUyNTkwMjE4OTMxNDM2NTM4Njk2Mjg5MDYyNWUtMDUpKTsKICAgIGYgPSBjbGFtcCgoKCgtMC4wNjI1MDA5NTM2NzQzMTY0MDYyNSkgKiBmbG9hdChpKSkgKyB2YWwpIC8gMC4wNjI0ODU2OTQ4ODUyNTM5MDYyNSwgMC4wLCAxLjApOwp9CgpoaWdocCB2ZWMyIHVucGFja0Zsb2F0MihoaWdocCBmbG9hdCBmKQp7CiAgICByZXR1cm4gdmVjMihmbG9vcihmKSAvIDI1NS4wLCBmcmFjdChmKSk7Cn0KCmhpZ2hwIHZlYzMgc3VyZmFjZUFsYmVkbyhoaWdocCB2ZWMzIGJhc2VDb2xvciwgaGlnaHAgZmxvYXQgbWV0YWxuZXNzKQp7CiAgICByZXR1cm4gbWl4KGJhc2VDb2xvciwgdmVjMygwLjApLCB2ZWMzKG1ldGFsbmVzcykpOwp9CgpoaWdocCB2ZWMzIHN1cmZhY2VGMChoaWdocCB2ZWMzIGJhc2VDb2xvciwgaGlnaHAgZmxvYXQgbWV0YWxuZXNzKQp7CiAgICByZXR1cm4gbWl4KHZlYzMoMC4wMzk5OTk5OTkxMDU5MzAzMjgzNjkxNDA2MjUpLCBiYXNlQ29sb3IsIHZlYzMobWV0YWxuZXNzKSk7Cn0KCmhpZ2hwIHZlYzMgZ2V0UG9zKGhpZ2hwIHZlYzMgZXllXzEsIGhpZ2hwIHZlYzMgZXllTG9va18xLCBoaWdocCB2ZWMzIHZpZXdSYXlfMSwgaGlnaHAgZmxvYXQgZGVwdGgsIGhpZ2hwIHZlYzIgY2FtZXJhUHJval8xKQp7CiAgICBoaWdocCBmbG9hdCBsaW5lYXJEZXB0aCA9IGNhbWVyYVByb2pfMS55IC8gKCgoZGVwdGggKiAwLjUpICsgMC41KSAtIGNhbWVyYVByb2pfMS54KTsKICAgIGhpZ2hwIGZsb2F0IHZpZXdaRGlzdCA9IGRvdChleWVMb29rXzEsIHZpZXdSYXlfMSk7CiAgICBoaWdocCB2ZWMzIHdwb3NpdGlvbiA9IGV5ZV8xICsgKHZpZXdSYXlfMSAqIChsaW5lYXJEZXB0aCAvIHZpZXdaRGlzdCkpOwogICAgcmV0dXJuIHdwb3NpdGlvbjsKfQoKaGlnaHAgdmVjMyBzaElycmFkaWFuY2UoaGlnaHAgdmVjMyBub3IsIGhpZ2hwIHZlYzQgc2hpcnJfMVs3XSkKewogICAgaGlnaHAgdmVjMyBjbDAwID0gdmVjMyhzaGlycl8xWzBdLngsIHNoaXJyXzFbMF0ueSwgc2hpcnJfMVswXS56KTsKICAgIGhpZ2hwIHZlYzMgY2wxbTEgPSB2ZWMzKHNoaXJyXzFbMF0udywgc2hpcnJfMVsxXS54LCBzaGlycl8xWzFdLnkpOwogICAgaGlnaHAgdmVjMyBjbDEwID0gdmVjMyhzaGlycl8xWzFdLnosIHNoaXJyXzFbMV0udywgc2hpcnJfMVsyXS54KTsKICAgIGhpZ2hwIHZlYzMgY2wxMSA9IHZlYzMoc2hpcnJfMVsyXS55LCBzaGlycl8xWzJdLnosIHNoaXJyXzFbMl0udyk7CiAgICBoaWdocCB2ZWMzIGNsMm0yID0gdmVjMyhzaGlycl8xWzNdLngsIHNoaXJyXzFbM10ueSwgc2hpcnJfMVszXS56KTsKICAgIGhpZ2hwIHZlYzMgY2wybTEgPSB2ZWMzKHNoaXJyXzFbM10udywgc2hpcnJfMVs0XS54LCBzaGlycl8xWzRdLnkpOwogICAgaGlnaHAgdmVjMyBjbDIwID0gdmVjMyhzaGlycl8xWzRdLnosIHNoaXJyXzFbNF0udywgc2hpcnJfMVs1XS54KTsKICAgIGhpZ2hwIHZlYzMgY2wyMSA9IHZlYzMoc2hpcnJfMVs1XS55LCBzaGlycl8xWzVdLnosIHNoaXJyXzFbNV0udyk7CiAgICBoaWdocCB2ZWMzIGNsMjIgPSB2ZWMzKHNoaXJyXzFbNl0ueCwgc2hpcnJfMVs2XS55LCBzaGlycl8xWzZdLnopOwogICAgcmV0dXJuICgoKCgoKCgoKChjbDIyICogMC40MjkwNDI5OTQ5NzYwNDM3MDExNzE4NzUpICogKChub3IueSAqIG5vci55KSAtICgoLW5vci56KSAqICgtbm9yLnopKSkpICsgKCgoY2wyMCAqIDAuNzQzMTI1MDIxNDU3NjcyMTE5MTQwNjI1KSAqIG5vci54KSAqIG5vci54KSkgKyAoY2wwMCAqIDAuODg2MjI3MDExNjgwNjAzMDI3MzQzNzUpKSAtIChjbDIwICogMC4yNDc3MDc5OTI3OTIxMjk1MTY2MDE1NjI1KSkgKyAoKChjbDJtMiAqIDAuODU4MDg1OTg5OTUyMDg3NDAyMzQzNzUpICogbm9yLnkpICogKC1ub3IueikpKSArICgoKGNsMjEgKiAwLjg1ODA4NTk4OTk1MjA4NzQwMjM0Mzc1KSAqIG5vci55KSAqIG5vci54KSkgKyAoKChjbDJtMSAqIDAuODU4MDg1OTg5OTUyMDg3NDAyMzQzNzUpICogKC1ub3IueikpICogbm9yLngpKSArICgoY2wxMSAqIDEuMDIzMzI3OTQ2NjYyOTAyODMyMDMxMjUpICogbm9yLnkpKSArICgoY2wxbTEgKiAxLjAyMzMyNzk0NjY2MjkwMjgzMjAzMTI1KSAqICgtbm9yLnopKSkgKyAoKGNsMTAgKiAxLjAyMzMyNzk0NjY2MjkwMjgzMjAzMTI1KSAqIG5vci54KTsKfQoKaGlnaHAgZmxvYXQgZ2V0TWlwRnJvbVJvdWdobmVzcyhoaWdocCBmbG9hdCByb3VnaG5lc3MsIGhpZ2hwIGZsb2F0IG51bU1pcG1hcHMpCnsKICAgIHJldHVybiByb3VnaG5lc3MgKiBudW1NaXBtYXBzOwp9CgpoaWdocCB2ZWMyIGVudk1hcEVxdWlyZWN0KGhpZ2hwIHZlYzMgbm9ybWFsKQp7CiAgICBoaWdocCBmbG9hdCBwaGkgPSBhY29zKG5vcm1hbC56KTsKICAgIGhpZ2hwIGZsb2F0IHRoZXRhID0gYXRhbigtbm9ybWFsLnksIG5vcm1hbC54KSArIDMuMTQxNTkyNzQxMDEyNTczMjQyMTg3NTsKICAgIHJldHVybiB2ZWMyKHRoZXRhIC8gNi4yODMxODU0ODIwMjUxNDY0ODQzNzUsIHBoaSAvIDMuMTQxNTkyNzQxMDEyNTczMjQyMTg3NSk7Cn0KCmhpZ2hwIHZlYzMgbGFtYmVydERpZmZ1c2VCUkRGKGhpZ2hwIHZlYzMgYWxiZWRvLCBoaWdocCBmbG9hdCBubCkKewogICAgcmV0dXJuIGFsYmVkbyAqIG1heCgwLjAsIG5sKTsKfQoKaGlnaHAgZmxvYXQgZF9nZ3goaGlnaHAgZmxvYXQgbmgsIGhpZ2hwIGZsb2F0IGEpCnsKICAgIGhpZ2hwIGZsb2F0IGEyID0gYSAqIGE7CiAgICBoaWdocCBmbG9hdCBkZW5vbSA9IHBvdygoKG5oICogbmgpICogKGEyIC0gMS4wKSkgKyAxLjAsIDIuMCk7CiAgICByZXR1cm4gKGEyICogMC4zMTgzMDk4NzMzNDI1MTQwMzgwODU5Mzc1KSAvIGRlbm9tOwp9CgpoaWdocCBmbG9hdCB2X3NtaXRoc2NobGljayhoaWdocCBmbG9hdCBubCwgaGlnaHAgZmxvYXQgbnYsIGhpZ2hwIGZsb2F0IGEpCnsKICAgIHJldHVybiAxLjAgLyAoKChubCAqICgxLjAgLSBhKSkgKyBhKSAqICgobnYgKiAoMS4wIC0gYSkpICsgYSkpOwp9CgpoaWdocCB2ZWMzIGZfc2NobGljayhoaWdocCB2ZWMzIGYwLCBoaWdocCBmbG9hdCB2aCkKewogICAgcmV0dXJuIGYwICsgKCh2ZWMzKDEuMCkgLSBmMCkgKiBleHAyKCgoKC01LjU1NDcyOTkzODUwNzA4MDA3ODEyNSkgKiB2aCkgLSA2Ljk4MzE2MDAxODkyMDg5ODQzNzUpICogdmgpKTsKfQoKaGlnaHAgdmVjMyBzcGVjdWxhckJSREYoaGlnaHAgdmVjMyBmMCwgaGlnaHAgZmxvYXQgcm91Z2huZXNzLCBoaWdocCBmbG9hdCBubCwgaGlnaHAgZmxvYXQgbmgsIGhpZ2hwIGZsb2F0IG52LCBoaWdocCBmbG9hdCB2aCkKewogICAgaGlnaHAgZmxvYXQgYSA9IHJvdWdobmVzcyAqIHJvdWdobmVzczsKICAgIHJldHVybiAoZl9zY2hsaWNrKGYwLCB2aCkgKiAoZF9nZ3gobmgsIGEpICogY2xhbXAodl9zbWl0aHNjaGxpY2sobmwsIG52LCBhKSwgMC4wLCAxLjApKSkgLyB2ZWMzKDQuMCk7Cn0KCmhpZ2hwIGZsb2F0IGF0dGVudWF0ZShoaWdocCBmbG9hdCBkaXN0KQp7CiAgICByZXR1cm4gMS4wIC8gKGRpc3QgKiBkaXN0KTsKfQoKaGlnaHAgZmxvYXQgbHBUb0RlcHRoKGlub3V0IGhpZ2hwIHZlYzMgbHAsIGhpZ2hwIHZlYzIgbGlnaHRQcm9qXzEpCnsKICAgIGxwID0gYWJzKGxwKTsKICAgIGhpZ2hwIGZsb2F0IHpjb21wID0gbWF4KGxwLngsIG1heChscC55LCBscC56KSk7CiAgICB6Y29tcCA9IGxpZ2h0UHJval8xLnggLSAobGlnaHRQcm9qXzEueSAvIHpjb21wKTsKICAgIHJldHVybiAoemNvbXAgKiAwLjUpICsgMC41Owp9CgpoaWdocCBmbG9hdCBQQ0ZDdWJlKGhpZ2hwIHNhbXBsZXJDdWJlU2hhZG93IHNoYWRvd01hcEN1YmUsIGhpZ2hwIHZlYzMgbHAsIGlub3V0IGhpZ2hwIHZlYzMgbWwsIGhpZ2hwIGZsb2F0IGJpYXMsIGhpZ2hwIHZlYzIgbGlnaHRQcm9qXzEsIGhpZ2hwIHZlYzMgbikKewogICAgaGlnaHAgdmVjMyBwYXJhbSA9IGxwOwogICAgaGlnaHAgZmxvYXQgXzQzMSA9IGxwVG9EZXB0aChwYXJhbSwgbGlnaHRQcm9qXzEpOwogICAgaGlnaHAgZmxvYXQgY29tcGFyZSA9IF80MzEgLSAoYmlhcyAqIDEuNSk7CiAgICBtbCArPSAoKG4gKiBiaWFzKSAqIDIwLjApOwogICAgaGlnaHAgdmVjNCBfNDQ3ID0gdmVjNChtbCwgY29tcGFyZSk7CiAgICBoaWdocCBmbG9hdCByZXN1bHQgPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzQ0Ny54eXosIF80NDcudykpOwogICAgaGlnaHAgdmVjNCBfNDU5ID0gdmVjNChtbCArIHZlYzMoMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzQ1OS54eXosIF80NTkudykpOwogICAgaGlnaHAgdmVjNCBfNDczID0gdmVjNChtbCArIHZlYzMoLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAwLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzQ3My54eXosIF80NzMudykpOwogICAgaGlnaHAgdmVjNCBfNDg2ID0gdmVjNChtbCArIHZlYzMoMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIC0wLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzQ4Ni54eXosIF80ODYudykpOwogICAgaGlnaHAgdmVjNCBfNDk5ID0gdmVjNChtbCArIHZlYzMoMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzQ5OS54eXosIF80OTkudykpOwogICAgaGlnaHAgdmVjNCBfNTEyID0gdmVjNChtbCArIHZlYzMoLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF81MTIueHl6LCBfNTEyLncpKTsKICAgIGhpZ2hwIHZlYzQgXzUyNSA9IHZlYzQobWwgKyB2ZWMzKDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIC0wLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSksIGNvbXBhcmUpOwogICAgcmVzdWx0ICs9IHRleHR1cmUoc2hhZG93TWFwQ3ViZSwgdmVjNChfNTI1Lnh5eiwgXzUyNS53KSk7CiAgICBoaWdocCB2ZWM0IF81MzggPSB2ZWM0KG1sICsgdmVjMygtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzUzOC54eXosIF81MzgudykpOwogICAgaGlnaHAgdmVjNCBfNTUxID0gdmVjNChtbCArIHZlYzMoLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF81NTEueHl6LCBfNTUxLncpKTsKICAgIHJldHVybiByZXN1bHQgLyA5LjA7Cn0KCmhpZ2hwIHZlYzMgc2FtcGxlTGlnaHQoaGlnaHAgdmVjMyBwLCBoaWdocCB2ZWMzIG4sIGhpZ2hwIHZlYzMgdiwgaGlnaHAgZmxvYXQgZG90TlYsIGhpZ2hwIHZlYzMgbHAsIGhpZ2hwIHZlYzMgbGlnaHRDb2wsIGhpZ2hwIHZlYzMgYWxiZWRvLCBoaWdocCBmbG9hdCByb3VnaCwgaGlnaHAgZmxvYXQgc3BlYywgaGlnaHAgdmVjMyBmMCwgaW50IGluZGV4LCBoaWdocCBmbG9hdCBiaWFzLCBib29sIHJlY2VpdmVTaGFkb3cpCnsKICAgIGhpZ2hwIHZlYzMgbGQgPSBscCAtIHA7CiAgICBoaWdocCB2ZWMzIGwgPSBub3JtYWxpemUobGQpOwogICAgaGlnaHAgdmVjMyBoID0gbm9ybWFsaXplKHYgKyBsKTsKICAgIGhpZ2hwIGZsb2F0IGRvdE5IID0gZG90KG4sIGgpOwogICAgaGlnaHAgZmxvYXQgZG90VkggPSBkb3QodiwgaCk7CiAgICBoaWdocCBmbG9hdCBkb3ROTCA9IGRvdChuLCBsKTsKICAgIGhpZ2hwIHZlYzMgZGlyZWN0ID0gbGFtYmVydERpZmZ1c2VCUkRGKGFsYmVkbywgZG90TkwpICsgKHNwZWN1bGFyQlJERihmMCwgcm91Z2gsIGRvdE5MLCBkb3ROSCwgZG90TlYsIGRvdFZIKSAqIHNwZWMpOwogICAgZGlyZWN0ICo9IGF0dGVudWF0ZShkaXN0YW5jZShwLCBscCkpOwogICAgZGlyZWN0ICo9IGxpZ2h0Q29sOwogICAgaWYgKHJlY2VpdmVTaGFkb3cpCiAgICB7CiAgICAgICAgaGlnaHAgdmVjMyBwYXJhbSA9IC1sOwogICAgICAgIGhpZ2hwIGZsb2F0IF82MDkgPSBQQ0ZDdWJlKHNoYWRvd01hcFBvaW50WzBdLCBsZCwgcGFyYW0sIGJpYXMsIGxpZ2h0UHJvaiwgbik7CiAgICAgICAgZGlyZWN0ICo9IF82MDk7CiAgICB9CiAgICByZXR1cm4gZGlyZWN0Owp9Cgp2b2lkIG1haW4oKQp7CiAgICBoaWdocCB2ZWM0IGcwID0gdGV4dHVyZUxvZChnYnVmZmVyMCwgdGV4Q29vcmQsIDAuMCk7CiAgICBoaWdocCB2ZWMzIG47CiAgICBuLnogPSAoMS4wIC0gYWJzKGcwLngpKSAtIGFicyhnMC55KTsKICAgIGhpZ2hwIHZlYzIgXzY0MDsKICAgIGlmIChuLnogPj0gMC4wKQogICAgewogICAgICAgIF82NDAgPSBnMC54eTsKICAgIH0KICAgIGVsc2UKICAgIHsKICAgICAgICBfNjQwID0gb2N0YWhlZHJvbldyYXAoZzAueHkpOwogICAgfQogICAgbiA9IHZlYzMoXzY0MC54LCBfNjQwLnksIG4ueik7CiAgICBuID0gbm9ybWFsaXplKG4pOwogICAgaGlnaHAgZmxvYXQgcm91Z2huZXNzID0gZzAuejsKICAgIGhpZ2hwIGZsb2F0IHBhcmFtOwogICAgdWludCBwYXJhbV8xOwogICAgdW5wYWNrRmxvYXRJbnQxNihnMC53LCBwYXJhbSwgcGFyYW1fMSk7CiAgICBoaWdocCBmbG9hdCBtZXRhbGxpYyA9IHBhcmFtOwogICAgdWludCBtYXRpZCA9IHBhcmFtXzE7CiAgICBoaWdocCB2ZWM0IGcxID0gdGV4dHVyZUxvZChnYnVmZmVyMSwgdGV4Q29vcmQsIDAuMCk7CiAgICBoaWdocCB2ZWMyIG9jY3NwZWMgPSB1bnBhY2tGbG9hdDIoZzEudyk7CiAgICBoaWdocCB2ZWMzIGFsYmVkbyA9IHN1cmZhY2VBbGJlZG8oZzEueHl6LCBtZXRhbGxpYyk7CiAgICBoaWdocCB2ZWMzIGYwID0gc3VyZmFjZUYwKGcxLnh5eiwgbWV0YWxsaWMpOwogICAgaGlnaHAgZmxvYXQgZGVwdGggPSAodGV4dHVyZUxvZChnYnVmZmVyRCwgdGV4Q29vcmQsIDAuMCkueCAqIDIuMCkgLSAxLjA7CiAgICBoaWdocCB2ZWMzIHAgPSBnZXRQb3MoZXllLCBleWVMb29rLCBub3JtYWxpemUodmlld1JheSksIGRlcHRoLCBjYW1lcmFQcm9qKTsKICAgIGhpZ2hwIHZlYzMgdiA9IG5vcm1hbGl6ZShleWUgLSBwKTsKICAgIGhpZ2hwIGZsb2F0IGRvdE5WID0gbWF4KGRvdChuLCB2KSwgMC4wKTsKICAgIGhpZ2hwIHZlYzIgZW52QlJERiA9IHRleHR1cmVMb2Qoc2Vudm1hcEJyZGYsIHZlYzIocm91Z2huZXNzLCAxLjAgLSBkb3ROViksIDAuMCkueHk7CiAgICBoaWdocCB2ZWMzIGVudmwgPSBzaElycmFkaWFuY2Uobiwgc2hpcnIpOwogICAgaGlnaHAgdmVjMyByZWZsZWN0aW9uV29ybGQgPSByZWZsZWN0KC12LCBuKTsKICAgIGhpZ2hwIGZsb2F0IGxvZCA9IGdldE1pcEZyb21Sb3VnaG5lc3Mocm91Z2huZXNzLCBmbG9hdChlbnZtYXBOdW1NaXBtYXBzKSk7CiAgICBoaWdocCB2ZWMzIHByZWZpbHRlcmVkQ29sb3IgPSB0ZXh0dXJlTG9kKHNlbnZtYXBSYWRpYW5jZSwgZW52TWFwRXF1aXJlY3QocmVmbGVjdGlvbldvcmxkKSwgbG9kKS54eXo7CiAgICBlbnZsICo9IGFsYmVkbzsKICAgIGVudmwgKz0gKCgocHJlZmlsdGVyZWRDb2xvciAqICgoZjAgKiBlbnZCUkRGLngpICsgdmVjMyhlbnZCUkRGLnkpKSkgKiAxLjUpICogb2Njc3BlYy55KTsKICAgIGVudmwgKj0gKGVudm1hcFN0cmVuZ3RoICogb2Njc3BlYy54KTsKICAgIGZyYWdDb2xvciA9IHZlYzQoZW52bC54LCBlbnZsLnksIGVudmwueiwgZnJhZ0NvbG9yLncpOwogICAgaGlnaHAgdmVjMyBfNzkxID0gZnJhZ0NvbG9yLnh5eiAqIHRleHR1cmVMb2Qoc3Nhb3RleCwgdGV4Q29vcmQsIDAuMCkueDsKICAgIGZyYWdDb2xvciA9IHZlYzQoXzc5MS54LCBfNzkxLnksIF83OTEueiwgZnJhZ0NvbG9yLncpOwogICAgaW50IHBhcmFtXzIgPSAwOwogICAgaGlnaHAgZmxvYXQgcGFyYW1fMyA9IHBvaW50QmlhczsKICAgIGJvb2wgcGFyYW1fNCA9IHRydWU7CiAgICBoaWdocCB2ZWMzIF84MTYgPSBmcmFnQ29sb3IueHl6ICsgc2FtcGxlTGlnaHQocCwgbiwgdiwgZG90TlYsIHBvaW50UG9zLCBwb2ludENvbCwgYWxiZWRvLCByb3VnaG5lc3MsIG9jY3NwZWMueSwgZjAsIHBhcmFtXzIsIHBhcmFtXzMsIHBhcmFtXzQpOwogICAgZnJhZ0NvbG9yID0gdmVjNChfODE2LngsIF84MTYueSwgXzgxNi56LCBmcmFnQ29sb3Iudyk7CiAgICBmcmFnQ29sb3IudyA9IDEuMDsKfQoK";
+kha_Shaders.deferred_light_fragData0 = "s12987:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyQ3ViZVNoYWRvdyBzaGFkb3dNYXBQb2ludFsxXTsKdW5pZm9ybSBoaWdocCB2ZWMyIGxpZ2h0UHJvajsKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgZ2J1ZmZlcjA7CnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIGdidWZmZXIxOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBnYnVmZmVyRDsKdW5pZm9ybSBoaWdocCB2ZWMzIGV5ZTsKdW5pZm9ybSBoaWdocCB2ZWMzIGV5ZUxvb2s7CnVuaWZvcm0gaGlnaHAgdmVjMiBjYW1lcmFQcm9qOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBzZW52bWFwQnJkZjsKdW5pZm9ybSBoaWdocCB2ZWM0IHNoaXJyWzddOwp1bmlmb3JtIGludCBlbnZtYXBOdW1NaXBtYXBzOwp1bmlmb3JtIGhpZ2hwIHNhbXBsZXIyRCBzZW52bWFwUmFkaWFuY2U7CnVuaWZvcm0gaGlnaHAgZmxvYXQgZW52bWFwU3RyZW5ndGg7CnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIHNzYW90ZXg7CnVuaWZvcm0gaGlnaHAgdmVjMyBwb2ludFBvczsKdW5pZm9ybSBoaWdocCB2ZWMzIHBvaW50Q29sOwp1bmlmb3JtIGhpZ2hwIGZsb2F0IHBvaW50QmlhczsKdW5pZm9ybSBoaWdocCB2ZWM0IGNhc0RhdGFbMjBdOwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKaW4gaGlnaHAgdmVjMyB2aWV3UmF5OwpvdXQgaGlnaHAgdmVjNCBmcmFnQ29sb3I7CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCnZvaWQgdW5wYWNrRmxvYXRJbnQxNihoaWdocCBmbG9hdCB2YWwsIG91dCBoaWdocCBmbG9hdCBmLCBvdXQgdWludCBpKQp7CiAgICB1aW50IGJpdHNWYWx1ZSA9IHVpbnQodmFsKTsKICAgIGkgPSBiaXRzVmFsdWUgPj4gMTJ1OwogICAgZiA9IGZsb2F0KGJpdHNWYWx1ZSAmIDQyOTQ5MDU4NTV1KSAvIDQwOTUuMDsKfQoKaGlnaHAgdmVjMiB1bnBhY2tGbG9hdDIoaGlnaHAgZmxvYXQgZikKewogICAgcmV0dXJuIHZlYzIoZmxvb3IoZikgLyAyNTUuMCwgZnJhY3QoZikpOwp9CgpoaWdocCB2ZWMzIHN1cmZhY2VBbGJlZG8oaGlnaHAgdmVjMyBiYXNlQ29sb3IsIGhpZ2hwIGZsb2F0IG1ldGFsbmVzcykKewogICAgcmV0dXJuIG1peChiYXNlQ29sb3IsIHZlYzMoMC4wKSwgdmVjMyhtZXRhbG5lc3MpKTsKfQoKaGlnaHAgdmVjMyBzdXJmYWNlRjAoaGlnaHAgdmVjMyBiYXNlQ29sb3IsIGhpZ2hwIGZsb2F0IG1ldGFsbmVzcykKewogICAgcmV0dXJuIG1peCh2ZWMzKDAuMDM5OTk5OTk5MTA1OTMwMzI4MzY5MTQwNjI1KSwgYmFzZUNvbG9yLCB2ZWMzKG1ldGFsbmVzcykpOwp9CgpoaWdocCB2ZWMzIGdldFBvcyhoaWdocCB2ZWMzIGV5ZV8xLCBoaWdocCB2ZWMzIGV5ZUxvb2tfMSwgaGlnaHAgdmVjMyB2aWV3UmF5XzEsIGhpZ2hwIGZsb2F0IGRlcHRoLCBoaWdocCB2ZWMyIGNhbWVyYVByb2pfMSkKewogICAgaGlnaHAgZmxvYXQgbGluZWFyRGVwdGggPSBjYW1lcmFQcm9qXzEueSAvICgoKGRlcHRoICogMC41KSArIDAuNSkgLSBjYW1lcmFQcm9qXzEueCk7CiAgICBoaWdocCBmbG9hdCB2aWV3WkRpc3QgPSBkb3QoZXllTG9va18xLCB2aWV3UmF5XzEpOwogICAgaGlnaHAgdmVjMyB3cG9zaXRpb24gPSBleWVfMSArICh2aWV3UmF5XzEgKiAobGluZWFyRGVwdGggLyB2aWV3WkRpc3QpKTsKICAgIHJldHVybiB3cG9zaXRpb247Cn0KCmhpZ2hwIHZlYzMgc2hJcnJhZGlhbmNlKGhpZ2hwIHZlYzMgbm9yLCBoaWdocCB2ZWM0IHNoaXJyXzFbN10pCnsKICAgIGhpZ2hwIHZlYzMgY2wwMCA9IHZlYzMoc2hpcnJfMVswXS54LCBzaGlycl8xWzBdLnksIHNoaXJyXzFbMF0ueik7CiAgICBoaWdocCB2ZWMzIGNsMW0xID0gdmVjMyhzaGlycl8xWzBdLncsIHNoaXJyXzFbMV0ueCwgc2hpcnJfMVsxXS55KTsKICAgIGhpZ2hwIHZlYzMgY2wxMCA9IHZlYzMoc2hpcnJfMVsxXS56LCBzaGlycl8xWzFdLncsIHNoaXJyXzFbMl0ueCk7CiAgICBoaWdocCB2ZWMzIGNsMTEgPSB2ZWMzKHNoaXJyXzFbMl0ueSwgc2hpcnJfMVsyXS56LCBzaGlycl8xWzJdLncpOwogICAgaGlnaHAgdmVjMyBjbDJtMiA9IHZlYzMoc2hpcnJfMVszXS54LCBzaGlycl8xWzNdLnksIHNoaXJyXzFbM10ueik7CiAgICBoaWdocCB2ZWMzIGNsMm0xID0gdmVjMyhzaGlycl8xWzNdLncsIHNoaXJyXzFbNF0ueCwgc2hpcnJfMVs0XS55KTsKICAgIGhpZ2hwIHZlYzMgY2wyMCA9IHZlYzMoc2hpcnJfMVs0XS56LCBzaGlycl8xWzRdLncsIHNoaXJyXzFbNV0ueCk7CiAgICBoaWdocCB2ZWMzIGNsMjEgPSB2ZWMzKHNoaXJyXzFbNV0ueSwgc2hpcnJfMVs1XS56LCBzaGlycl8xWzVdLncpOwogICAgaGlnaHAgdmVjMyBjbDIyID0gdmVjMyhzaGlycl8xWzZdLngsIHNoaXJyXzFbNl0ueSwgc2hpcnJfMVs2XS56KTsKICAgIHJldHVybiAoKCgoKCgoKCgoY2wyMiAqIDAuNDI5MDQyOTk0OTc2MDQzNzAxMTcxODc1KSAqICgobm9yLnkgKiBub3IueSkgLSAoKC1ub3IueikgKiAoLW5vci56KSkpKSArICgoKGNsMjAgKiAwLjc0MzEyNTAyMTQ1NzY3MjExOTE0MDYyNSkgKiBub3IueCkgKiBub3IueCkpICsgKGNsMDAgKiAwLjg4NjIyNzAxMTY4MDYwMzAyNzM0Mzc1KSkgLSAoY2wyMCAqIDAuMjQ3NzA3OTkyNzkyMTI5NTE2NjAxNTYyNSkpICsgKCgoY2wybTIgKiAwLjg1ODA4NTk4OTk1MjA4NzQwMjM0Mzc1KSAqIG5vci55KSAqICgtbm9yLnopKSkgKyAoKChjbDIxICogMC44NTgwODU5ODk5NTIwODc0MDIzNDM3NSkgKiBub3IueSkgKiBub3IueCkpICsgKCgoY2wybTEgKiAwLjg1ODA4NTk4OTk1MjA4NzQwMjM0Mzc1KSAqICgtbm9yLnopKSAqIG5vci54KSkgKyAoKGNsMTEgKiAxLjAyMzMyNzk0NjY2MjkwMjgzMjAzMTI1KSAqIG5vci55KSkgKyAoKGNsMW0xICogMS4wMjMzMjc5NDY2NjI5MDI4MzIwMzEyNSkgKiAoLW5vci56KSkpICsgKChjbDEwICogMS4wMjMzMjc5NDY2NjI5MDI4MzIwMzEyNSkgKiBub3IueCk7Cn0KCmhpZ2hwIGZsb2F0IGdldE1pcEZyb21Sb3VnaG5lc3MoaGlnaHAgZmxvYXQgcm91Z2huZXNzLCBoaWdocCBmbG9hdCBudW1NaXBtYXBzKQp7CiAgICByZXR1cm4gcm91Z2huZXNzICogbnVtTWlwbWFwczsKfQoKaGlnaHAgdmVjMiBlbnZNYXBFcXVpcmVjdChoaWdocCB2ZWMzIG5vcm1hbCkKewogICAgaGlnaHAgZmxvYXQgcGhpID0gYWNvcyhub3JtYWwueik7CiAgICBoaWdocCBmbG9hdCB0aGV0YSA9IGF0YW4oLW5vcm1hbC55LCBub3JtYWwueCkgKyAzLjE0MTU5Mjc0MTAxMjU3MzI0MjE4NzU7CiAgICByZXR1cm4gdmVjMih0aGV0YSAvIDYuMjgzMTg1NDgyMDI1MTQ2NDg0Mzc1LCBwaGkgLyAzLjE0MTU5Mjc0MTAxMjU3MzI0MjE4NzUpOwp9CgpoaWdocCB2ZWMzIGxhbWJlcnREaWZmdXNlQlJERihoaWdocCB2ZWMzIGFsYmVkbywgaGlnaHAgZmxvYXQgbmwpCnsKICAgIHJldHVybiBhbGJlZG8gKiBubDsKfQoKaGlnaHAgZmxvYXQgZF9nZ3goaGlnaHAgZmxvYXQgbmgsIGhpZ2hwIGZsb2F0IGEpCnsKICAgIGhpZ2hwIGZsb2F0IGEyID0gYSAqIGE7CiAgICBoaWdocCBmbG9hdCBkZW5vbSA9IHBvdygoKG5oICogbmgpICogKGEyIC0gMS4wKSkgKyAxLjAsIDIuMCk7CiAgICByZXR1cm4gKGEyICogMC4zMTgzMDk4NzMzNDI1MTQwMzgwODU5Mzc1KSAvIGRlbm9tOwp9CgpoaWdocCBmbG9hdCBnMl9hcHByb3goaGlnaHAgZmxvYXQgTmRvdEwsIGhpZ2hwIGZsb2F0IE5kb3RWLCBoaWdocCBmbG9hdCBhbHBoYSkKewogICAgaGlnaHAgdmVjMiBoZWxwZXIgPSAodmVjMihOZG90TCwgTmRvdFYpICogMi4wKSAqICh2ZWMyKDEuMCkgLyAoKHZlYzIoTmRvdEwsIE5kb3RWKSAqICgyLjAgLSBhbHBoYSkpICsgdmVjMihhbHBoYSkpKTsKICAgIHJldHVybiBtYXgoaGVscGVyLnggKiBoZWxwZXIueSwgMC4wKTsKfQoKaGlnaHAgdmVjMyBmX3NjaGxpY2soaGlnaHAgdmVjMyBmMCwgaGlnaHAgZmxvYXQgdmgpCnsKICAgIHJldHVybiBmMCArICgodmVjMygxLjApIC0gZjApICogZXhwMigoKCgtNS41NTQ3Mjk5Mzg1MDcwODAwNzgxMjUpICogdmgpIC0gNi45ODMxNjAwMTg5MjA4OTg0Mzc1KSAqIHZoKSk7Cn0KCmhpZ2hwIHZlYzMgc3BlY3VsYXJCUkRGKGhpZ2hwIHZlYzMgZjAsIGhpZ2hwIGZsb2F0IHJvdWdobmVzcywgaGlnaHAgZmxvYXQgbmwsIGhpZ2hwIGZsb2F0IG5oLCBoaWdocCBmbG9hdCBudiwgaGlnaHAgZmxvYXQgdmgpCnsKICAgIGhpZ2hwIGZsb2F0IGEgPSByb3VnaG5lc3MgKiByb3VnaG5lc3M7CiAgICByZXR1cm4gKGZfc2NobGljayhmMCwgdmgpICogKGRfZ2d4KG5oLCBhKSAqIGcyX2FwcHJveChubCwgbnYsIGEpKSkgLyB2ZWMzKG1heCg0LjAgKiBudiwgOS45OTk5OTk3NDczNzg3NTE2MzU1NTE0NTI2MzY3MTg4ZS0wNikpOwp9CgpoaWdocCBmbG9hdCBhdHRlbnVhdGUoaGlnaHAgZmxvYXQgZGlzdCkKewogICAgcmV0dXJuIDEuMCAvIChkaXN0ICogZGlzdCk7Cn0KCmhpZ2hwIGZsb2F0IGxwVG9EZXB0aChpbm91dCBoaWdocCB2ZWMzIGxwLCBoaWdocCB2ZWMyIGxpZ2h0UHJval8xKQp7CiAgICBscCA9IGFicyhscCk7CiAgICBoaWdocCBmbG9hdCB6Y29tcCA9IG1heChscC54LCBtYXgobHAueSwgbHAueikpOwogICAgemNvbXAgPSBsaWdodFByb2pfMS54IC0gKGxpZ2h0UHJval8xLnkgLyB6Y29tcCk7CiAgICByZXR1cm4gKHpjb21wICogMC41KSArIDAuNTsKfQoKaGlnaHAgZmxvYXQgUENGQ3ViZShoaWdocCBzYW1wbGVyQ3ViZVNoYWRvdyBzaGFkb3dNYXBDdWJlLCBoaWdocCB2ZWMzIGxwLCBpbm91dCBoaWdocCB2ZWMzIG1sLCBoaWdocCBmbG9hdCBiaWFzLCBoaWdocCB2ZWMyIGxpZ2h0UHJval8xLCBoaWdocCB2ZWMzIG4pCnsKICAgIGhpZ2hwIHZlYzMgcGFyYW0gPSBscDsKICAgIGhpZ2hwIGZsb2F0IF80MzkgPSBscFRvRGVwdGgocGFyYW0sIGxpZ2h0UHJval8xKTsKICAgIGhpZ2hwIGZsb2F0IGNvbXBhcmUgPSBfNDM5IC0gKGJpYXMgKiAxLjUpOwogICAgbWwgKz0gKChuICogYmlhcykgKiAyMC4wKTsKICAgIGhpZ2hwIHZlYzQgXzQ1NSA9IHZlYzQobWwsIGNvbXBhcmUpOwogICAgaGlnaHAgZmxvYXQgcmVzdWx0ID0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF80NTUueHl6LCBfNDU1LncpKTsKICAgIGhpZ2hwIHZlYzQgXzQ2NyA9IHZlYzQobWwgKyB2ZWMzKDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF80NjcueHl6LCBfNDY3LncpKTsKICAgIGhpZ2hwIHZlYzQgXzQ4MSA9IHZlYzQobWwgKyB2ZWMzKC0wLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF80ODEueHl6LCBfNDgxLncpKTsKICAgIGhpZ2hwIHZlYzQgXzQ5NCA9IHZlYzQobWwgKyB2ZWMzKDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUsIDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF80OTQueHl6LCBfNDk0LncpKTsKICAgIGhpZ2hwIHZlYzQgXzUwNyA9IHZlYzQobWwgKyB2ZWMzKDAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAwLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF81MDcueHl6LCBfNTA3LncpKTsKICAgIGhpZ2hwIHZlYzQgXzUyMCA9IHZlYzQobWwgKyB2ZWMzKC0wLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAwLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSksIGNvbXBhcmUpOwogICAgcmVzdWx0ICs9IHRleHR1cmUoc2hhZG93TWFwQ3ViZSwgdmVjNChfNTIwLnh5eiwgXzUyMC53KSk7CiAgICBoaWdocCB2ZWM0IF81MzMgPSB2ZWM0KG1sICsgdmVjMygwLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAtMC4wMDEwMDAwMDAwNDc0OTc0NTEzMDUzODk0MDQyOTY4NzUpLCBjb21wYXJlKTsKICAgIHJlc3VsdCArPSB0ZXh0dXJlKHNoYWRvd01hcEN1YmUsIHZlYzQoXzUzMy54eXosIF81MzMudykpOwogICAgaGlnaHAgdmVjNCBfNTQ2ID0gdmVjNChtbCArIHZlYzMoLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1LCAwLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSwgLTAuMDAxMDAwMDAwMDQ3NDk3NDUxMzA1Mzg5NDA0Mjk2ODc1KSwgY29tcGFyZSk7CiAgICByZXN1bHQgKz0gdGV4dHVyZShzaGFkb3dNYXBDdWJlLCB2ZWM0KF81NDYueHl6LCBfNTQ2LncpKTsKICAgIGhpZ2hwIHZlYzQgXzU1OSA9IHZlYzQobWwgKyB2ZWMzKC0wLjAwMTAwMDAwMDA0NzQ5NzQ1MTMwNTM4OTQwNDI5Njg3NSksIGNvbXBhcmUpOwogICAgcmVzdWx0ICs9IHRleHR1cmUoc2hhZG93TWFwQ3ViZSwgdmVjNChfNTU5Lnh5eiwgXzU1OS53KSk7CiAgICByZXR1cm4gcmVzdWx0IC8gOS4wOwp9CgpoaWdocCB2ZWMzIHNhbXBsZUxpZ2h0KGhpZ2hwIHZlYzMgcCwgaGlnaHAgdmVjMyBuLCBoaWdocCB2ZWMzIHYsIGhpZ2hwIGZsb2F0IGRvdE5WLCBoaWdocCB2ZWMzIGxwLCBoaWdocCB2ZWMzIGxpZ2h0Q29sLCBoaWdocCB2ZWMzIGFsYmVkbywgaGlnaHAgZmxvYXQgcm91Z2gsIGhpZ2hwIGZsb2F0IHNwZWMsIGhpZ2hwIHZlYzMgZjAsIGludCBpbmRleCwgaGlnaHAgZmxvYXQgYmlhcywgYm9vbCByZWNlaXZlU2hhZG93KQp7CiAgICBoaWdocCB2ZWMzIGxkID0gbHAgLSBwOwogICAgaGlnaHAgdmVjMyBsID0gbm9ybWFsaXplKGxkKTsKICAgIGhpZ2hwIHZlYzMgaCA9IG5vcm1hbGl6ZSh2ICsgbCk7CiAgICBoaWdocCBmbG9hdCBkb3ROSCA9IG1heCgwLjAsIGRvdChuLCBoKSk7CiAgICBoaWdocCBmbG9hdCBkb3RWSCA9IG1heCgwLjAsIGRvdCh2LCBoKSk7CiAgICBoaWdocCBmbG9hdCBkb3ROTCA9IG1heCgwLjAsIGRvdChuLCBsKSk7CiAgICBoaWdocCB2ZWMzIGRpcmVjdCA9IGxhbWJlcnREaWZmdXNlQlJERihhbGJlZG8sIGRvdE5MKSArIChzcGVjdWxhckJSREYoZjAsIHJvdWdoLCBkb3ROTCwgZG90TkgsIGRvdE5WLCBkb3RWSCkgKiBzcGVjKTsKICAgIGRpcmVjdCAqPSBhdHRlbnVhdGUoZGlzdGFuY2UocCwgbHApKTsKICAgIGRpcmVjdCAqPSBsaWdodENvbDsKICAgIGlmIChyZWNlaXZlU2hhZG93KQogICAgewogICAgICAgIGhpZ2hwIHZlYzMgcGFyYW0gPSAtbDsKICAgICAgICBoaWdocCBmbG9hdCBfNjIwID0gUENGQ3ViZShzaGFkb3dNYXBQb2ludFswXSwgbGQsIHBhcmFtLCBiaWFzLCBsaWdodFByb2osIG4pOwogICAgICAgIGRpcmVjdCAqPSBfNjIwOwogICAgfQogICAgcmV0dXJuIGRpcmVjdDsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjNCBnMCA9IHRleHR1cmVMb2QoZ2J1ZmZlcjAsIHRleENvb3JkLCAwLjApOwogICAgaGlnaHAgdmVjMyBuOwogICAgbi56ID0gKDEuMCAtIGFicyhnMC54KSkgLSBhYnMoZzAueSk7CiAgICBoaWdocCB2ZWMyIF82NTA7CiAgICBpZiAobi56ID49IDAuMCkKICAgIHsKICAgICAgICBfNjUwID0gZzAueHk7CiAgICB9CiAgICBlbHNlCiAgICB7CiAgICAgICAgXzY1MCA9IG9jdGFoZWRyb25XcmFwKGcwLnh5KTsKICAgIH0KICAgIG4gPSB2ZWMzKF82NTAueCwgXzY1MC55LCBuLnopOwogICAgbiA9IG5vcm1hbGl6ZShuKTsKICAgIGhpZ2hwIGZsb2F0IHJvdWdobmVzcyA9IGcwLno7CiAgICBoaWdocCBmbG9hdCBwYXJhbTsKICAgIHVpbnQgcGFyYW1fMTsKICAgIHVucGFja0Zsb2F0SW50MTYoZzAudywgcGFyYW0sIHBhcmFtXzEpOwogICAgaGlnaHAgZmxvYXQgbWV0YWxsaWMgPSBwYXJhbTsKICAgIHVpbnQgbWF0aWQgPSBwYXJhbV8xOwogICAgaGlnaHAgdmVjNCBnMSA9IHRleHR1cmVMb2QoZ2J1ZmZlcjEsIHRleENvb3JkLCAwLjApOwogICAgaGlnaHAgdmVjMiBvY2NzcGVjID0gdW5wYWNrRmxvYXQyKGcxLncpOwogICAgaGlnaHAgdmVjMyBhbGJlZG8gPSBzdXJmYWNlQWxiZWRvKGcxLnh5eiwgbWV0YWxsaWMpOwogICAgaGlnaHAgdmVjMyBmMCA9IHN1cmZhY2VGMChnMS54eXosIG1ldGFsbGljKTsKICAgIGhpZ2hwIGZsb2F0IGRlcHRoID0gKHRleHR1cmVMb2QoZ2J1ZmZlckQsIHRleENvb3JkLCAwLjApLnggKiAyLjApIC0gMS4wOwogICAgaGlnaHAgdmVjMyBwID0gZ2V0UG9zKGV5ZSwgZXllTG9vaywgbm9ybWFsaXplKHZpZXdSYXkpLCBkZXB0aCwgY2FtZXJhUHJvaik7CiAgICBoaWdocCB2ZWMzIHYgPSBub3JtYWxpemUoZXllIC0gcCk7CiAgICBoaWdocCBmbG9hdCBkb3ROViA9IG1heChkb3QobiwgdiksIDAuMCk7CiAgICBoaWdocCB2ZWMyIGVudkJSREYgPSB0ZXhlbEZldGNoKHNlbnZtYXBCcmRmLCBpdmVjMih2ZWMyKGRvdE5WLCAxLjAgLSByb3VnaG5lc3MpICogMjU2LjApLCAwKS54eTsKICAgIGhpZ2hwIHZlYzMgZW52bCA9IHNoSXJyYWRpYW5jZShuLCBzaGlycik7CiAgICBoaWdocCB2ZWMzIHJlZmxlY3Rpb25Xb3JsZCA9IHJlZmxlY3QoLXYsIG4pOwogICAgaGlnaHAgZmxvYXQgbG9kID0gZ2V0TWlwRnJvbVJvdWdobmVzcyhyb3VnaG5lc3MsIGZsb2F0KGVudm1hcE51bU1pcG1hcHMpKTsKICAgIGhpZ2hwIHZlYzMgcHJlZmlsdGVyZWRDb2xvciA9IHRleHR1cmVMb2Qoc2Vudm1hcFJhZGlhbmNlLCBlbnZNYXBFcXVpcmVjdChyZWZsZWN0aW9uV29ybGQpLCBsb2QpLnh5ejsKICAgIGVudmwgKj0gYWxiZWRvOwogICAgZW52bCAqPSAodmVjMygxLjApIC0gKChmMCAqIGVudkJSREYueCkgKyB2ZWMzKGVudkJSREYueSkpKTsKICAgIGVudmwgKz0gKHByZWZpbHRlcmVkQ29sb3IgKiAoKGYwICogZW52QlJERi54KSArIHZlYzMoZW52QlJERi55KSkpOwogICAgZW52bCAqPSAoZW52bWFwU3RyZW5ndGggKiBvY2NzcGVjLngpOwogICAgZnJhZ0NvbG9yID0gdmVjNChlbnZsLngsIGVudmwueSwgZW52bC56LCBmcmFnQ29sb3Iudyk7CiAgICBoaWdocCB2ZWMzIF84MTQgPSBmcmFnQ29sb3IueHl6ICogdGV4dHVyZUxvZChzc2FvdGV4LCB0ZXhDb29yZCwgMC4wKS54OwogICAgZnJhZ0NvbG9yID0gdmVjNChfODE0LngsIF84MTQueSwgXzgxNC56LCBmcmFnQ29sb3Iudyk7CiAgICBpbnQgcGFyYW1fMiA9IDA7CiAgICBoaWdocCBmbG9hdCBwYXJhbV8zID0gcG9pbnRCaWFzOwogICAgYm9vbCBwYXJhbV80ID0gdHJ1ZTsKICAgIGhpZ2hwIHZlYzMgXzgzOSA9IGZyYWdDb2xvci54eXogKyBzYW1wbGVMaWdodChwLCBuLCB2LCBkb3ROViwgcG9pbnRQb3MsIHBvaW50Q29sLCBhbGJlZG8sIHJvdWdobmVzcywgb2Njc3BlYy55LCBmMCwgcGFyYW1fMiwgcGFyYW1fMywgcGFyYW1fNCk7CiAgICBmcmFnQ29sb3IgPSB2ZWM0KF84MzkueCwgXzgzOS55LCBfODM5LnosIGZyYWdDb2xvci53KTsKICAgIGZyYWdDb2xvci53ID0gMS4wOwp9Cgo";
 kha_Shaders.painter_colored_fragData0 = "s223:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwppbiBoaWdocCB2ZWM0IGZyYWdtZW50Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBGcmFnQ29sb3IgPSBmcmFnbWVudENvbG9yOwp9Cgo";
 kha_Shaders.painter_colored_vertData0 = "s311:I3ZlcnNpb24gMzAwIGVzCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmluIHZlYzMgdmVydGV4UG9zaXRpb247Cm91dCB2ZWM0IGZyYWdtZW50Q29sb3I7CmluIHZlYzQgdmVydGV4Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9Qb3NpdGlvbiA9IHByb2plY3Rpb25NYXRyaXggKiB2ZWM0KHZlcnRleFBvc2l0aW9uLCAxLjApOwogICAgZnJhZ21lbnRDb2xvciA9IHZlcnRleENvbG9yOwp9Cgo";
 kha_Shaders.painter_image_fragData0 = "s487:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgdGV4OwoKaW4gaGlnaHAgdmVjMiB0ZXhDb29yZDsKaW4gaGlnaHAgdmVjNCBjb2xvcjsKb3V0IGhpZ2hwIHZlYzQgRnJhZ0NvbG9yOwoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgdmVjNCB0ZXhjb2xvciA9IHRleHR1cmUodGV4LCB0ZXhDb29yZCkgKiBjb2xvcjsKICAgIGhpZ2hwIHZlYzMgXzMyID0gdGV4Y29sb3IueHl6ICogY29sb3IudzsKICAgIHRleGNvbG9yID0gdmVjNChfMzIueCwgXzMyLnksIF8zMi56LCB0ZXhjb2xvci53KTsKICAgIEZyYWdDb2xvciA9IHRleGNvbG9yOwp9Cgo";
@@ -27675,8 +30067,6 @@ kha_Shaders.smaa_neighborhood_blend_vertData0 = "s368:I3ZlcnNpb24gMzAwIGVzCgp1bm
 kha_Shaders.ssao_pass_fragData0 = "s3547:I3ZlcnNpb24gMzAwIGVzCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBoaWdocCBzYW1wbGVyMkQgZ2J1ZmZlckQ7CnVuaWZvcm0gaGlnaHAgc2FtcGxlcjJEIGdidWZmZXIwOwp1bmlmb3JtIGhpZ2hwIHZlYzMgZXllTG9vazsKdW5pZm9ybSBoaWdocCB2ZWMyIGNhbWVyYVByb2o7CnVuaWZvcm0gaGlnaHAgdmVjMiBzY3JlZW5TaXplOwp1bmlmb3JtIGhpZ2hwIHZlYzMgZXllOwp1bmlmb3JtIGhpZ2hwIG1hdDQgaW52VlA7CgppbiBoaWdocCB2ZWMyIHRleENvb3JkOwpvdXQgaGlnaHAgZmxvYXQgZnJhZ0NvbG9yOwppbiBoaWdocCB2ZWMzIHZpZXdSYXk7CgpoaWdocCB2ZWMyIG9jdGFoZWRyb25XcmFwKGhpZ2hwIHZlYzIgdikKewogICAgcmV0dXJuICh2ZWMyKDEuMCkgLSBhYnModi55eCkpICogdmVjMigodi54ID49IDAuMCkgPyAxLjAgOiAoLTEuMCksICh2LnkgPj0gMC4wKSA:IDEuMCA6ICgtMS4wKSk7Cn0KCmhpZ2hwIHZlYzMgZ2V0UG9zTm9FeWUoaGlnaHAgdmVjMyBleWVMb29rXzEsIGhpZ2hwIHZlYzMgdmlld1JheV8xLCBoaWdocCBmbG9hdCBkZXB0aCwgaGlnaHAgdmVjMiBjYW1lcmFQcm9qXzEpCnsKICAgIGhpZ2hwIGZsb2F0IGxpbmVhckRlcHRoID0gY2FtZXJhUHJval8xLnkgLyAoKChkZXB0aCAqIDAuNSkgKyAwLjUpIC0gY2FtZXJhUHJval8xLngpOwogICAgaGlnaHAgZmxvYXQgdmlld1pEaXN0ID0gZG90KGV5ZUxvb2tfMSwgdmlld1JheV8xKTsKICAgIGhpZ2hwIHZlYzMgd3Bvc2l0aW9uID0gdmlld1JheV8xICogKGxpbmVhckRlcHRoIC8gdmlld1pEaXN0KTsKICAgIHJldHVybiB3cG9zaXRpb247Cn0KCmhpZ2hwIHZlYzMgZ2V0UG9zMk5vRXllKGhpZ2hwIHZlYzMgZXllXzEsIGhpZ2hwIG1hdDQgaW52VlBfMSwgaGlnaHAgZmxvYXQgZGVwdGgsIGhpZ2hwIHZlYzIgY29vcmQpCnsKICAgIGhpZ2hwIHZlYzQgcG9zID0gdmVjNCgoY29vcmQgKiAyLjApIC0gdmVjMigxLjApLCBkZXB0aCwgMS4wKTsKICAgIHBvcyA9IGludlZQXzEgKiBwb3M7CiAgICBoaWdocCB2ZWMzIF84NyA9IHBvcy54eXogLyB2ZWMzKHBvcy53KTsKICAgIHBvcyA9IHZlYzQoXzg3LngsIF84Ny55LCBfODcueiwgcG9zLncpOwogICAgcmV0dXJuIHBvcy54eXogLSBleWVfMTsKfQoKdm9pZCBtYWluKCkKewogICAgaGlnaHAgZmxvYXQgZGVwdGggPSAodGV4dHVyZUxvZChnYnVmZmVyRCwgdGV4Q29vcmQsIDAuMCkueCAqIDIuMCkgLSAxLjA7CiAgICBpZiAoZGVwdGggPT0gMS4wKQogICAgewogICAgICAgIGZyYWdDb2xvciA9IDEuMDsKICAgICAgICByZXR1cm47CiAgICB9CiAgICBoaWdocCB2ZWMyIGVuYyA9IHRleHR1cmVMb2QoZ2J1ZmZlcjAsIHRleENvb3JkLCAwLjApLnh5OwogICAgaGlnaHAgdmVjMyBuOwogICAgbi56ID0gKDEuMCAtIGFicyhlbmMueCkpIC0gYWJzKGVuYy55KTsKICAgIGhpZ2hwIHZlYzIgXzEzNjsKICAgIGlmIChuLnogPj0gMC4wKQogICAgewogICAgICAgIF8xMzYgPSBlbmM7CiAgICB9CiAgICBlbHNlCiAgICB7CiAgICAgICAgXzEzNiA9IG9jdGFoZWRyb25XcmFwKGVuYyk7CiAgICB9CiAgICBuID0gdmVjMyhfMTM2LngsIF8xMzYueSwgbi56KTsKICAgIG4gPSBub3JtYWxpemUobik7CiAgICBoaWdocCB2ZWMzIHZyYXkgPSBub3JtYWxpemUodmlld1JheSk7CiAgICBoaWdocCB2ZWMzIGN1cnJlbnRQb3MgPSBnZXRQb3NOb0V5ZShleWVMb29rLCB2cmF5LCBkZXB0aCwgY2FtZXJhUHJvaik7CiAgICBoaWdocCBmbG9hdCBjdXJyZW50RGlzdGFuY2UgPSBsZW5ndGgoY3VycmVudFBvcyk7CiAgICBoaWdocCBmbG9hdCBjdXJyZW50RGlzdGFuY2VBID0gKGN1cnJlbnREaXN0YW5jZSAqIDIwLjApICogMS4wOwogICAgaGlnaHAgZmxvYXQgY3VycmVudERpc3RhbmNlQiA9IGN1cnJlbnREaXN0YW5jZSAqIDAuMDAwNTAwMDAwMDIzNzQ4NzI1NjUyNjk0NzAyMTQ4NDM3NTsKICAgIGl2ZWMyIHB4ID0gaXZlYzIodGV4Q29vcmQgKiBzY3JlZW5TaXplKTsKICAgIGhpZ2hwIGZsb2F0IHBoaSA9IGZsb2F0KCgoMyAqIHB4LngpIF4gKHB4LnkgKyAocHgueCAqIHB4LnkpKSkgKiAxMCk7CiAgICBmcmFnQ29sb3IgPSAwLjA7CiAgICBmb3IgKGludCBpID0gMDsgaSA8IDg7IGkrKykKICAgIHsKICAgICAgICBoaWdocCBmbG9hdCB0aGV0YSA9ICgwLjc4NTM5ODE4NTI1MzE0MzMxMDU0Njg3NSAqIChmbG9hdChpKSArIDAuNSkpICsgcGhpOwogICAgICAgIGhpZ2hwIHZlYzIgayA9IHZlYzIoY29zKHRoZXRhKSwgc2luKHRoZXRhKSkgLyB2ZWMyKGN1cnJlbnREaXN0YW5jZUEpOwogICAgICAgIGRlcHRoID0gKHRleHR1cmVMb2QoZ2J1ZmZlckQsIHRleENvb3JkICsgaywgMC4wKS54ICogMi4wKSAtIDEuMDsKICAgICAgICBoaWdocCB2ZWMzIHBvcyA9IGdldFBvczJOb0V5ZShleWUsIGludlZQLCBkZXB0aCwgdGV4Q29vcmQgKyBrKSAtIGN1cnJlbnRQb3M7CiAgICAgICAgZnJhZ0NvbG9yICs9IChtYXgoMC4wLCBkb3QocG9zLCBuKSAtIGN1cnJlbnREaXN0YW5jZUIpIC8gKGRvdChwb3MsIHBvcykgKyAwLjAxNDk5OTk5OTY2NDcyMzg3MzEzODQyNzczNDM3NSkpOwogICAgfQogICAgZnJhZ0NvbG9yICo9IDAuMDM3NTAwMDAxNDkwMTE2MTE5Mzg0NzY1NjI1OwogICAgZnJhZ0NvbG9yID0gMS4wIC0gZnJhZ0NvbG9yOwp9Cgo";
 kha_System.renderListeners = [];
 kha_System.foregroundListeners = [];
-kha_System.resumeListeners = [];
-kha_System.pauseListeners = [];
 kha_System.backgroundListeners = [];
 kha_System.shutdownListeners = [];
 kha_System.dropFilesListeners = [];
@@ -27685,6 +30075,7 @@ kha_SystemImpl.ios = false;
 kha_SystemImpl.mobileAudioPlaying = false;
 kha_SystemImpl.chrome = false;
 kha_SystemImpl.firefox = false;
+kha_SystemImpl.safari = false;
 kha_SystemImpl.ie = false;
 kha_SystemImpl.insideInputEvent = false;
 kha_SystemImpl.estimatedRefreshRate = 60;

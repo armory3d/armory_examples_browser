@@ -1,0 +1,7 @@
+#?RADIANCE
+# Output from cmft.
+FORMAT=32-bit_rle_rgbe
+EXPOSURE=1
+
+-Y 16 +X 32
+’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ü’³ül‰½e‚±`|¨]x¢[w ]y¢`{¥c~©gƒ¯m‰·t‘Â~›Ï‡¥Þ“²òP`„‚Vh‚]oœ‚cv§‚h{±‚l€¹‚m‚¼‚l€º‚i}µ‚ey®‚_s¦‚Yk›‚Qc‚IZ‚†§í|œÛs’Ël‰½”Äø€€­Õ€v¢Å€y¦Í€}«Ö€°á€…µî€†µí€‰·í€¼ò€Ne€Zqkƒ¨€›É™·ñ[k‘‚i{ª‚wŒÄ‚~’Í‚ƒ˜Ö‚ˆžà‚£ë‚¤î‚†ã‚}“Ö‚q‡Ä‚dw¬‚Uf‘‚Šªìj†´Vo”Äø€m“©€Vz„€V{†€X}‰€Z€Œ€^„’€bˆ¡€cŠ¬€a†¬€`„ª€d„¡€q¦€³Î€d{–‰¥ÔVf†‚ewŸ‚rƒ®‚}Žº‚žÏ‚¯é‚¥¹ú‚U`…ƒS_…ƒO[ƒƒ‘¨ò‚}“Ñ‚dw¨‚”´öj„¬ˆ²Ô€m“©€¢Öô´ÍŒÈç•ÕÙ“Ð¿“Ëµ‘À²¥ØéWq…€Qj€Ž¼Þ¡Íàqž€Zo†‹¦Ì´Îòv~‡‚§¤œ‚•˜ ‚­¯º‚°·Ñ‚µÀê‚“Á‚ŒšÉ‚–¨ã‚ ¶ú‚•­õ‚xÆ‚Uf‹‚bx–zšµ€¢ÖôYo€€…°ËœÔü\“€®êê¨ØÒ²Þãczˆ€e}‘€Zoƒ€Ž¯È|–¤€šº€btŒŠ³ÌØß¦¡‘‚‘‚jƒÎ´ƒæÉŸƒ€viƒŒ‰‡‚ÄÌã¸Èòiu“‚uƒ«‚€’Ã‚€”Ç‚]l‹‚{°¬Ì€Yo€€±ÐàŽ®µ±Þðp‘ž€r’—€i†€Èðücu€€ºÝ÷»Ís‡Š¯Ë»~±ÏäŽ£µ€àóú€¹º­«Ÿƒ‚¡lƒòÏ›ƒ‰uX„Ó¼—‚²©“áæä€Óãù€z…›ƒ’±“¥Ð¥¼ïš®Õr˜‡›°€±Ðà•¤’‘¡„¹Ñ·r†|€qˆ~€Éëß±ÊÅœ°­†–‘ÕìÖ~˜£{~éó‘}²Ã£~“Ÿ’†‰z€øïÇ€öÞ«åÅ‚¡ˆbƒ£‰cƒÌ´†¢šv€ÓØ»ÊÖÍÚëîÛîüx„’€Œœ°€£µÈ€Œš¦€¾ÑÐ•¤’òî›~ˆ…Q§¤m¸»‰¨²…‘—s÷üÂ~ÕÒ~¼³~~¡“]~‡v?~ôÏb}„vC~¨Ÿn~‚|^ÜÎœÊ´ƒ€®”hÜ¹€»máÊ‹áÛ›~²¶~·¼¡~ÅÉ²~ÑÓ¾~àâÎ~ëïÖ~ƒ‹Œzñðµ~òî›~ÙÁj~ïÔr~…uD„uJïÙ~àËˆ~Ð¹y~Ã§g~º™Y~±‹M~¨F~¦}F~«…P~¯‘_~Åªw~÷Ú~¬–kíÉŒïÈ‰÷ÐŒ~ûæ›}ã×•}éÜŸ}‚wY~”ƒc~­–s~Â¦~~Ê«|~×»…~Ö¼‚~Î·o~ÙÁj~É¥[~Î©[~Î§`~½˜`~²•h~·šk~ºšh~½™b~À–^~¿“[~¿‘[~Ä•a~Ï¢m~Ï¦s~Ì§x~É§z~¿ v~°“l~vW~Á£x}ºžr}Ó´}ìÇ‹}†nL~œ{U~µc~Ên~Ú©t~â±t~Ñ§j~È£_~É¥[~¶ŽU~±ŠS~§Q~ƒiJ~ùÍ›}ý×ª}šƒd~¥Šg~¬g~±Žh~¨m~µ–s~Â z~Ïª~Ü²‚~Ò«~¸–r~•{_~×¶”}¸›}}¾œx}Ñ§{}€eF~pM~¢{V~°†^~¢~]~¤\~¤€Z~¾’_~¹Y~¶ŽU~öÃ‹}öÂŠ}ðÁŒ}ëÀ}èÂ–}éÈ }òÒ«}ýÞ¶}†u`~{d~•h~œ†l~¤Œo~¨q~§p~…k~‹wb~ðÐ¯}Í³š}· Š}²™}¸›€}Â¡ƒ}Ô¯}å½™}ðÆŸ}õÉ¡}õÈž}ñÄ—}ôÄ’}ñÀ‹}öÃ‹}Õ±Œ}×³Œ}Ø´Ž}Ú¸’}Ý¼—}àÁ}äÇ£}ìÏª}ôÖ°}ûÜ¶}q]~ƒs_~„s_~‚r_~üÞ»}ðÔ´}ßÆ«}Ì¶¡}À¬™}·¤‘}±Œ}¬™ˆ}­šˆ}¶ ‹}½¥}Ã©’}É­’}Í¯‘}Ï¯}Ï®Œ}Ò¯‹}Õ±Œ}È­}Ê¯‘}Ì°“}Í²”}Î´–}Ñ·™}Õ»œ}Ø¾Ÿ}ÚÀ¡}ÛÁ£}ÛÂ¤}ÚÁ¥}ÙÁ¥}ØÀ¤}Õ½£}Ð¹¡}Êµ}Ä¯š}½ª–}·¤’}´¢}µ¢}¶¢}·£}¹¤}º¤}»¥}¼¥Ž}¿§Ž}Â©}Å«}È­}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}Å®–}
