@@ -15,5 +15,6 @@ haxe build-templates.hxml
 haxe build-tutorials.hxml
 
 # Build application
-haxe app.hxml
+haxelib install build.hxml
+haxe build.hxml
 ```
