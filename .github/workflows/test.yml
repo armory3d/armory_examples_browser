@@ -35,7 +35,7 @@ jobs:
       - name: Build application
         run: |
           export ARMSDK="$(pwd)/armsdk"
-          haxelib install app.hxml --always
-          haxe app.hxml 
+          haxelib install build.hxml --always
+          haxe build.hxml
 
 
