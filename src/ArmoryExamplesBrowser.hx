@@ -62,8 +62,9 @@ class ArmoryExamplesBrowser {
             } else {
                 console.debug(build);
                 readme.innerHTML = '<span>Build:</span> <a href="$GITHUB/armsdk">ARMSDK</a>';
-                if (build.commit != null)
-                    readme.innerHTML += '/<a href="$GITHUB/armsdk/commit/${build.commit}">' + ${build.commit.substr(0, 7)} + '</a>';
+                if (build.commit != null) {
+                    readme.innerHTML += '/<a href="$GITHUB/armsdk/commit/${build.commit}">${build.commit.substr(0, 7)}</a>';
+                }
                 readme.innerHTML += ' ' + build.time;
             }
 
@@ -373,17 +374,13 @@ class ArmoryExamplesBrowser {
 	macro public static function getBuildInfo() {
 		var armsdk = getArmsdkPath();
 		if (armsdk == null) {
-            
 			//Context.fatalError('armsdk not found', Context.currentPos());
 		}
 		Sys.println('armsdk path = $armsdk');
-		var commit = Git.getCommit(armsdk);
-		return macro $v{
-			{
-				time: $v{DateTools.format(Date.now(), "%Y-%m-%d")},
-				commit: $v{commit},
-				os: Sys.systemName()
-			}
-		};
+        var obj = {
+            commit: Git.getCommit(armsdk),
+            time: DateTools.format(Date.now(), "%Y-%m-%d")
+        };
+        return macro $v{obj};
 	}
 }
