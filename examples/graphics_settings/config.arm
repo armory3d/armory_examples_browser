@@ -5,6 +5,7 @@
     "rp_motionblur": true,
     "rp_shadowmap_cascade": 1024,
     "rp_shadowmap_cube": 512,
+    "rp_ss_refraction": true,
     "rp_ssgi": true,
     "rp_ssr": true,
     "rp_supersample": 1.0,
